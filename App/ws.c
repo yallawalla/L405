@@ -114,9 +114,9 @@ void			*ledProc(void *p) {
 					if(pTimeout && HAL_GetTick() > pTimeout) {
 						pTimeout=0;
 						for(int i=0; i<__COLS; ++i) {
-							leds[i].bit24=DecodeTab[leds[i].bit12];
+							leds[i].bit24 |= DecodeTab[leds[i].bit12];
 							for(int j=0; j < __LEDS; ++j)
-								if(leds[i].bit24 & (1 << j))
+								if(leds[i].timeout[j] == 0 && leds[i].bit24 & (1 << j))
 									leds[i].timeout[j]=HAL_GetTick()+3000;
 							leds[i].bit12=0;
 						}
