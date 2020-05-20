@@ -1,0 +1,12 @@
+-	pri relociranju zablokirati spremembo VTOR v system_stm32f4xx.c					Done
+
+-	remote funkcionalnosti:
+	-	preklop VCP-CDC																Done
+	-	dolocanje kvadranta															Done
+
+-	pri dekodiranju remote crc rešiti problem veckratnih identicnih(istih) 			Done
+	komand na vec senzorjih
+-	error meesages med iap 
+-	debug CANa
+
+-	ce je VCP buffer 2x2048, mora biti heap 0x8000
