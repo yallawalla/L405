@@ -61,6 +61,21 @@ uint32_t	*p = &_leds[(sect+8+4)*24];
 						for(int k=0; k<8; ++k)
 							(rgb.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 					}
+							
+					if(n==1) {
+						int i=colour;
+						if(i<0)
+							i=-i-1;
+						p = &_leds[(8+i)*24];
+						for(int k=0; k<8; ++k)
+							(rgb.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+						for(int k=0; k<8; ++k)
+							(rgb.r & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+						for(int k=0; k<8; ++k)
+							(rgb.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+					}
+					
+					
 					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_leds,sizeof(_leds)/sizeof(uint32_t));
 					if(debug & (1<<DBG_LED)) {
 						_io	*io=_stdio(_DBG);
