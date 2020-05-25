@@ -20,7 +20,10 @@ namespace WindowsFormsApplication2
     {
         string  rxString = "";
         byte[]  R = new byte[24],G = new byte[24],B = new byte[24];
-        int type = 0;
+        int type = 1;
+        int burst = 1;
+        int pw = 5;
+        int period = 1000;
         public Form1()
         {
             InitializeComponent();
@@ -212,29 +215,43 @@ namespace WindowsFormsApplication2
         {
             int a = 3 * Math.Min(Height, Width) / 4;
             int center = a/10 + a/2;
-            double fi = Math.Atan2(- e.Y + center, e.X - center) / Math.PI * 180.0;
+            double fi = Math.Atan2(- e.Y + center, - e.X + center) / Math.PI * 180.0;
             if(fi<0)
                 fi=fi+360.0;
             int id = (int)fi / 90 + 0x210;
             int sect = ((int)fi % 90)/30;
 
-            Text = "> " + Convert.ToString(id, 16) + " " + type.ToString() + " " + sect.ToString() + " 1 0 5 0 0 4" + "\r";
+            Text = "> " + Convert.ToString(id, 16) +
+                " " + Convert.ToString(type, 16) +
+                " " + Convert.ToString(sect, 16) +
+                " " + Convert.ToString(burst % 256, 16) +
+                " " + Convert.ToString(burst / 256, 16) +
+                " " + Convert.ToString(pw % 256, 16) +
+                " " + Convert.ToString(pw / 256, 16) +
+                " " + Convert.ToString(period % 256, 16) +
+                " " + Convert.ToString(period / 256, 16) + "\r";
             com.Write(Text);
         }
 
         private void LR_Click(object sender, EventArgs e)
         {
             type = 1;
+            burst = 1;
+            pw = 1;
         }
 
         private void LD_Click(object sender, EventArgs e)
         {
-            type = 2;
+            type = 1;
+            burst = 15;
+            pw = 1;
         }
 
         private void BR_Click(object sender, EventArgs e)
         {
-            type = 4;
+            type = 2;
+            burst = 15;
+            pw = 55;
         }
     }
 }

@@ -34,9 +34,9 @@ tim timStack[] = {
 	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA},					//PC8 -
 	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA},					//PC9 -
 
-	{NULL,&htim3,TIM_CHANNEL_1,0,1,_IT},					//PA6
-	{NULL,&htim3,TIM_CHANNEL_3,1,1,_IT},					//PB0 -
-	{NULL,&htim3,TIM_CHANNEL_4,2,1,_IT},					//PB1 - 
+	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT},					//PA6
+	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT},					//PB0 -
+	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT},					//PB1 - 
 	
 	{NULL,&htim4,TIM_CHANNEL_1,0,1,_IT},					//PB6 A2 1
 	{NULL,&htim4,TIM_CHANNEL_3,1,1,_IT},					//PB8 A2 2
@@ -409,13 +409,15 @@ uint32_t 		ch=rx.buf.byte[0],
 						per=rx.buf.hword[3]*84,
 						to=HAL_GetTick();
 						for(tim *t=timStack; t->htim; ++t)
-							if(t->sect == sect && (ch & (1<<(t->ch))))
+							if(t->sect == sect && (ch & (1<<(t->ch)))) {
 								while(n--) {
 									_buffer_put(t->dma,&to,sizeof(uint32_t)); 
 									to-=pw;
 									_buffer_put(t->dma,&to,sizeof(uint32_t));
 									to-=per;
 								}
+								break;
+							}
 					}
 				break;
 				
