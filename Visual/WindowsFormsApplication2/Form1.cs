@@ -19,8 +19,8 @@ namespace WindowsFormsApplication2
     public partial class Form1 : Form
     {
         string  rxString = "";
-        byte[] R = new byte[24],G = new byte[24],B = new byte[24];
- 
+        byte[]  R = new byte[24],G = new byte[24],B = new byte[24];
+        int type = 0;
         public Form1()
         {
             InitializeComponent();
@@ -213,7 +213,28 @@ namespace WindowsFormsApplication2
             int a = 3 * Math.Min(Height, Width) / 4;
             int center = a/10 + a/2;
             double fi = Math.Atan2(- e.Y + center, e.X - center) / Math.PI * 180.0;
-            Text = fi.ToString();
+            if(fi<0)
+                fi=fi+360.0;
+            int id = (int)fi / 90 + 0x210;
+            int sect = ((int)fi % 90)/30;
+
+            Text = "> " + Convert.ToString(id, 16) + " " + type.ToString() + " " + sect.ToString() + " 1 0 5 0 0 4" + "\r";
+            com.Write(Text);
+        }
+
+        private void LR_Click(object sender, EventArgs e)
+        {
+            type = 1;
+        }
+
+        private void LD_Click(object sender, EventArgs e)
+        {
+            type = 2;
+        }
+
+        private void BR_Click(object sender, EventArgs e)
+        {
+            type = 4;
         }
     }
 }

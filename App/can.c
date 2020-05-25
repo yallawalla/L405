@@ -403,18 +403,21 @@ payload		p;
 				case _THR_LEFT_REAR:
 					if(rx.hdr.StdId - 0x010 == idPos) {
 uint32_t 		ch=rx.buf.byte[0],
-						n=rx.buf.byte[1],
-						pw=rx.buf.byte[2]*84,
-						per=rx.buf.byte[2]*84,
-						t=HAL_GetTick();
-						while(n--) {
-							_buffer_put(timStack[ch].dma,&t,sizeof(uint32_t)); 
-							t-=pw;
-							_buffer_put(timStack[ch].dma,&t,sizeof(uint32_t));
-							t-=per;
-						}
+						sect=rx.buf.byte[1],
+						n=rx.buf.hword[1],
+						pw=rx.buf.hword[2]*84,
+						per=rx.buf.hword[3]*84,
+						to=HAL_GetTick();
+						for(tim *t=timStack; t->htim; ++t)
+							if(t->sect == sect && (ch & (1<<(t->ch))))
+								while(n--) {
+									_buffer_put(t->dma,&to,sizeof(uint32_t)); 
+									to-=pw;
+									_buffer_put(t->dma,&to,sizeof(uint32_t));
+									to-=per;
+								}
 					}
-					
+				break;
 				
 				case _ACK_LEFT_FRONT:
 				case _ACK_RIGHT_FRONT:

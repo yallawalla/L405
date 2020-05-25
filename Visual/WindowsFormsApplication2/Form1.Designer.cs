@@ -87,6 +87,7 @@
             this.LR.TabIndex = 1;
             this.LR.Text = "LR";
             this.LR.UseVisualStyleBackColor = true;
+            this.LR.Click += new System.EventHandler(this.LR_Click);
             // 
             // LD
             // 
@@ -97,6 +98,7 @@
             this.LD.TabIndex = 2;
             this.LD.Text = "LD";
             this.LD.UseVisualStyleBackColor = true;
+            this.LD.Click += new System.EventHandler(this.LD_Click);
             // 
             // BR
             // 
@@ -107,6 +109,7 @@
             this.BR.TabIndex = 3;
             this.BR.Text = "BR";
             this.BR.UseVisualStyleBackColor = true;
+            this.BR.Click += new System.EventHandler(this.BR_Click);
             // 
             // Form1
             // 
