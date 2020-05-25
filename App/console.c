@@ -210,6 +210,7 @@ FRESULT	err=f_findfirst(&dir,&fno,"/","*");
 * Return				:
 *******************************************************************************/
 FRESULT	DecodeCom(char *c) {
+CanRxMsg	rx;
 //__________________________________________________Prompt only response ____
 			if(!c)
 				_print("\r\n>");
@@ -247,6 +248,26 @@ FRESULT	DecodeCom(char *c) {
 					else
 						_RED(1000);
 				break;		
+//__________________________________________________
+				case '<': 
+					rx.hdr.StdId=strtoul(++c,&c,16);
+					do {
+						while(*c == ' ') ++c;
+						for(rx.hdr.DLC=0; *c && rx.hdr.DLC < 8; ++rx.hdr.DLC)
+							rx.buf.byte[rx.hdr.DLC]=strtoul(c,&c,16);
+						_buffer_push(_CAN->rx,&rx,sizeof(CanRxMsg));
+					} while(*c);
+					break;
+//__________________________________________________
+				case '>': 
+					rx.hdr.StdId=strtoul(++c,&c,16);
+					do {
+						while(*c == ' ') ++c;
+						for(rx.hdr.DLC=0; *c && rx.hdr.DLC < 8; ++rx.hdr.DLC)
+							rx.buf.byte[rx.hdr.DLC]=strtoul(c,&c,16);
+						Send(rx.hdr.StdId,&rx.buf,rx.hdr.DLC);
+					} while(*c);
+					break;
 //__________________________________________________
 				case '+':
 					return DecodePlus(++c);

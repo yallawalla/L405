@@ -182,7 +182,6 @@ namespace WindowsFormsApplication2
 //                g.DrawPie(pen, high, 180 + 360 / 48 + 360 * i / 24, 360 / 24);
              }
 //            g.FillEllipse(brush, low);
- 
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -207,6 +206,14 @@ namespace WindowsFormsApplication2
                 System.Windows.Forms.Application.Exit();
             else
                 System.Environment.Exit(1);
+        }
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            int a = 3 * Math.Min(Height, Width) / 4;
+            int center = a/10 + a/2;
+            double fi = Math.Atan2(- e.Y + center, e.X - center) / Math.PI * 180.0;
+            Text = fi.ToString();
         }
     }
 }

@@ -199,7 +199,7 @@ void	*canTx(void *v) {
 /*******************************************************************************/	
 	if(!_CAN) {
 		_CAN	=	_io_init(100*sizeof(CanRxMsg), 100*sizeof(CanTxMsg));
-		canFilterCfg(_ID_RxReq,	0x7f0, _ID_IAP_GO, 0x7f0);
+		canFilterCfg(_ACK_LEFT_FRONT,	0x7c0, _ID_IAP_GO, 0x7f0);
 		idDev=(uint32_t)HAL_CRC_Calculate(&hcrc,(uint32_t *)0x1FFF7A10,3);
 		
 		for(tim *t=timStack; t->htim; ++t) {
@@ -259,16 +259,16 @@ void	*canTx(void *v) {
 					}
 					
 					
-					if(t->count % 2) {
+					if(t->count % 2) {			// __---
 						if(t->count == 1)
 							t->sum=dt;
 						else
-							t->sum+=dt;				
+							t->sum+=dt;
 						if(t->sum/84 > 50) {
 							++t->scount;
 							t->sum=0;
 						}
-					} else {
+					} else {								// --___
 						if(dt/84 > 100)
 							t->sum=0;
 					}
@@ -332,11 +332,11 @@ void	*canTx(void *v) {
 						if(t->ch == 0) {
 							if(t->count == 2)
 								py.byte[t->sect] |= (1 << 0);
-							if(t->count > 30)
+							if(t->count > 14)
 								py.byte[t->sect] |= (1 << 1);
 						}
 			
-						if(t->ch == 1 &&  t->scount > 30)
+						if(t->ch == 1 &&  t->scount > 14)
 							py.byte[t->sect] |= (1 << 2);
 				}						
 				t->count=0;
@@ -397,6 +397,25 @@ payload		p;
 						++ackCount;
 					break;
 					
+				case _THR_LEFT_FRONT:
+				case _THR_RIGHT_FRONT:
+				case _THR_RIGHT_REAR:
+				case _THR_LEFT_REAR:
+					if(rx.hdr.StdId - 0x010 == idPos) {
+uint32_t 		ch=rx.buf.byte[0],
+						n=rx.buf.byte[1],
+						pw=rx.buf.byte[2]*84,
+						per=rx.buf.byte[2]*84,
+						t=HAL_GetTick();
+						while(n--) {
+							_buffer_put(timStack[ch].dma,&t,sizeof(uint32_t)); 
+							t-=pw;
+							_buffer_put(timStack[ch].dma,&t,sizeof(uint32_t));
+							t-=per;
+						}
+					}
+					
+				
 				case _ACK_LEFT_FRONT:
 				case _ACK_RIGHT_FRONT:
 				case _ACK_RIGHT_REAR:
@@ -413,15 +432,7 @@ payload		p;
 						break;
 						default:
 							break;
-					}
-					
-//				case _ID_RxReq:
-//					_print("id %02X%c%04X:dev %hd, ch %02X, %04X\r\n",
-//							rx.buf.hword[0],'-',rx.buf.hword[1],rx.buf.hword[2]>>8,
-//								rx.buf.hword[2]&0xff, rx.buf.hword[3]);
-//					alarmOn(((rx.buf.hword[2]>>8)-1)*2 + rx.buf.hword[0]*__LEDS/4,rx.buf.hword[2]&0x0f,1);
-//					break;
-					
+					}					
 				default:
 					break;
 			}
