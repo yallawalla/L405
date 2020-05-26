@@ -325,15 +325,15 @@ void	*canTx(void *v) {
 						SaveSettings();
 					break;
 			
-					case _REPEAT:
-					break;
+//					case _REPEAT:
+//					break;
 						
 					default:
 						if(t->ch == 0) {
-							if(t->count == 2)
-								py.byte[t->sect] |= (1 << 0);
 							if(t->count > 14)
 								py.byte[t->sect] |= (1 << 1);
+							else
+								py.byte[t->sect] |= (1 << 0);
 						}
 			
 						if(t->ch == 1 &&  t->scount > 14)

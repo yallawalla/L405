@@ -216,12 +216,19 @@ namespace WindowsFormsApplication2
             int a = 3 * Math.Min(Height, Width) / 4;
             int center = a/10 + a/2;
             double fi = Math.Atan2(- e.Y + center, - e.X + center) / Math.PI * 180.0;
-            if(fi<0)
-                fi=fi+360.0;
-            int id = (int)fi / 90 + 0x210;
-            int sect = ((int)fi % 90)/30;
+            SendThead(fi);
+            SendThead(fi + 30.0 / 4.0);
+            SendThead(fi - 30.0 / 4.0);
+        }
 
-            Text = "> " + Convert.ToString(id, 16) +
+        private void SendThead(double fi)
+        {
+            if (fi < 0)
+                fi = fi + 360.0;
+            int id = (int)fi / 90 + 0x210;
+            int sect = ((int)fi % 90) / 30;
+
+            string s = "> " + Convert.ToString(id, 16) +
                 " " + Convert.ToString(type, 16) +
                 " " + Convert.ToString(sect, 16) +
                 " " + Convert.ToString(burst % 256, 16) +
@@ -230,8 +237,9 @@ namespace WindowsFormsApplication2
                 " " + Convert.ToString(pw / 256, 16) +
                 " " + Convert.ToString(period % 256, 16) +
                 " " + Convert.ToString(period / 256, 16) + "\r";
-            com.Write(Text);
+            com.Write(s);
         }
+
 
         private void LR_Click(object sender, EventArgs e)
         {
