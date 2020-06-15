@@ -325,8 +325,8 @@ void	*canTx(void *v) {
 						SaveSettings();
 					break;
 			
-//					case _REPEAT:
-//					break;
+					case _REPEAT:
+					break;
 						
 					default:
 						if(t->ch == 0) {
