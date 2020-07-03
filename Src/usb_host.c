@@ -31,7 +31,6 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-void			VCP_USB_DEVICE_Init(void);
 /* USER CODE END PV */
 
 /* USER CODE BEGIN PFP */
