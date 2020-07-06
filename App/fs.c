@@ -169,9 +169,9 @@ FRESULT 		fr;          																											//	FatFs function common resul
 UINT 				br, bw;         																									//	File read/write count */
 FILINFO			fno;
 	
-						if(f_mount(&fs0,"1:",1) ||
-							f_mount(&fs1,"0:",1) ||
-							f_chdrive("1:") || 
+						if(f_mount(&fs0,"USB:",1) ||
+							f_mount(&fs1,"FLASH:",1) ||
+							f_chdrive("USB:") || 
 							f_chdir("/sync") ||
 							f_findfirst(&dir,&fno,"/sync","*")) 
 								return 0;
@@ -183,9 +183,9 @@ FILINFO			fno;
 								continue;
 							}
 							_print("%-8d",(int)fno.fsize);
-							if(f_chdrive("1:") || f_open(&f0,fno.fname,FA_OPEN_EXISTING | FA_READ))
+							if(f_chdrive("USB:") || f_open(&f0,fno.fname,FA_OPEN_EXISTING | FA_READ))
 								continue;
-							if(f_chdrive("0:") || f_open(&f1,fno.fname,FA_CREATE_ALWAYS | FA_WRITE))
+							if(f_chdrive("FLASH:") || f_open(&f1,fno.fname,FA_CREATE_ALWAYS | FA_WRITE))
 								continue;
 							for (;;) {
 								if((HAL_GetTick() / 100) % 2)

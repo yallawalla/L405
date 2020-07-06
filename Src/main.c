@@ -135,24 +135,6 @@ FATFS		fatfs;
 
   /* USER CODE BEGIN SysInit */
 		__HAL_RCC_CLEAR_RESET_FLAGS();
-	  GPIO_InitTypeDef GPIO_InitStruct = {0};
-// leds
-		__HAL_RCC_GPIOD_CLK_ENABLE();
-    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
-// Nucleo USB power switch
-		__HAL_RCC_GPIOG_CLK_ENABLE();
-    GPIO_InitStruct.Pin = GPIO_PIN_6;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
-		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -170,11 +152,12 @@ FATFS		fatfs;
   MX_IWDG_Init();
   MX_ADC1_Init();
   MX_DAC_Init();
-  MX_USB_HOST_Init();
+//  MX_USB_HOST_Init();
+	VCP_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-	if(f_mount(&fatfs,"0:",1) || f_chdrive("0:") || LoadSettings()) {
-		ff_format("0:");
-		f_chdrive("0:");
+	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
+		ff_format("FLASH:");
+		f_chdrive("FLASH:");
 		SaveSettings();
 	} else {
 //		f_unlink("0:/L405.hex");
@@ -192,6 +175,50 @@ FATFS		fatfs;
 	ledProcInit();
 	InitITM();
 	
+	
+	
+#ifdef	__DISCO__
+// leds G,O,R,B
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};
+		__HAL_RCC_GPIOD_CLK_ENABLE();
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+		HAL_GPIO_WritePin(GPIOD, 
+		PIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+		
+// Discovery USB power switch
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};
+		__HAL_RCC_GPIOC_CLK_ENABLE();
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+#endif
+#ifdef	__NUCLEO__
+// leds G,B,R
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};
+		__HAL_RCC_GPIOD_CLK_ENABLE();
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_7|GPIO_PIN_14;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_7|GPIO_PIN_14, GPIO_PIN_RESET);
+
+// Nucleo USB power switch
+		__HAL_RCC_GPIOG_CLK_ENABLE();
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
+#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */

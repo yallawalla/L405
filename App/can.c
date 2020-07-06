@@ -15,7 +15,16 @@ uint32_t	idDev=0,
 					ackCount=0, 
 					tref=0;
 payload		py={0,0};
-led Leds = {{0,0,0,0},{GPIO_PIN_12,GPIO_PIN_13,GPIO_PIN_14,GPIO_PIN_15}};
+
+#ifdef	__DISCO__
+		led Leds = {{0,0,0,0},GPIOD,{GPIO_PIN_14,GPIO_PIN_12,GPIO_PIN_15,GPIO_PIN_13}};
+#else 
+	#ifdef	__NUCLEO__
+		led Leds = {{0,0,0,0},GPIOB,{GPIO_PIN_14,GPIO_PIN_0,GPIO_PIN_7,GPIO_PIN_7}};
+	#else
+		led Leds = {{0,0,0,0},LED_R_GPIO_Port,{LED_R_Pin,LED_G_Pin,LED_R_Pin,LED_G_Pin}};
+	#endif
+#endif
 
 // B11,B12,B13 lrf
 // A21,A22,A23 br
@@ -190,11 +199,11 @@ void	*canTx(void *v) {
 		if(!Leds.t[i])
 			continue;
 		if(HAL_GetTick() > Leds.t[i]) {
-			HAL_GPIO_WritePin(GPIOD, Leds.pin[i], GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(Leds.port, Leds.pin[i], GPIO_PIN_RESET);
 			Leds.t[i]=0;
 		}
 		else
-			HAL_GPIO_WritePin(GPIOD, Leds.pin[i], GPIO_PIN_SET);
+			HAL_GPIO_WritePin(Leds.port, Leds.pin[i], GPIO_PIN_SET);
 	}
 /*******************************************************************************/	
 	if(!_CAN) {

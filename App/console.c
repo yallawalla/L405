@@ -220,19 +220,19 @@ CanRxMsg	rx;
 //__________________________________________________SW version query_________
 //__________________________________________________
 				case '0':
-					f_mount(&fatfs,"0:",1);
-					f_chdrive("0:");
+					f_mount(&fatfs,"FLASH:",1);
+				f_chdrive("FLASH:");
 					break;
 //__________________________________________________
 				case '1':
-					f_mount(&fatfs,"1:",1);
-					f_chdrive("1:");
+					f_mount(&fatfs,"USB:",1);
+				f_chdrive("USB:");
 					break;
 //__________________________________________________
 				case 'F':
 				{
 					FIL f;
-					ff_format("0:");
+					ff_format("FLASH:");
 					SaveSettings();
 					f_printf(&f,"ok...");
 				}
@@ -304,18 +304,21 @@ char	*c;
 					
 				case __f9:
 				case __F9:
+				case 'v':
 							MX_USB_HOST_DeInit();
 							MSC_USB_DEVICE_DeInit();
 							VCP_USB_DEVICE_Init();
 				break;
 				case __f10:
 				case __F10:
+				case 'f':
 							MX_USB_HOST_DeInit();
 							VCP_USB_DEVICE_DeInit();
 							MSC_USB_DEVICE_Init();
 				break;
 				case __f11:
 				case __F11:
+				case 'h':
 							VCP_USB_DEVICE_DeInit();
 							MSC_USB_DEVICE_DeInit();
 							MX_USB_HOST_Init();

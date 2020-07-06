@@ -36,6 +36,7 @@ void			*canRx(void *),
 
 typedef struct  {
 	uint32_t	t[4];
+	GPIO_TypeDef *port;
 	uint16_t	pin[4];
 } led;
 

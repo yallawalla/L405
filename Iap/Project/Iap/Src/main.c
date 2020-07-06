@@ -46,11 +46,11 @@ int					*p=(int *)*_FW_START;
 						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
 						GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-	//					if(RCC_GetFlagStatus(RCC_FLAG_SFTRST) != RESET && !crcError()) {
+						if(RCC_GetFlagStatus(RCC_FLAG_SFTRST) != RESET && !crcError()) {
 							NVIC_SetVectorTable(NVIC_VectTab_FLASH,(uint32_t)p-_BOOT_TOP);				
 							__set_MSP(*p++);
 							((void (*)(void))*p)();
-//						}
+						}
 
 						App_Init();
 						if(RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET) {

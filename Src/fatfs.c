@@ -34,9 +34,9 @@ FIL USERFile;       /* File object for USER */
 void MX_FATFS_Init(void) 
 {
   /*## FatFS: Link the USBH driver ###########################*/
-  retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
   /*## FatFS: Link the USER driver ###########################*/
   retUSER = FATFS_LinkDriver(&USER_Driver, USERPath);
+  retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
 
   /* USER CODE BEGIN Init */
   /* additional user code for init */     
