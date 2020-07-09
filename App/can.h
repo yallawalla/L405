@@ -22,6 +22,7 @@ extern 		TIM_HandleTypeDef htim1,
 
 extern		_io								*_CAN,
 														*_VCP,
+														*_ITM,
 														*_DBG;
 
 extern		uint32_t					idDev,
@@ -42,10 +43,10 @@ typedef struct  {
 
 extern led Leds;
 
-#define _GREEN(a)		Leds.t[0]=HAL_GetTick()+a
-#define _YELLOW(a)	Leds.t[1]=HAL_GetTick()+a
-#define _RED(a)			Leds.t[2]=HAL_GetTick()+a
-#define _BLUE(a)		Leds.t[3]=HAL_GetTick()+a
+#define _RED(a)			Leds.t[0]=HAL_GetTick()+a
+#define _GREEN(a)		Leds.t[1]=HAL_GetTick()+a
+#define _BLUE(a)		Leds.t[2]=HAL_GetTick()+a
+#define _YELLOW(a)	Leds.t[3]=HAL_GetTick()+a
 
 typedef enum {    
 	_ACK_LEFT_FRONT	=0x200,

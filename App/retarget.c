@@ -71,8 +71,9 @@ _io 		*io=*(_io **)v;
 				return v;
 }
 //______________________________________________________________________________________
-void		InitITM(void) {
-				_ITM=_io_init(128,128);
+_io			*InitITM(void) {
+				_ITM=_io_init(1280,1280);
 				_proc_add(console,&_ITM,"console",0);
 				_proc_add(itm,&_ITM,"itm",10);
+				return _ITM;
 }

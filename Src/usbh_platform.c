@@ -42,7 +42,7 @@ void MX_DriverVbusFS(uint8_t state)
     /* Drive high Charge pumhp */ 	     
     data = GPIO_PIN_RESET;
 #ifdef	__NUCLEO__
-		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_SET);
 #endif
   }
   else
@@ -50,7 +50,7 @@ void MX_DriverVbusFS(uint8_t state)
     /* Drive low Charge pump */
     data = GPIO_PIN_SET;
 #ifdef	__NUCLEO__
-		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
 #endif
   }
   /* USER CODE END PREPARE_GPIO_DATA_VBUS_FS */

@@ -125,8 +125,82 @@ void Error_Handler(void);
 #define _3B3_Pin GPIO_PIN_9
 #define _3B3_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
+#ifdef	__NUCLEO__
+#define	__otgDeviceId	HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10)
+#define	__otgPwr			HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_6)
+#define	__otgPwrInit do {\
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
+		__HAL_RCC_GPIOG_CLK_ENABLE();\
+    GPIO_InitStruct.Pin = GPIO_PIN_6;\
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;\
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;\
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;\
+    HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);\
+		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);\
+	} while(0)
+#define __ledInit do {\
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
+		__HAL_RCC_GPIOD_CLK_ENABLE();\
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_7|GPIO_PIN_14;\
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;\
+    GPIO_InitStruct.Pull = GPIO_NOPULL;\
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;\
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);\
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_7|GPIO_PIN_14, GPIO_PIN_RESET);\
+	} while(0)
 
-/* USER CODE END Private defines */
+#define	__otgIdInit do {\
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
+		__HAL_RCC_GPIOA_CLK_ENABLE();\
+    GPIO_InitStruct.Pin = GPIO_PIN_10;\
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;\
+    GPIO_InitStruct.Pull = GPIO_PULLUP;\
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;\
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);\
+	} while(0)
+#else 
+	#ifdef	__DISCO__
+#define	__otgDeviceId	HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10)
+#define	__otgPwr			HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0)
+#define	__otgPwrInit do {\
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
+		__HAL_RCC_GPIOC_CLK_ENABLE();\
+    GPIO_InitStruct.Pin = GPIO_PIN_0;\
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;\
+    GPIO_InitStruct.Pull = GPIO_NOPULL;\
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;\
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);\
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);\
+	} while(0)
+#define __ledInit do {\
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
+		__HAL_RCC_GPIOD_CLK_ENABLE();\
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;\
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;\
+    GPIO_InitStruct.Pull = GPIO_NOPULL;\
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;\
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);\
+		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);\
+	} while(0)
+#define	__otgIdInit do {\
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
+		__HAL_RCC_GPIOA_CLK_ENABLE();\
+    GPIO_InitStruct.Pin = GPIO_PIN_10;\
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;\
+    GPIO_InitStruct.Pull = GPIO_PULLUP;\
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;\
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);\
+	} while(0)
+ #else
+	#define	__otgDeviceId	HAL_GPIO_ReadPin(OTG_ID_GPIO_Port, OTG_ID_Pin)
+	#define	__otgPwr			HAL_GPIO_ReadPin(OTG_VBUS_GPIO_Port, OTG_VBUS_Pin)
+	#define	__otgPwrInit
+	#define __ledInit
+	#define	__otgIdInit
+ #endif
+#endif
+
+	/* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }

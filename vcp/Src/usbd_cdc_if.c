@@ -25,6 +25,8 @@
 /* USER CODE BEGIN INCLUDE */
 #include "proc.h"
 static void	*CDC_Poll_FS(void *);
+			 void  printVersion(void *);
+
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,8 +161,9 @@ static int8_t CDC_Init_FS(void)
   /* Set Application Buffers */
   USBD_CDC_SetTxBuffer(&hVcpDeviceFS, UserTxBufferFS, 0);
   USBD_CDC_SetRxBuffer(&hVcpDeviceFS, UserRxBufferFS);
-	_VCP=_io_init(2048,2046);
+	_VCP=_io_init(2048,2048);
  	_proc_add(CDC_Poll_FS,&_VCP,"CDC poll",0); 
+	printVersion(_VCP);
   return (USBD_OK);
   /* USER CODE END 3 */
 }

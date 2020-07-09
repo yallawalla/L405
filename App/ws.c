@@ -36,7 +36,7 @@ void			Decode(int sect,uint8_t *p) {
 									leds[j].bit12 |= 1 << (sect*__LEDS/8+i);
 								}
 					}	else {
-						ledStream(sect*__LEDS/4,0,__LEDS/4-1);
+						wsStream(sect*__LEDS/4,0,__LEDS/4-1);
 						for(int i=0; i<__LEDS/4; ++i)
 							leds[0].timeout[sect*__LEDS/4+i]=HAL_GetTick()+1000;
 					}
@@ -47,7 +47,7 @@ void			Decode(int sect,uint8_t *p) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void			ledStream(int32_t sect, int32_t colour, int32_t n) {
+void			wsStream(int32_t sect, int32_t colour, int32_t n) {
 RGB				rgb={0,0,0};
 uint32_t	*p = &_leds[(sect+8+4)*24];
 					if(colour >= 0)
@@ -89,7 +89,7 @@ uint32_t	*p = &_leds[(sect+8+4)*24];
 * Output				:
 * Return				:
 *******************************************************************************/
-void			ledProcInit(void) {
+void			wsProcInit(void) {
 					uint32_t *p = &_leds[4*24];
 		
 					for(int i=0; i<(__LEDS+8)*24; ++i)
@@ -116,7 +116,7 @@ void			ledProcInit(void) {
 							j = ror(12, j, 1);
 						}
 					}
-					_proc_add(ledProc,NULL,"ledProc",20);
+					_proc_add(wsProc,NULL,"wsProc",20);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -124,7 +124,7 @@ void			ledProcInit(void) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void			*ledProc(void *p) {
+void			*wsProc(void *p) {
 	
 					if(pTimeout && HAL_GetTick() > pTimeout) {
 						pTimeout=0;
@@ -142,7 +142,7 @@ void			*ledProc(void *p) {
 						for(j=0; j < __COLS; ++j) {
 							if((leds[j].bit24 & (1 << i)) && pCount[j][i] < 5) {
 								if(!pCount[j][i]++)
-									ledStream(i,j,1);
+									wsStream(i,j,1);
 								break;
 							}
 						}
@@ -155,12 +155,12 @@ void			*ledProc(void *p) {
 					for(int i=0; i<__COLS; ++i) 
 						for(int j=0; j<__LEDS; ++j)
 							if(leds[i].timeout[j] && HAL_GetTick() > leds[i].timeout[j]) {
-								ledStream(j,-i-1,1);
+								wsStream(j,-i-1,1);
 								leds[i].timeout[j]=0;
 								leds[i].bit24 &= ~(1<<j);
 								pCount[i][j]=0;
 							}
-					return ledProc;
+					return wsProc;
 }
 /*******************************************************************************
  * Function RGB2HSV

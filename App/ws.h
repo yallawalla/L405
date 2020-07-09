@@ -25,9 +25,9 @@ struct led {
 extern		TIM_HandleTypeDef htim2;
 extern		uint32_t	DecodeTab[];
 
-void			ledProcInit(void),
-					ledStream(int32_t, int32_t, int32_t),
-					*ledProc(void *),
+void			wsProcInit(void),
+					wsStream(int32_t, int32_t, int32_t),
+					*wsProc(void *),
 					Decode(int,uint8_t *),
 					RGB2HSV(RGB, HSV *),
 					HSV2RGB(HSV, RGB *);

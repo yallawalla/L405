@@ -170,7 +170,7 @@ FRESULT DecodeEq(char *c) {
 FRESULT DecodeInq(char *c) {
 	switch(*trim(&c)) {
 		case 'v':
-			printVersion();
+			printVersion(NULL);
 		break;
 		case 't':
 			for(int i=0; i<4096; ++i) {
@@ -211,32 +211,32 @@ FRESULT	err=f_findfirst(&dir,&fno,"/","*");
 *******************************************************************************/
 FRESULT	DecodeCom(char *c) {
 CanRxMsg	rx;
+FRESULT		ret=FR_OK;
 //__________________________________________________Prompt only response ____
 			if(!c)
 				_print("\r\n>");
 			else
 //___________________________________________________________________________
-			switch(*c) {
+				switch(*c) {
 //__________________________________________________SW version query_________
 //__________________________________________________
 				case '0':
-					f_mount(&fatfs,"FLASH:",1);
-				f_chdrive("FLASH:");
+					ret=f_mount(&fatfs,"FLASH:",1);
+					if(ret==FR_OK)
+						ret=f_chdrive("FLASH:");
 					break;
 //__________________________________________________
 				case '1':
-					f_mount(&fatfs,"USB:",1);
-				f_chdrive("USB:");
+					ret=f_mount(&fatfs,"USB:",1);
+					if(ret==FR_OK)
+						ret=f_chdrive("USB:");
 					break;
 //__________________________________________________
 				case 'F':
-				{
-					FIL f;
-					ff_format("FLASH:");
-					SaveSettings();
-					f_printf(&f,"ok...");
-				}
-				break;
+					ret=ff_format("FLASH:");
+					if(ret==FR_OK)
+						SaveSettings();
+					break;
 //__________________________________________________
 				case 'P':
 					printf("...%d",ff_pack(0));
@@ -279,9 +279,9 @@ CanRxMsg	rx;
 					return DecodeInq(++c);
 //_______________________________________________________________________________________
 				default:
-					return FR_INVALID_NAME;
+					ret = FR_INVALID_NAME;
 			}
-			return FR_OK;
+			return ret;
 }				
 /*******************************************************************************
 * Function Name	: 
@@ -294,31 +294,31 @@ char	*c;
 			switch(i) {
 				case EOF:																				// empty usart
 					break;				
+				
 				case __CtrlZ:																		// call watchdog reset
 					while(1);				
+				
 				case __CtrlY:																		// call system reset
 					NVIC_SystemReset();	
+				
 				case __Esc:
 					Send(_ID_IAP_PING,NULL,0);
 				break;
 					
 				case __f9:
 				case __F9:
-				case 'v':
 							MX_USB_HOST_DeInit();
 							MSC_USB_DEVICE_DeInit();
 							VCP_USB_DEVICE_Init();
 				break;
 				case __f10:
 				case __F10:
-				case 'f':
 							MX_USB_HOST_DeInit();
 							VCP_USB_DEVICE_DeInit();
 							MSC_USB_DEVICE_Init();
 				break;
 				case __f11:
 				case __F11:
-				case 'h':
 							VCP_USB_DEVICE_DeInit();
 							MSC_USB_DEVICE_DeInit();
 							MX_USB_HOST_Init();
@@ -362,11 +362,16 @@ _io 	*current=*(_io **)v;
 * Output				:
 * Return				:
 ****************************f***************************************************/
-void	printVersion() {
-			_print(" %d.%02d %s <%08X>",
+void	printVersion(void *v) {
+_io		*io;
+			if(v)
+				io=_stdio(v);
+			_print("\rV%d.%02d %s <%08X>",
 				SW_version/100,SW_version%100,
 					__DATE__,
 						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));
+			if(v)
+				_stdio(io);			
 }
 /*******************************************************************************
 * Function Name	: 

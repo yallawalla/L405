@@ -169,8 +169,7 @@ FRESULT	ff_format(char *drv) {
 		FLASH_Erase(i,1);
 		Watchdog();
 	}
-	FRESULT err = f_mkfs(drv,1,CLUSTER_SIZE,wbuf,SECTOR_SIZE);
-	return err;
+	return f_mkfs(drv,1,CLUSTER_SIZE,wbuf,SECTOR_SIZE);
 }
 /* Private variables ---------------------------------------------------------*/
 /* Disk status */
