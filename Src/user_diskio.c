@@ -92,8 +92,9 @@ uint32_t	SectorError;
 * Output				:
 * Return				:
 *******************************************************************************/
-void	Watchdog() {
+void	*Watchdog(void) {
 			HAL_IWDG_Refresh(&hiwdg);	
+			return(Watchdog);
 }
 /*******************************************************************************
 * Function Name	: 

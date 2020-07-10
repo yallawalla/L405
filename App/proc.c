@@ -68,23 +68,13 @@ __weak 	int	_print(const char *format, ...) {
 //______________________________________________________________________________
 void	_wait(int t) {
 uint32_t	tout = HAL_GetTick() + t;
-			while(HAL_GetTick() < tout)
+			while(HAL_GetTick() < tout) {
 				_proc_loop();
+				Watchdog();
+			}
 }
 //______________________________________________________________________________
 void HAL_Delay(uint32_t Delay)
 {
-  uint32_t tickstart = HAL_GetTick();
-  uint32_t wait = Delay;
-
-  /* Add a freq to guarantee minimum wait */
-  if (wait < HAL_MAX_DELAY)
-  {
-    wait += HAL_TICK_FREQ_DEFAULT;
-  }
-
-  while((HAL_GetTick() - tickstart) < wait)
-  {
-		Watchdog();
-  }
+	_wait(Delay);
 }

@@ -45,7 +45,7 @@ int			putch(int),
 int			__get (_buffer *);
 int			__put (_buffer *, int);
 //______________________________________________________________________________________
-void		Watchdog(void);
+void		*Watchdog(void);
 void		Watchdog_init(int);
 //______________________________________________________________________________________
 struct	__FILE

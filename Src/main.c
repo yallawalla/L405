@@ -134,8 +134,8 @@ FATFS		fatfs;
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-		__HAL_RCC_CLEAR_RESET_FLAGS();
-		__otgPwrInit;
+	__HAL_RCC_CLEAR_RESET_FLAGS();
+	__otgPwrInit;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -157,11 +157,11 @@ FATFS		fatfs;
   /* USER CODE BEGIN 2 */
 	__ledInit;
 	__otgIdInit;
-
-	if(__otgDeviceId==GPIO_PIN_SET) {
-		MX_USB_HOST_DeInit();
-		VCP_USB_DEVICE_Init();
-	}
+//	if(__otgDeviceId) {
+//		MX_USB_HOST_DeInit();
+//		VCP_USB_DEVICE_Init();
+//	}		
+	
 	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
 		ff_format("FLASH:");
 		f_chdrive("FLASH:");
@@ -175,6 +175,7 @@ FATFS		fatfs;
 		}
 	}
 	f_close(&f);
+	_proc_add(Watchdog,NULL,"watchdog",0); 
 	_proc_add(console,&_VCP,"console",0); 
 	_proc_add(canRx,&_CAN,"canRx",0);
 	_proc_add(canTx,&_CAN,"canTx",0);
@@ -192,24 +193,23 @@ FATFS		fatfs;
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
-		HAL_IWDG_Refresh(&hiwdg);	
 		_proc_loop(); 
 		
-		if(__otgPwr==GPIO_PIN_RESET) {
-			if(__otgDeviceId==GPIO_PIN_RESET) {
-				VCP_USB_DEVICE_DeInit();
-				_RED(500);
-				_wait(500);
-				MX_USB_HOST_Init();
-			}
-		} else {
-			if(__otgDeviceId==GPIO_PIN_SET) {
-				MX_USB_HOST_DeInit();
-				_BLUE(500);
-				_wait(500);
-				VCP_USB_DEVICE_Init();
-			}
-		}
+//		if(__otgDeviceId) {
+//			if(__otgPwrOn) {
+//				MX_USB_HOST_DeInit();
+//				_wait(500);
+//				MSC_USB_DEVICE_DeInit();
+//				VCP_USB_DEVICE_Init();			
+//			}
+//		} else {
+//			if(__otgPwrOff) {
+//				VCP_USB_DEVICE_DeInit();
+//				MSC_USB_DEVICE_DeInit();
+//				_wait(500);
+//				MX_USB_HOST_Init();			
+//			}
+//		}
 	}
   /* USER CODE END 3 */
 }

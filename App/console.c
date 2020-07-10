@@ -14,7 +14,7 @@ int		Escape(void) {
 static struct {	
 			uint32_t	seq;
 			uint32_t	timeout;
-			} esc, rpt;
+			} esc, usbid;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -22,26 +22,28 @@ static struct {
 * Return				:
 *******************************************************************************/
 int		i=getchar();
-			if(i==EOF) {
+			if(i==__Esc) {
+				esc.seq=i;
+				esc.timeout=HAL_GetTick()+10;
+			} else if(i==EOF) {
+				if(usbid.seq != __otgDeviceId) {
+					usbid.seq = __otgDeviceId;
+					usbid.timeout=HAL_GetTick()+10;
+				}				
 				if(esc.timeout && (HAL_GetTick() > esc.timeout)) {
 					esc.timeout=0;
 					return esc.seq;
-					}
-				if(rpt.timeout && (HAL_GetTick() > rpt.timeout)) {
-					rpt.timeout=0;
-					return rpt.seq;
-					}
-			} else if(esc.timeout > 0) {
-				esc.seq=(esc.seq<<8) | i;
-				if(i=='~' || i=='A' || i=='B' || i=='C' || i=='D') {
-					esc.timeout=0;
-					return esc.seq;
 				}
-			} else if(i==__Esc) {
-				esc.timeout=HAL_GetTick()+10;
-				esc.seq=i;
+				if(usbid.timeout && (HAL_GetTick() > usbid.timeout)) {
+					usbid.timeout=0;
+					if(usbid.seq)
+						return __F9;
+					else
+						return __F11;
+				}
+			} else if(esc.timeout) {
+				esc.seq=(esc.seq<<8) | i;
 			} else {
-				esc.timeout=0;
 				return i;
 			}
 			return EOF;
@@ -307,20 +309,14 @@ char	*c;
 					
 				case __f9:
 				case __F9:
-							MX_USB_HOST_DeInit();
-							MSC_USB_DEVICE_DeInit();
 							VCP_USB_DEVICE_Init();
 				break;
 				case __f10:
 				case __F10:
-							MX_USB_HOST_DeInit();
-							VCP_USB_DEVICE_DeInit();
 							MSC_USB_DEVICE_Init();
 				break;
 				case __f11:
 				case __F11:
-							VCP_USB_DEVICE_DeInit();
-							MSC_USB_DEVICE_DeInit();
 							MX_USB_HOST_Init();
 				break;
 				
@@ -366,7 +362,7 @@ void	printVersion(void *v) {
 _io		*io;
 			if(v)
 				io=_stdio(v);
-			_print("\rV%d.%02d %s <%08X>",
+			_print("\rV%d.%02d %s <%08X>\r\n>",
 				SW_version/100,SW_version%100,
 					__DATE__,
 						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));
