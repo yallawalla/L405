@@ -15,7 +15,7 @@ enum			err_parse	{
 };
 
 extern		IWDG_HandleTypeDef hiwdg;
-void			printVersion(void *);
+void			printVersion(void);
 int32_t		USBH_Iap(void);
 FRESULT		ff_format(char *);
 FRESULT		LoadSettings(void),

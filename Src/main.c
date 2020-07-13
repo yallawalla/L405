@@ -181,7 +181,10 @@ FATFS		fatfs;
 	_proc_add(canTx,&_CAN,"canTx",0);
 	
 	wsProcInit();
-	printVersion(InitITM());
+	
+	_io *io=_stdio(InitITM());
+	printVersion();
+	_stdio(io);
 	
   /* USER CODE END 2 */
 

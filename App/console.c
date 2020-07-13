@@ -115,15 +115,6 @@ char *trim(char **c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-FATFS			fatfs;
-DIR				dir;
-FILINFO		fno;
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 FRESULT DecodePlus(char *c) {
 	switch(*trim(&c)) {
 		case 'D':
@@ -164,30 +155,46 @@ FRESULT DecodeEq(char *c) {
 	return FR_OK;
 }
 /*******************************************************************************
-* Function Name	: 
-* Description		: 
+* Function Name	:
+* Description		:
 * Output				:
 * Return				:
 *******************************************************************************/
-FRESULT DecodeInq(char *c) {
-	switch(*trim(&c)) {
-		case 'v':
-			printVersion(NULL);
-		break;
-		case 't':
-			for(int i=0; i<4096; ++i) {
-				_print("\r\n");
-				for(int j=0x800; j; j/=2)
-					i & j ? _print(" 1") : _print(" 0");
-				_print("\r\n");				
-				for(int j=0x800000; j; j/=2)
-					DecodeTab[i] & j ? _print("1") : _print("0");
-			}
-		break;
-		case 'd': {
-FRESULT	err=f_findfirst(&dir,&fno,"/","*");
-			if(err)
-				return err;	
+FRESULT fCopy(int argc, char *argv[]) {
+	return FR_OK;
+}
+//-----------------------------------------------------
+FRESULT fRename(int argc, char *argv[]) {
+	return f_rename(argv[1],argv[2]);
+}
+//-----------------------------------------------------
+FRESULT fDelete(int argc, char *argv[]) {
+	return f_unlink(argv[1]);
+}
+//-----------------------------------------------------
+FRESULT mkDir(int argc, char *argv[]) {
+	if(argc>1)
+		return f_mkdir(argv[1]);
+	else
+		return f_mkdir("new");
+}
+//-----------------------------------------------------
+FRESULT chDir(int argc, char *argv[]) {
+	return f_chdir(argv[1]);
+}
+//-----------------------------------------------------
+FRESULT Dir(int argc, char *argv[]) {
+DIR				dir;
+FILINFO		fno;
+FRESULT		err=FR_OK;
+
+	err=f_getcwd(fno.fname,_MAX_LFN);
+	if(err==FR_OK) {
+		if(argc>1)
+			err=f_findfirst(&dir,&fno,fno.fname,argv[1]);
+		else
+			err=f_findfirst(&dir,&fno,fno.fname,"*");
+		if(err==FR_OK) {
 			do {
 				_print("\r\n%-16s",fno.fname);
 				if (fno.fattrib & AM_DIR)
@@ -196,24 +203,41 @@ FRESULT	err=f_findfirst(&dir,&fno,"/","*");
 					_print("%-8d",(int)fno.fsize);
 				err=f_findnext(&dir,&fno);
 				if(err)
-					return err;	
+					break;
 			} while(*fno.fname);
-			break;
-			}
-		default:
-			return FR_INVALID_NAME;
+		}
 	}
-	return FR_OK;
+	return err;
 }
 /*******************************************************************************
-* Function Name	: 
-* Description		: 
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+struct cmd {
+	char *str;
+	FRESULT (*f)(int, char *[]);
+} cmds[]=
+{
+	{"copy",			fCopy},
+	{"rename",		fRename},
+	{"delete",		fDelete},
+	{"directory",	Dir},
+	{"mkd",				mkDir},
+	{"mdir",			mkDir},
+	{"cdir",			chDir}
+};
+/*******************************************************************************
+* Function Name	:
+* Description		:
 * Output				:
 * Return				:
 *******************************************************************************/
 FRESULT	DecodeCom(char *c) {
 CanRxMsg	rx;
 FRESULT		ret=FR_OK;
+FATFS			fatfs;
 //__________________________________________________Prompt only response ____
 			if(!c)
 				_print("\r\n>");
@@ -277,14 +301,22 @@ FRESULT		ret=FR_OK;
 					return DecodeMinus(++c);
 				case '=':
 					return DecodeEq(++c);
-				case '?':
-					return DecodeInq(++c);
 //_______________________________________________________________________________________
-				default:
+				default: {
+					char *q[8];
+					int n=0;
+					q[n]=strtok(c," ,");
+					while(q[n]) {
+						q[++n]=strtok(NULL," ,");
+					}
+					for(int i=0; i<sizeof(cmds)/sizeof(struct cmd); ++i)
+						if(!strncmp(q[0],cmds[i].str,strlen(q[0])))
+							return cmds[i].f(n,q);
 					ret = FR_INVALID_NAME;
-			}
+					}
+				}				
 			return ret;
-}				
+}
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -358,16 +390,11 @@ _io 	*current=*(_io **)v;
 * Output				:
 * Return				:
 ****************************f***************************************************/
-void	printVersion(void *v) {
-_io		*io;
-			if(v)
-				io=_stdio(v);
+void	printVersion() {
 			_print("\rV%d.%02d %s <%08X>\r\n>",
 				SW_version/100,SW_version%100,
 					__DATE__,
-						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));
-			if(v)
-				_stdio(io);			
+						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));		
 }
 /*******************************************************************************
 * Function Name	: 
