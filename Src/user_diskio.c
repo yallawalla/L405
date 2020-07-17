@@ -45,7 +45,7 @@ extern		IWDG_HandleTypeDef hiwdg;
 #define 	FATFS_SECTOR	FLASH_SECTOR_6
 #define		FATFS_ADDRESS 0x08040000
 #define		PAGE_SIZE			0x20000
-#define		PAGE_COUNT		5
+#define		PAGE_COUNT		6
 #define		SECTOR_SIZE		512
 #define		CLUSTER_SIZE	4*SECTOR_SIZE
 #define		SECTOR_COUNT	(int)(PAGE_SIZE*PAGE_COUNT/(SECTOR_SIZE + sizeof(uint32_t)))
@@ -110,7 +110,7 @@ void	Watchdog_init(int t) {
 }
 /*******************************************************************************
 * Function Name	: ff_pack
-* Description		: packing flash dile system sectors
+* Description		: packing flash file system sectors
 * Input					: mode flag, 0-analyze, 1-rewrite
 * Output				: 
 * Return				: percentage of number of sectors reduced

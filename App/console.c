@@ -100,14 +100,14 @@ _buffer		*p=__stdin.io->gets;
 * Output				:
 * Return				:
 *******************************************************************************/
-char *trim(char **c) {
-	if(!c)
-		return NULL;
-	if(*c) {
-		while(**c==' ') ++*c;
-		for(char *cc=strchr(*c,0); *c != cc && *--cc==' '; *cc=0);
-	}
-	return *c;
+char	*trim(char **c) {
+			if(!c)
+				return NULL;
+			if(*c) {
+				while(**c==' ') ++*c;
+				for(char *cc=strchr(*c,0); *c != cc && *--cc==' '; *cc=0);
+			}
+			return *c;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -116,16 +116,16 @@ char *trim(char **c) {
 * Return				:
 *******************************************************************************/
 FRESULT DecodePlus(char *c) {
-	switch(*trim(&c)) {
-		case 'D':
-		for(c=strchr(c,' '); c && *c;)
-			debug |= (1<<strtoul(++c,&c,10));
-		_DBG=stdout->io;
-		break;
-		default:
-			return FR_INVALID_NAME;
-	}
-	return FR_OK;
+			switch(*trim(&c)) {
+				case 'D':
+				for(c=strchr(c,' '); c && *c;)
+					debug |= (1<<strtoul(++c,&c,10));
+				_DBG=stdout->io;
+				break;
+				default:
+					return FR_INVALID_NAME;
+			}
+			return FR_OK;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -161,7 +161,26 @@ FRESULT DecodeEq(char *c) {
 * Return				:
 *******************************************************************************/
 FRESULT fCopy(int argc, char *argv[]) {
-	return FR_OK;
+	FRESULT ret=FR_OK;
+	FIL	fs,fd;
+	BYTE buff[1024];
+	UINT br,bw;
+	ret=f_open(&fs,argv[1],FA_READ);
+	if(ret==FR_OK) {
+		ret=f_open(&fd,argv[2],FA_CREATE_ALWAYS | FA_WRITE);
+		if(ret==FR_OK)
+			for (;;) {
+				ret=f_read(&fs, buff, sizeof buff, &br);
+				if (ret != FR_OK || br == 0) 
+					break;
+				ret=f_write(&fd, buff, br, &bw);
+				if (ret != FR_OK || bw < br) 
+					break;
+			}
+	}
+	f_close(&fs);
+	f_close(&fd);
+	return ret;
 }
 //-----------------------------------------------------
 FRESULT fRename(int argc, char *argv[]) {
@@ -169,7 +188,12 @@ FRESULT fRename(int argc, char *argv[]) {
 }
 //-----------------------------------------------------
 FRESULT fDelete(int argc, char *argv[]) {
-	return f_unlink(argv[1]);
+DIR			dir;
+FILINFO	fno;
+FRESULT	err;
+	for(err=f_findfirst(&dir,&fno,"",argv[1]); err==FR_OK && *fno.fname; err=f_findnext(&dir,&fno))
+		err=f_unlink(fno.fname);
+	return err;
 }
 //-----------------------------------------------------
 FRESULT mkDir(int argc, char *argv[]) {
@@ -184,28 +208,25 @@ FRESULT chDir(int argc, char *argv[]) {
 }
 //-----------------------------------------------------
 FRESULT Dir(int argc, char *argv[]) {
-DIR				dir;
-FILINFO		fno;
-FRESULT		err=FR_OK;
+DIR			dir;
+FILINFO	fno;
+FRESULT	err=FR_OK;
 
-	err=f_getcwd(fno.fname,_MAX_LFN);
+	if(argc>1)
+		err=f_findfirst(&dir,&fno,"",argv[1]);
+	else
+		err=f_findfirst(&dir,&fno,"","*");
 	if(err==FR_OK) {
-		if(argc>1)
-			err=f_findfirst(&dir,&fno,fno.fname,argv[1]);
-		else
-			err=f_findfirst(&dir,&fno,fno.fname,"*");
-		if(err==FR_OK) {
-			do {
-				_print("\r\n%-16s",fno.fname);
-				if (fno.fattrib & AM_DIR)
-					_print("%-8s","/");
-				else
-					_print("%-8d",(int)fno.fsize);
-				err=f_findnext(&dir,&fno);
-				if(err)
-					break;
-			} while(*fno.fname);
-		}
+		do {
+			_print("\r\n%-16s",fno.fname);
+			if (fno.fattrib & AM_DIR)
+				_print("%-8s","/");
+			else
+				_print("%-8d",(int)fno.fsize);
+			err=f_findnext(&dir,&fno);
+			if(err)
+				break;
+		} while(*fno.fname);
 	}
 	return err;
 }
@@ -239,8 +260,11 @@ CanRxMsg	rx;
 FRESULT		ret=FR_OK;
 FATFS			fatfs;
 //__________________________________________________Prompt only response ____
-			if(!c)
-				_print("\r\n>");
+			if(!c) {
+				TCHAR	c[128];
+				f_getcwd(c,sizeof(c));
+				_print("\r\n%s>",c);
+			}
 			else
 //___________________________________________________________________________
 				switch(*c) {
@@ -265,7 +289,7 @@ FATFS			fatfs;
 					break;
 //__________________________________________________
 				case 'P':
-					printf("...%d",ff_pack(0));
+					printf("...%d",ff_pack(EOF));
 				break;
 //__________________________________________________
 				case 'I':
@@ -391,10 +415,11 @@ _io 	*current=*(_io **)v;
 * Return				:
 ****************************f***************************************************/
 void	printVersion() {
-			_print("\rV%d.%02d %s <%08X>\r\n>",
+			_print("\rV%d.%02d %s <%08X>\r\n",
 				SW_version/100,SW_version%100,
 					__DATE__,
-						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));		
+						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));	
+			DecodeCom(NULL);
 }
 /*******************************************************************************
 * Function Name	: 

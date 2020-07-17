@@ -41,7 +41,7 @@ int			putch(int),
 				getch(void),
 				ungetch(int),
 				ungets(char *);
-//int			f_getc (FIL*);
+				
 int			__get (_buffer *);
 int			__put (_buffer *, int);
 //______________________________________________________________________________________

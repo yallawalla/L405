@@ -166,12 +166,13 @@ FATFS		fatfs;
 		ff_format("FLASH:");
 		f_chdrive("FLASH:");
 		SaveSettings();
+		_RED(3000);
 	} else {
 //		f_unlink("0:/L405.hex");
 		idCrc=HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int));
 		if(ff_pack(0) > 20) {
 			ff_pack(EOF);		
-			_BLUE(1000);
+			_GREEN(1000);
 		}
 	}
 	f_close(&f);
