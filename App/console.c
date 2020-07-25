@@ -360,7 +360,17 @@ char	*c;
 					NVIC_SystemReset();	
 				
 				case __Esc:
+				{
+					_io *io=_DBG;
+					_DBG=stdout->io;
+					ackCount=0;
 					Send(_ID_IAP_PING,NULL,0);
+					_wait(500);
+					ackMax=ackCount;
+					_print("%3d dev. found",ackMax);
+					DecodeCom(NULL);
+					_DBG=io;
+				}
 				break;
 					
 				case __f9:
@@ -378,7 +388,7 @@ char	*c;
 				
 				case __f12:
 				case __F12:
-					iapRemote("L405.hex");
+					iapRemote();
 				break;
 				
 				default:

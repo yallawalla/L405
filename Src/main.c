@@ -157,10 +157,10 @@ FATFS		fatfs;
   /* USER CODE BEGIN 2 */
 	__ledInit;
 	__otgIdInit;
-//	if(__otgDeviceId) {
-//		MX_USB_HOST_DeInit();
-//		VCP_USB_DEVICE_Init();
-//	}		
+	if(__otgDeviceId) {
+		MX_USB_HOST_DeInit();
+		VCP_USB_DEVICE_Init();
+	}		
 	
 	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
 		ff_format("FLASH:");
@@ -168,7 +168,8 @@ FATFS		fatfs;
 		SaveSettings();
 		_RED(3000);
 	} else {
-//		f_unlink("0:/L405.hex");
+		f_unlink("L405.hex");
+		f_unlink("L405.bin");
 		idCrc=HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int));
 		if(ff_pack(0) > 20) {
 			ff_pack(EOF);		

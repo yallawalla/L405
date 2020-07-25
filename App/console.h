@@ -20,7 +20,7 @@ int32_t		USBH_Iap(void);
 FRESULT		ff_format(char *);
 FRESULT		LoadSettings(void),
 					SaveSettings(void);
-
+FRESULT		DecodeCom(char *);
 int				ff_pack(int);
 
 

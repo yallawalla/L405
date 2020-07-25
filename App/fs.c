@@ -21,7 +21,7 @@ int					AckWait(int t) {
 						to = HAL_GetTick() + t;																// nastavi cakalni nterval
 						for(ackCount=0; HAL_GetTick() < to; _proc_loop()) {
 							Watchdog();
-							if(ackCount == 3)
+							if(ackCount == ackMax)
 								return EOF;
 						}
 						return 0;
@@ -103,7 +103,7 @@ payload 		pyld;
 * Return         : 0 ce je checksum error sicer eof(-1). bootloader asinhrono odgovarja z ACK message
 *				 				 : za vsakih 8 bytov !!!
 *******************************************************************************/
-void				iapRemote(char * filename) {
+void				iapRemote() {
 						uint32_t n,k;																		// misc
 																														// count lines >>>> n
 						for(k=n=_FLASH_TOP; k<FATFS_ADDRESS; k+=sizeof(uint32_t)) {
@@ -112,7 +112,7 @@ void				iapRemote(char * filename) {
 							Watchdog();
 						}
 												
-						Send(_ID_IAP_GO,NULL,0);												// send iap req. as from sys
+						Send(_ID_IAP_REQ,NULL,0);												// send iap req. as from sys
 						if(!AckWait(3000)) {														// wait for ping
 							Send(_ID_IAP_PING,NULL,0);										// send ping
 							if(!AckWait(100))															// wait for response '-'

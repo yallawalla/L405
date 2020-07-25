@@ -8,11 +8,13 @@
 * Return				:
 *******************************************************************************/
 _io				*_CAN,*_DBG;
+char			*strPos[]={"front left","front right","rear right","rear left"};
 uint32_t	idDev=0, 
 					idCrc=0,
 					debug,
 					idPos=_ACK_LEFT_FRONT,
 					ackCount=0, 
+					ackMax=_MAXDEV, 
 					tref=0;
 payload		py={0,0};
 
@@ -395,15 +397,18 @@ payload		p;
 					Send(idPos,&p,sizeof(payload));
 				break;
 
-				case _ID_IAP_GO:
+				case _ID_IAP_REQ:
 					if(rx.hdr.DLC)
 						if(rx.buf.word[0]!=idDev)
 							break;
 					while(1);
 
 				case _ID_IAP_ACK:
-					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0)
+					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0) {
 						++ackCount;
+						_print("  ser %08X, boot",rx.buf.word[1]);
+						DecodeCom(NULL);
+					}
 					break;
 					
 				case _THR_LEFT_FRONT:
@@ -435,14 +440,16 @@ uint32_t 		ch=rx.buf.byte[0],
 				case _ACK_RIGHT_REAR:
 				case _ACK_LEFT_REAR:
 					switch(rx.hdr.DLC) {
-						case 0:
-							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);
+						case 0:																									// quadrant id.
+							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);						
 						break;
-						case 3*sizeof(uint8_t):
-							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,rx.buf.bytes);
+						case 3*sizeof(uint8_t):																	// thread
+							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,rx.buf.bytes);		
 						break;
-						case sizeof(payload):
-							_print("%03X: v=%08X, dev=%08X\r\n>",rx.hdr.StdId, rx.buf.word[0],rx.buf.word[1]);
+						case sizeof(payload):																		// device ack.
+							++ackCount;
+							_print("  v <%08X>, ser %08X, %s",rx.buf.word[0],rx.buf.word[1], strPos[rx.hdr.StdId-_ACK_LEFT_FRONT]);
+							DecodeCom(NULL);
 						break;
 						default:
 							break;

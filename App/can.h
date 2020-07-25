@@ -59,6 +59,8 @@ typedef enum {
 	_THR_RIGHT_REAR	=0x212,
 	_THR_LEFT_REAR	=0x213,
 
+	_ID_IAP_REQ			=0x214,
+
 	_ID_IAP_GO			=0xA0,
 	_ID_IAP_ERASE		=0xA1,
 	_ID_IAP_ADDRESS	=0xA2,
@@ -121,9 +123,9 @@ typedef struct {
 	uint32_t					sum,scount;
 } tim;
 
-void				Send(int, payload *,int), iapRemote(char *);
+void				Send(int, payload *,int), iapRemote(void);
 int					AckWait(int);
-extern			uint32_t ackCount;
+extern			uint32_t ackCount,ackMax;
 
 #define			_SIGN_PAGE			FLASH_Sector_1
 #define			_FLASH_TOP			0x08008000

@@ -161,9 +161,9 @@ void Error_Handler(void);
 	} while(0)
 #else 
 	#ifdef	__DISCO__
-#define	(__otgDeviceId	HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10)==GPIO_PIN_SET)
-#define	(__otgPwrOn		HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0)==GPIO_PIN_SET)
-#define	(__otgPwrOff		HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0)==GPIO_PIN_RESET)
+#define	__otgDeviceId	(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10)==GPIO_PIN_SET)
+#define	__otgPwrOn		(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0)==GPIO_PIN_SET)
+#define	__otgPwrOff		(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0)==GPIO_PIN_RESET)
 #define	__otgPwrInit do {\
 	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
 		__HAL_RCC_GPIOC_CLK_ENABLE();\
