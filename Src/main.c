@@ -25,6 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "ascii.h"
 #include "proc.h"
 #include "ws.h"
 #include "can.h"
@@ -116,8 +117,9 @@ void MX_USB_HOST_Process(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-FIL			f;
-FATFS		fatfs;
+FIL				f;
+FATFS			fatfs;
+uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
 
   /* USER CODE END 1 */
 
@@ -135,7 +137,6 @@ FATFS		fatfs;
 
   /* USER CODE BEGIN SysInit */
 	__HAL_RCC_CLEAR_RESET_FLAGS();
-	__otgPwrInit;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -157,11 +158,7 @@ FATFS		fatfs;
   /* USER CODE BEGIN 2 */
 	__ledInit;
 	__otgIdInit;
-	if(__otgDeviceId) {
-		MX_USB_HOST_DeInit();
-		VCP_USB_DEVICE_Init();
-	}		
-	
+	__otgPwrInit;
 	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
 		ff_format("FLASH:");
 		f_chdrive("FLASH:");
@@ -196,9 +193,20 @@ FATFS		fatfs;
   {
     /* USER CODE END WHILE */
     MX_USB_HOST_Process();
-
     /* USER CODE BEGIN 3 */
-		_proc_loop(); 
+		_proc_loop();
+		
+		if(otgDeviceId !=  __otgDeviceId) {
+			otgDeviceId	= __otgDeviceId;
+			otgDeviceTimeout=HAL_GetTick()+100;
+		}
+		if(otgDeviceTimeout && HAL_GetTick() > otgDeviceTimeout) {
+			otgDeviceTimeout=0;
+			if(otgDeviceId)
+				Parse(__f9);
+			else
+				Parse(__f11);
+		}	
 	}
   /* USER CODE END 3 */
 }

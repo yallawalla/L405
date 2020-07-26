@@ -18,12 +18,16 @@ typedef struct _buffer
 	int		size;
 } _buffer;	
 //______________________________________________________________________________________
+typedef 	struct esc {	
+			unsigned int	seq, timeout;
+			} esc;
+//______________________________________________________________________________________
 typedef struct _io
 {
 	_buffer	*rx,*tx,*gets;
 	int	(*get)(struct _buffer *);
 	int	(*put)(struct _buffer *, int);
-	void	*huart;
+	esc	*esc;
 } _io;
 //______________________________________________________________________________________
 _buffer	*_buffer_init(int),

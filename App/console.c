@@ -11,38 +11,19 @@
 * Return				:
 *******************************************************************************/
 int		Escape(void) {
-	static struct {	
-			uint32_t	seq;
-			uint32_t	timeout;
-			} esc, usbid;
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 int		i=getchar();
+			if(stdin->io->esc == NULL)
+				stdin->io->esc=calloc(1,sizeof(esc));
 			if(i==__Esc) {
-				esc.seq=i;
-				esc.timeout=HAL_GetTick()+10;
+				stdin->io->esc->seq=i;
+				stdin->io->esc->timeout=HAL_GetTick()+10;
 			} else if(i==EOF) {
-				if(usbid.seq != __otgDeviceId) {
-					usbid.seq = __otgDeviceId;
-					usbid.timeout=HAL_GetTick()+10;
-				}				
-				if(esc.timeout && (HAL_GetTick() > esc.timeout)) {
-					esc.timeout=0;
-					return esc.seq;
+				if(stdin->io->esc->timeout && (HAL_GetTick() > stdin->io->esc->timeout)) {
+					stdin->io->esc->timeout=0;
+					return stdin->io->esc->seq;
 				}
-				if(usbid.timeout && (HAL_GetTick() > usbid.timeout)) {
-					usbid.timeout=0;
-					if(usbid.seq)
-						return __F9;
-					else
-						return __F11;
-				}
-			} else if(esc.timeout) {
-				esc.seq=(esc.seq<<8) | i;
+			} else if(stdin->io->esc->timeout) {
+				stdin->io->esc->seq=((stdin->io->esc->seq) << 8) | i;
 			} else {
 				return i;
 			}

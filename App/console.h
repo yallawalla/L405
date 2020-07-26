@@ -22,7 +22,7 @@ FRESULT		LoadSettings(void),
 					SaveSettings(void);
 FRESULT		DecodeCom(char *);
 int				ff_pack(int);
-
+void			Parse(int);
 
 
 
