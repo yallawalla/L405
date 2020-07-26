@@ -11,7 +11,7 @@
 * Return				:
 *******************************************************************************/
 int		Escape(void) {
-static struct {	
+	static struct {	
 			uint32_t	seq;
 			uint32_t	timeout;
 			} esc, usbid;
@@ -358,8 +358,8 @@ char	*c;
 				
 				case __CtrlY:																		// call system reset
 					NVIC_SystemReset();	
-				
-				case __Esc:
+//__________________________________________________
+				case __CtrlV:
 				{
 					_io *io=_DBG;
 					_DBG=stdout->io;
@@ -370,6 +370,7 @@ char	*c;
 					_print("%3d dev. found",ackMax);
 					DecodeCom(NULL);
 					_DBG=io;
+					printVersion();
 				}
 				break;
 					
@@ -425,7 +426,7 @@ _io 	*current=*(_io **)v;
 * Return				:
 ****************************f***************************************************/
 void	printVersion() {
-			_print("\rV%d.%02d %s <%08X>\r\n",
+			_print("\rV%d.%02d %s <%08X>",
 				SW_version/100,SW_version%100,
 					__DATE__,
 						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));	

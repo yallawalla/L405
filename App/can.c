@@ -109,6 +109,7 @@ void	Send(int id,  payload *buf, int len) {
 		memcpy(&tx.buf,buf,len);
 	if(HAL_CAN_AddTxMessage(&hcan2, &tx.hdr, (uint8_t *)&tx.buf, &mailbox) != HAL_OK)
 		_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg));
+	_YELLOW(500);
 	if(debug & (1<<DBG_CAN_TX)) {
 		_io	*io=_stdio(_DBG);
 		_print("\r%3d: > %03X",HAL_GetTick() % 1000,tx.hdr.StdId);
@@ -227,7 +228,12 @@ void	*canTx(void *v) {
 		HAL_CAN_Start(&hcan2);
 /*******************************************************************************/
 	} else {
-		for(tim *t=timStack; t->htim; ++t) {
+		tim 	*t;
+		_io		*in=stdin->io;
+		_io 	*out=stdout->io;
+		_io 	*current=*(_io **)v;
+		_stdio(current);
+		for(t=timStack; t->htim; ++t) {
 			uint32_t	tcapt,dt;
 			if(t->tmode == _DMA)
 				t->dma->_push = &t->dma->_buf[(t->dma->size - t->htim->hdma[((t->Channel)>>2)+1]->Instance->NDTR*sizeof(uint32_t))];
@@ -356,10 +362,10 @@ void	*canTx(void *v) {
 				t->crc = 0;
 			}
 		}
-		for(tim *t=timStack; t->htim; ++t)
+		for(t=timStack; t->htim; ++t)
 			if(t->timeout)
-				return v;
-		if(py.word[0]) {
+				break;
+		if(t->htim && py.word[0]) {
 			for(int k=0; k<3; ++k)
 				if((py.byte[k] & 6)==6)
 					py.byte[k]=(py.byte[k] & ~6) | 2;
@@ -367,6 +373,8 @@ void	*canTx(void *v) {
 			Send(idPos,&py,3*sizeof(uint8_t));
 			memset(&py,0,sizeof(payload));	
 		}
+		stdin->io=in;
+		stdout->io=out;
 	}
 	return v;
 }
@@ -378,11 +386,16 @@ void	*canTx(void *v) {
 *******************************************************************************/
 void	*canRx(void *v) {
 	if(_CAN) {
-_io	*io=_stdio(_DBG);
-CanRxMsg	rx;
+_io		*in=stdin->io;
+_io 	*out=stdout->io;
+_io 	*current=*(_io **)v;
+			_stdio(current);
+
+		CanRxMsg	rx;
 payload		p;
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
+			_BLUE(500);
 			if(debug & (1<<DBG_CAN_RX)) {
 				_print("\r%3d: < %03X",HAL_GetTick() % 1000,rx.hdr.StdId);
 				for(int i=0; i<rx.hdr.DLC; ++i)
@@ -458,7 +471,8 @@ uint32_t 		ch=rx.buf.byte[0],
 					break;
 			}
 		}
-	_stdio(io);
+		stdin->io=in;
+		stdout->io=out;
 	}
 	return v;
 }

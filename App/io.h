@@ -21,9 +21,9 @@ typedef struct _buffer
 typedef struct _io
 {
 	_buffer	*rx,*tx,*gets;
-				int		(*get)(struct _buffer *),
-							(*put)(struct _buffer *, int);
-				void	*huart;
+	int	(*get)(struct _buffer *);
+	int	(*put)(struct _buffer *, int);
+	void	*huart;
 } _io;
 //______________________________________________________________________________________
 _buffer	*_buffer_init(int),

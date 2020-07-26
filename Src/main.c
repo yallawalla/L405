@@ -179,8 +179,8 @@ FATFS		fatfs;
 	f_close(&f);
 	_proc_add(Watchdog,NULL,"watchdog",0); 
 	_proc_add(console,&_VCP,"console",0); 
-	_proc_add(canRx,&_CAN,"canRx",0);
-	_proc_add(canTx,&_CAN,"canTx",0);
+	_proc_add(canRx,&_DBG,"canRx",0);
+	_proc_add(canTx,&_DBG,"canTx",0);
 	
 	wsProcInit();
 	
@@ -199,22 +199,6 @@ FATFS		fatfs;
 
     /* USER CODE BEGIN 3 */
 		_proc_loop(); 
-		
-//		if(__otgDeviceId) {
-//			if(__otgPwrOn) {
-//				MX_USB_HOST_DeInit();
-//				_wait(500);
-//				MSC_USB_DEVICE_DeInit();
-//				VCP_USB_DEVICE_Init();			
-//			}
-//		} else {
-//			if(__otgPwrOff) {
-//				VCP_USB_DEVICE_DeInit();
-//				MSC_USB_DEVICE_DeInit();
-//				_wait(500);
-//				MX_USB_HOST_Init();			
-//			}
-//		}
 	}
   /* USER CODE END 3 */
 }
