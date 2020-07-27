@@ -10,3 +10,4 @@
 -	debug CANa
 
 -	ce je VCP buffer 2x2048, mora biti heap 0x8000
+- TODO: https://community.st.com/s/question/0D50X00009XkgIYSAZ/unable-to-configure-serial-port-error-for-usb-cdc
