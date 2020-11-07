@@ -43,6 +43,12 @@
 /* USER CODE BEGIN PD */
 void	*console(void *);
 _io		*InitITM(void);
+
+struct {
+	uint16_t	V45;
+	uint16_t	Vm5;
+}	supply[128];
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,6 +58,7 @@ _io		*InitITM(void);
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
 
 CAN_HandleTypeDef hcan2;
 
@@ -179,6 +186,7 @@ uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
 	_proc_add(canRx,&_DBG,"canRx",0);
 	_proc_add(canTx,&_DBG,"canTx",0);
 	
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)supply, sizeof(supply)/sizeof(uint16_t));
 	wsProcInit();
 	
 	_io *io=_stdio(InitITM());
@@ -193,6 +201,7 @@ uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
   {
     /* USER CODE END WHILE */
     MX_USB_HOST_Process();
+
     /* USER CODE BEGIN 3 */
 		_proc_loop();
 		
@@ -276,15 +285,15 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -293,7 +302,15 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_112CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
+  sConfig.Channel = ADC_CHANNEL_11;
+  sConfig.Rank = 2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -814,6 +831,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream7_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream7_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);
+  /* DMA2_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
   /* DMA2_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
@@ -899,6 +919,23 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+	int32_t i,v45=0,vm5=0;
+	for(i=0; i<sizeof(supply)/2/sizeof(uint16_t); ++i) {
+		v45+=supply->V45;
+		vm5+=supply->Vm5;
+	}
+	if(abs(45000- (v45*3300/4096/i*(1200+47000)/1200)) > 1000)
+		_RED(100);
+	if(abs(5000 - ((3300 - vm5*3300/4096/i)*(1200+6800)/1200-3300)) > 500)
+		_GREEN(100);
+}
 /* USER CODE END 4 */
 
 /**

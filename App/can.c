@@ -19,11 +19,17 @@ uint32_t	idDev=0,
 payload		py={0,0};
 
 #ifdef	__DISCO__
+		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
+		#define ledOn(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_SET)
 		led Leds = {{0,0,0,0},GPIOD,{GPIO_PIN_14,GPIO_PIN_12,GPIO_PIN_15,GPIO_PIN_13}};
 #else 
 	#ifdef	__NUCLEO__
+		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
+		#define ledOn(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_SET)
 		led Leds = {{0,0,0,0},GPIOB,{GPIO_PIN_14,GPIO_PIN_0,GPIO_PIN_7,GPIO_PIN_7}};
 	#else
+		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_SET)
+		#define ledOn(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
 		led Leds = {{0,0,0,0},LED_R_GPIO_Port,{LED_R_Pin,LED_G_Pin,LED_R_Pin,LED_G_Pin}};
 	#endif
 #endif
@@ -202,11 +208,11 @@ void	*canTx(void *v) {
 		if(!Leds.t[i])
 			continue;
 		if(HAL_GetTick() > Leds.t[i]) {
-			HAL_GPIO_WritePin(Leds.port, Leds.pin[i], GPIO_PIN_RESET);
+			ledOff(Leds.port, Leds.pin[i]);
 			Leds.t[i]=0;
 		}
 		else
-			HAL_GPIO_WritePin(Leds.port, Leds.pin[i], GPIO_PIN_SET);
+			ledOn(Leds.port, Leds.pin[i]);
 	}
 /*******************************************************************************/	
 	if(!_CAN) {

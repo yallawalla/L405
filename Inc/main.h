@@ -203,7 +203,7 @@ void Error_Handler(void);
  #endif
 #endif
 
-	/* USER CODE END Private defines */
+/* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }
