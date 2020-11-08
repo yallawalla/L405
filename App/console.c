@@ -103,6 +103,13 @@ FRESULT DecodePlus(char *c) {
 					debug |= (1<<strtoul(++c,&c,10));
 				_DBG=stdout->io;
 				break;
+				
+				case 't':
+				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_RESET);
+				_GREEN(200);
+				SaveSettings();
+				break;
+
 				default:
 					return FR_INVALID_NAME;
 			}
@@ -115,14 +122,20 @@ FRESULT DecodePlus(char *c) {
 * Return				:
 *******************************************************************************/
 FRESULT DecodeMinus(char *c) {
-	switch(*trim(&c)) {
-		case 'D':
-		for(c=strchr(c,' '); c && *c;)
-			debug &= ~(1<<strtoul(++c,&c,10));
-		break;
+			switch(*trim(&c)) {
+				case 'D':
+				for(c=strchr(c,' '); c && *c;)
+					debug &= ~(1<<strtoul(++c,&c,10));
+				break;
 		
-		default:
-			return FR_INVALID_NAME;
+				case 't':
+				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_SET);
+				_RED(200);
+				SaveSettings();
+				break;
+
+				default:
+				return FR_INVALID_NAME;
 	}
 	return FR_OK;
 }
@@ -161,6 +174,24 @@ FRESULT fCopy(int argc, char *argv[]) {
 	}
 	f_close(&fs);
 	f_close(&fd);
+	return ret;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT fType(int argc, char *argv[]) {
+	FRESULT ret=FR_OK;
+	FIL	fs;
+	ret=f_open(&fs,argv[1],FA_READ);
+	if(ret==FR_OK) {
+		_print("\r\n");
+		while(!f_eof(&fs))
+			_print("%c",fgetc((FILE *)&fs));
+	}
+	f_close(&fs);
 	return ret;
 }
 //-----------------------------------------------------
@@ -228,7 +259,8 @@ struct cmd {
 	{"directory",	Dir},
 	{"mkd",				mkDir},
 	{"mdir",			mkDir},
-	{"cdir",			chDir}
+	{"cdir",			chDir},
+	{"type",			fType}
 };
 /*******************************************************************************
 * Function Name	:
@@ -353,8 +385,7 @@ char	*c;
 					_DBG=io;
 					printVersion();
 				}
-				break;
-					
+				break;				
 				case __f9:
 				case __F9:
 							VCP_USB_DEVICE_Init();
@@ -426,6 +457,12 @@ FRESULT	LoadSettings(void) {
 				TCHAR	c[128];
 				f_gets(c,sizeof(c),&f);
 				sscanf(c,"%03X\n", &idPos);
+				
+				f_gets(c,sizeof(c),&f);
+				uint32_t state=GPIO_PIN_SET;
+				sscanf(c,"%03X\n", &state);
+				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin,(GPIO_PinState)state);
+				
 				f_close(&f);
 			}
 			return err;
@@ -438,9 +475,10 @@ FRESULT	LoadSettings(void) {
 ****************************f***************************************************/
 FRESULT	SaveSettings(void) {
 			FIL f;
-	FRESULT err=f_open(&f,"/L405.ini",FA_WRITE | FA_CREATE_ALWAYS);
+			FRESULT err=f_open(&f,"/L405.ini",FA_WRITE | FA_CREATE_ALWAYS);
 			if(err==FR_OK) {
 				f_printf(&f,"%03X\n", idPos);
+				f_printf(&f,"%03X\n",HAL_GPIO_ReadPin(CAN_TERM_GPIO_Port, CAN_TERM_Pin));
 				f_close(&f);
 			}
 			return err;
