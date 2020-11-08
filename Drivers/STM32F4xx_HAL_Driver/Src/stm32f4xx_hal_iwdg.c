@@ -185,7 +185,7 @@ HAL_StatusTypeDef HAL_IWDG_Init(IWDG_HandleTypeDef *hiwdg)
 //  /* Reload IWDG counter with value defined in the reload register */
 //  __HAL_IWDG_RELOAD_COUNTER(hiwdg);
 
-//  /* Return function status */
+  /* Return function status */
   return HAL_OK;
 }
 

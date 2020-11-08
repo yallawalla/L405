@@ -47,6 +47,7 @@ _io		*InitITM(void);
 struct {
 	uint16_t	V45;
 	uint16_t	Vm5;
+	uint16_t	T;
 }	supply[128];
 
 /* USER CODE END PD */
@@ -291,7 +292,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -311,6 +312,14 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_11;
   sConfig.Rank = 2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
+  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Rank = 3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -926,15 +935,16 @@ static void MX_GPIO_Init(void)
 * Return				:
 *******************************************************************************/
 void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-	int32_t i,v45=0,vm5=0;
-	for(i=0; i<sizeof(supply)/2/sizeof(uint16_t); ++i) {
+	int32_t i,v45=0,vm5=0,t=0;
+	for(i=0; i<sizeof(supply)/3/sizeof(uint16_t); ++i) {
 		v45+=supply->V45;
 		vm5+=supply->Vm5;
+		t+=supply->T;
 	}
-	if(abs(45000- (v45*3300/4096/i*(1200+47000)/1200)) > 1000)
-		_RED(100);
-	if(abs(5000 - ((3300 - vm5*3300/4096/i)*(1200+6800)/1200-3300)) > 500)
-		_GREEN(100);
+//	if(abs(45000- (v45*3300/4096/i*(1200+47000)/1200)) > 1000)
+//		_RED(100);
+//	if(abs(5000 - ((3300 - vm5*3300/4096/i)*(1200+6800)/1200-3300)) > 500)
+//		_GREEN(100);
 }
 /* USER CODE END 4 */
 

@@ -340,7 +340,7 @@ char	*c;
 				case __CtrlY:																		// call system reset
 					NVIC_SystemReset();	
 //__________________________________________________
-				case __CtrlV:
+				case __CtrlD:
 				{
 					_io *io=_DBG;
 					_DBG=stdout->io;

@@ -34,30 +34,55 @@ payload		py={0,0};
 	#endif
 #endif
 
-// B11,B12,B13 lrf
-// A21,A22,A23 br
+//tim timStack[] = {
+//	{NULL,&htim1,TIM_CHANNEL_1,0,5,_DMA},					//PA8
+//	{NULL,&htim1,TIM_CHANNEL_2,1,5,_DMA},					//PA9 ---
+//	{NULL,&htim1,TIM_CHANNEL_3,2,5,_DMA},					//PA10
+//	{NULL,&htim3,TIM_CHANNEL_2,0,4,_DMA},					//PA7
+//	{NULL,&htim4,TIM_CHANNEL_2,1,4,_DMA},					//PB7
+//	{NULL,&htim5,TIM_CHANNEL_1,2,4,_DMA},					//PA0
+//	{NULL,&htim5,TIM_CHANNEL_2,0,0,_DMA},					//PA1 A1 1
+//	{NULL,&htim5,TIM_CHANNEL_3,1,0,_DMA},					//PA2 A1 2
+//	{NULL,&htim5,TIM_CHANNEL_4,2,0,_DMA},					//PA3 A1 3
+//	{NULL,&htim8,TIM_CHANNEL_2,0,3,_DMA},					//PC7
+//	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA},					//PC8 -
+//	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA},					//PC9 -
+
+//	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT},					//PA6
+//	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT},					//PB0 -
+//	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT},					//PB1 - 
+//	
+//	{NULL,&htim4,TIM_CHANNEL_1,0,1,_IT},					//PB6 A2 1
+//	{NULL,&htim4,TIM_CHANNEL_3,1,1,_IT},					//PB8 A2 2
+//	{NULL,&htim4,TIM_CHANNEL_4,2,1,_IT},					//PB9 A2 3
+//	{NULL,NULL,0,0,0,_IT}
+//};
 
 tim timStack[] = {
-	{NULL,&htim1,TIM_CHANNEL_1,0,5,_DMA},					//PA8
-	{NULL,&htim1,TIM_CHANNEL_2,1,5,_DMA},					//PA9 ---
-	{NULL,&htim1,TIM_CHANNEL_3,2,5,_DMA},					//PA10
-	{NULL,&htim3,TIM_CHANNEL_2,0,4,_DMA},					//PA7
-	{NULL,&htim4,TIM_CHANNEL_2,1,4,_DMA},					//PB7
-	{NULL,&htim5,TIM_CHANNEL_1,2,4,_DMA},					//PA0
-	{NULL,&htim5,TIM_CHANNEL_2,0,0,_DMA},					//PA1 A1 1
-	{NULL,&htim5,TIM_CHANNEL_3,1,0,_DMA},					//PA2 A1 2
-	{NULL,&htim5,TIM_CHANNEL_4,2,0,_DMA},					//PA3 A1 3
-	{NULL,&htim8,TIM_CHANNEL_2,0,3,_DMA},					//PC7
-	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA},					//PC8 -
-	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA},					//PC9 -
-
-	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT},					//PA6
-	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT},					//PB0 -
-	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT},					//PB1 - 
+	{NULL,&htim1,TIM_CHANNEL_1,0,0,_DMA},					//PA8		1A1
+	{NULL,&htim1,TIM_CHANNEL_2,1,0,_DMA},					//PA9		2A1
+	{NULL,&htim1,TIM_CHANNEL_3,2,0,_DMA},					//PA10	3A1
 	
-	{NULL,&htim4,TIM_CHANNEL_1,0,1,_IT},					//PB6 A2 1
-	{NULL,&htim4,TIM_CHANNEL_3,1,1,_IT},					//PB8 A2 2
-	{NULL,&htim4,TIM_CHANNEL_4,2,1,_IT},					//PB9 A2 3
+	{NULL,&htim3,TIM_CHANNEL_2,0,1,_DMA},					//PA7		1A2
+	{NULL,&htim4,TIM_CHANNEL_2,0,4,_DMA},					//PB7		1B2
+	
+	{NULL,&htim5,TIM_CHANNEL_1,1,1,_DMA},					//PA0 	2A2
+	{NULL,&htim5,TIM_CHANNEL_2,1,4,_DMA},					//PA1 	2B2
+	
+	{NULL,&htim5,TIM_CHANNEL_3,2,1,_DMA},					//PA2 	3A2
+	{NULL,&htim5,TIM_CHANNEL_4,2,4,_DMA},					//PA3		3B2
+	
+	{NULL,&htim8,TIM_CHANNEL_2,0,3,_DMA},					//PC7		1B1
+	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA},					//PC8		2B1
+	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA},					//PC9		3B1
+
+	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT},					//PA6		1A3
+	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT},					//PB0		2A3
+	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT},					//PB1 	3A3
+	
+	{NULL,&htim4,TIM_CHANNEL_1,0,5,_IT},					//PB6 	1B3
+	{NULL,&htim4,TIM_CHANNEL_3,1,5,_IT},					//PB8 	2B3
+	{NULL,&htim4,TIM_CHANNEL_4,2,5,_IT},					//PB9 	3B3
 	{NULL,NULL,0,0,0,_IT}
 };
 
