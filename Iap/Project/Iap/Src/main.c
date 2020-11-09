@@ -40,14 +40,16 @@ int					*p=(int *)*_FW_START;
 
 						Watchdog_init(4000);
 	
+						GPIO_WriteBit(GPIOC, GPIO_Pin_14, Bit_RESET);
+						GPIO_WriteBit(GPIOC, GPIO_Pin_15, Bit_SET);
 						GPIO_StructInit(&GPIO_InitStructure);
 						GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 						GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
 						GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
-						GPIO_Init(GPIOA, &GPIO_InitStructure);
+//						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
+//						GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 						if(RCC_GetFlagStatus(RCC_FLAG_SFTRST) != RESET  && !crcError()) {
 							NVIC_SetVectorTable(NVIC_VectTab_FLASH,(uint32_t)p-_BOOT_TOP);				
@@ -111,10 +113,10 @@ static int	t=0;
 							t=__time__;
 							if(!(t % 100))
 								GPIO_ToggleBits(GPIOC,GPIO_Pin_14 | GPIO_Pin_15);
-							if(!(t % 500))
-								GPIO_ToggleBits(GPIOA,GPIO_Pin_11);
-							if(!(t % 1000))
-								GPIO_ToggleBits(GPIOA,GPIO_Pin_12);		
+//							if(!(t % 500))
+//								GPIO_ToggleBits(GPIOA,GPIO_Pin_11);
+//							if(!(t % 1000))
+//								GPIO_ToggleBits(GPIOA,GPIO_Pin_12);		
 						if(t/1000 >= _timeout)
 							NVIC_SystemReset();
 						}

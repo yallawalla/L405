@@ -66,6 +66,9 @@ typedef enum {
 	_TEST_RIGHT_REAR	=0x222,
 	_TEST_LEFT_REAR		=0x223,
 
+	idCOM2CAN					=0x20C,
+	idCAN2COM					=0x24C,
+
 	_ID_IAP_GO				=0xA0,
 	_ID_IAP_ERASE			=0xA1,
 	_ID_IAP_ADDRESS		=0xA2,

@@ -7,7 +7,8 @@
 * Output				: 
 * Return				:
 *******************************************************************************/
-_io				*_CAN,*_DBG;
+_io				*_CAN,*_DBG, *canConsole;
+//______________________________________________________________________________________
 char			*strPos[]={"front left","front right","rear right","rear left"};
 uint32_t	idDev=0, 
 					idCrc=0,
@@ -242,7 +243,10 @@ void	*canTx(void *v) {
 /*******************************************************************************/	
 	if(!_CAN) {
 		_CAN	=	_io_init(100*sizeof(CanRxMsg), 100*sizeof(CanTxMsg));
-		canFilterCfg(_ACK_LEFT_FRONT,	0x7c0, _ID_IAP_GO, 0x7f0);
+		canConsole=_io_init(128,128);
+		_proc_add(console,&canConsole,"can console",0);
+
+		canFilterCfg(_ACK_LEFT_FRONT,	0x780, _ID_IAP_GO, 0x7f0);
 		idDev=(uint32_t)HAL_CRC_Calculate(&hcrc,(uint32_t *)0x1FFF7A10,3);
 		
 		for(tim *t=timStack; t->htim; ++t) {
@@ -432,8 +436,15 @@ _io 	*out=stdout->io;
 _io 	*current=*(_io **)v;
 			_stdio(current);
 
-		CanRxMsg	rx;
+CanRxMsg	rx;
 payload		p;
+	
+
+		if(canConsole) {
+			int n=_buffer_pull(canConsole->tx,p.bytes,8);
+			if(n)
+				Send(idCOM2CAN,&p,n);
+		}		
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
 			_BLUE(500);
@@ -464,7 +475,12 @@ payload		p;
 						DecodeCom(NULL);
 					}
 					break;
-					
+	
+				case idCAN2COM:
+					while(rx.hdr.DLC && !_buffer_push(canConsole->rx,rx.buf.bytes,rx.hdr.DLC))
+						_wait(2);
+				break;
+
 				case _THR_LEFT_FRONT:
 				case _THR_RIGHT_FRONT:
 				case _THR_RIGHT_REAR:
@@ -529,7 +545,7 @@ uint32_t 		ch=rx.buf.byte[0],
 				default:
 					break;
 			}
-		}
+		}		
 		stdin->io=in;
 		stdout->io=out;
 	}
