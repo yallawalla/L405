@@ -66,7 +66,7 @@ uint32_t	*p = &_leds[(sect+8+4)*24];
 						int i=colour;
 						if(i<0)
 							i=-i-1;
-						p = &_leds[(8+i)*24];
+						p = &_leds[(8+i-2)*24];
 						for(int k=0; k<8; ++k)
 							(rgb.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 						for(int k=0; k<8; ++k)

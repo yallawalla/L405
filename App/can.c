@@ -406,7 +406,7 @@ void	*canTx(void *v) {
 		for(t=timStack; t->htim; ++t)
 			if(t->timeout)
 				break;
-		if(t->htim && py.word[0]) {
+		if(t->htim == NULL && py.word[0]) {
 			for(int k=0; k<3; ++k)
 				if((py.byte[k] & 6)==6)
 					py.byte[k]=(py.byte[k] & ~6) | 2;
