@@ -49,26 +49,31 @@ extern led Leds;
 #define _YELLOW(a)	Leds.t[3]=HAL_GetTick()+a
 
 typedef enum {    
-	_ACK_LEFT_FRONT	=0x200,
-	_ACK_RIGHT_FRONT=0x201,
-	_ACK_RIGHT_REAR	=0x202,
-	_ACK_LEFT_REAR	=0x203,
+	_ACK_LEFT_FRONT		=0x200,
+	_ACK_RIGHT_FRONT	=0x201,
+	_ACK_RIGHT_REAR		=0x202,
+	_ACK_LEFT_REAR		=0x203,
 	
-	_THR_LEFT_FRONT	=0x210,
-	_THR_RIGHT_FRONT=0x211,
-	_THR_RIGHT_REAR	=0x212,
-	_THR_LEFT_REAR	=0x213,
+	_THR_LEFT_FRONT		=0x210,
+	_THR_RIGHT_FRONT	=0x211,
+	_THR_RIGHT_REAR		=0x212,
+	_THR_LEFT_REAR		=0x213,
 
-	_ID_IAP_REQ			=0x214,
+	_TEST_LEFT_FRONT	=0x220,
+	_TEST_RIGHT_FRONT	=0x221,
+	_TEST_RIGHT_REAR	=0x222,
+	_TEST_LEFT_REAR		=0x223,
 
-	_ID_IAP_GO			=0xA0,
-	_ID_IAP_ERASE		=0xA1,
-	_ID_IAP_ADDRESS	=0xA2,
-	_ID_IAP_DWORD		=0xA3,
-	_ID_IAP_ACK			=0xA4,
-	_ID_IAP_SIGN		=0xA5,
-	_ID_IAP_STRING	=0xA6,
-	_ID_IAP_PING		=0xA7
+	_ID_IAP_REQ				=0x214,
+
+	_ID_IAP_GO				=0xA0,
+	_ID_IAP_ERASE			=0xA1,
+	_ID_IAP_ADDRESS		=0xA2,
+	_ID_IAP_DWORD			=0xA3,
+	_ID_IAP_ACK				=0xA4,
+	_ID_IAP_SIGN			=0xA5,
+	_ID_IAP_STRING		=0xA6,
+	_ID_IAP_PING			=0xA7
 } _StdId;
 
 
@@ -95,6 +100,10 @@ typedef enum {
 #define	_RIGHT_REAR		0xDAF5192F
 #define	_LEFT_REAR		0x0B8AAB4D
 
+typedef struct {
+	unsigned mask:6;
+	unsigned sect:2;
+} test;
 
 typedef union {
 		uint8_t		byte[8];

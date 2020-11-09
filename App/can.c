@@ -320,7 +320,6 @@ void	*canTx(void *v) {
 						if(dt/84 > 100)
 							t->sum=0;
 					}
-					
 				}	else {
 					t->to = tcapt;
 				}
@@ -386,6 +385,17 @@ void	*canTx(void *v) {
 			
 						if(t->ch == 1 &&  t->scount > 14)
 							py.byte[t->sect] |= (1 << 2);
+						
+						
+						if(t->ch == 3) {
+							if(t->count > 14)
+								py.byte[t->sect] |= (1 << 4);
+							else
+								py.byte[t->sect] |= (1 << 3);
+						}
+			
+						if(t->ch == 4 &&  t->scount > 14)
+							py.byte[t->sect] |= (1 << 5);
 				}						
 				t->count=0;
 				t->scount=0;
@@ -476,6 +486,24 @@ uint32_t 		ch=rx.buf.byte[0],
 								}
 								break;
 							}
+					}
+				break;
+
+				case _TEST_LEFT_FRONT:
+				case _TEST_RIGHT_FRONT:
+				case _TEST_RIGHT_REAR:
+				case _TEST_LEFT_REAR:
+					if(rx.hdr.StdId - 0x020 == idPos) {
+						test *p=(test *)&rx.buf;
+						for(int i=0; i<rx.hdr.DLC; ++i) {
+							for(int j=0; j<6; ++j) {
+								if(p->mask & (1<<j))
+									for(tim *t=timStack; t->htim; ++t) {
+										if(t->sect == p->sect && t->ch == j)
+											_buffer_put(t->dma, (uint32_t *)t, sizeof(uint32_t));
+									}
+							}
+						}
 					}
 				break;
 				
