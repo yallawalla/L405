@@ -48,8 +48,10 @@ int					*p=(int *)*_FW_START;
 						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
 						GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-//						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
-//						GPIO_Init(GPIOA, &GPIO_InitStructure);
+// CAN STB, TERM
+						GPIO_WriteBit(GPIOB, GPIO_Pin_14 | GPIO_Pin_14, Bit_RESET);
+						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
+						GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 						if(RCC_GetFlagStatus(RCC_FLAG_SFTRST) != RESET  && !crcError()) {
 							NVIC_SetVectorTable(NVIC_VectTab_FLASH,(uint32_t)p-_BOOT_TOP);				
@@ -101,6 +103,7 @@ void 				SysTick_init(void)
 void 				App_Init(void) {
 						Initialize_CAN(0);	// 0=normal, 1=loopback(testiranje)
 						SysTick_init();
+						printf(IAP_MSG);
 						_Words32Received=0;
 						SendAck(0);
 						_timeout=3;
@@ -120,8 +123,9 @@ static int	t=0;
 						if(t/1000 >= _timeout)
 							NVIC_SystemReset();
 						}
-
 						ParseCAN(NULL);
+						if(fgetc(stdin)==27)
+							crcSIGN(EOF);
 						Watchdog();
 }
 /*******************************************************************************/
@@ -180,7 +184,6 @@ int					i;
 ********************************************************************************/
 int					crcError(void) {
 int 				i;
-
 						RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_CRC, ENABLE);
 						CRC_ResetDR();
 						if(CRC_CalcBlockCRC((uint32_t *)_FW_SIZE,3)==*_SIGN_CRC) {
@@ -490,7 +493,7 @@ GPIO_InitTypeDef				GPIO_InitStructure;
 
 						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
 						GPIO_Init(GPIOB, &GPIO_InitStructure);
-						GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+						GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
 						GPIO_Init(GPIOB, &GPIO_InitStructure);
 
@@ -517,8 +520,8 @@ GPIO_InitTypeDef				GPIO_InitStructure;
 
 						CAN_InitStructure.CAN_SJW=CAN_SJW_4tq;
 						CAN_InitStructure.CAN_BS1=CAN_BS1_10tq;
-						CAN_InitStructure.CAN_BS2=CAN_BS2_4tq;
-						CAN_InitStructure.CAN_Prescaler=4;
+						CAN_InitStructure.CAN_BS2=CAN_BS2_3tq;
+						CAN_InitStructure.CAN_Prescaler=6;
 						CAN_Init(__CAN__,&CAN_InitStructure);
 
 						CAN_FilterInitStructure.CAN_FilterMode=CAN_FilterMode_IdList;
@@ -602,6 +605,25 @@ char	s[128];
 						f_mount(0,NULL);
 					}
 }
+/*******************************************************************************
+* Function Name  : IO retarget 
+* Description    : This function handles USART1  interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+volatile int32_t ITM_RxBuffer=ITM_RXBUFFER_EMPTY;
+//_________________________________________________________________________________
+int 				fgetc(FILE *f) {
+						if(ITM_CheckChar())
+							return ITM_ReceiveChar();
+						else
+							return EOF;
+}		
+int 				fputc(int c, FILE *f) {
+							return	ITM_SendChar(c);
+}
+
 /**
 * @}
 */ 
