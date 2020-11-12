@@ -154,6 +154,43 @@ FRESULT DecodeEq(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
+int 	remoteConsole(int stdid) {
+	payload buf;
+	int			m,n=0;
+	while(n<8) {
+		m=getchar();
+		if(m==EOF || m==__CtrlE)
+			break;
+		else
+			buf.byte[n++]=m;
+	}
+	if(n)
+		Send(stdid,&buf,n);
+	return m;
+}
+//-----------------------------------------------------
+FRESULT fRemote(int argc, char *argv[]) {
+			_io *io=_DBG;
+			_DBG=stdout->io;
+			uint32_t dbg=debug;
+			debug |= (1<<DBG_CONSOLE);
+
+
+			while(remoteConsole(idCAN2COM) != __CtrlE) 
+				_wait(2);
+			
+			_DBG=io;
+			debug=dbg;
+			_print("remote console closed...");
+			DecodeCom(0);
+			return FR_OK;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
 FRESULT fCopy(int argc, char *argv[]) {
 	FRESULT ret=FR_OK;
 	FIL	fs,fd;
@@ -255,6 +292,7 @@ struct cmd {
 {
 	{"copy",			fCopy},
 	{"rename",		fRename},
+	{"remote",		fRemote},
 	{"delete",		fDelete},
 	{"directory",	Dir},
 	{"mkd",				mkDir},
@@ -376,6 +414,9 @@ char	*c;
 				{
 					_io *io=_DBG;
 					_DBG=stdout->io;
+					uint32_t dbg=debug;
+					debug |= (1<<DBG_CONSOLE);
+					
 					ackCount=0;
 					Send(_ID_IAP_PING,NULL,0);
 					_wait(500);
@@ -383,6 +424,7 @@ char	*c;
 					_print("%3d dev. found",ackMax);
 					DecodeCom(NULL);
 					_DBG=io;
+					debug=dbg;
 					printVersion();
 				}
 				break;				
@@ -483,3 +525,7 @@ FRESULT	SaveSettings(void) {
 			}
 			return err;
 }
+
+
+
+

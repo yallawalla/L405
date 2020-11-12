@@ -471,14 +471,23 @@ payload		p;
 				case _ID_IAP_ACK:
 					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0) {
 						++ackCount;
-						_print("  ser %08X, boot",rx.buf.word[1]);
-						DecodeCom(NULL);
+						if(current && (debug & (1<<DBG_CONSOLE))) {
+							_print("  ser %08X, boot",rx.buf.word[1]);
+							DecodeCom(NULL);
+						}
 					}
 					break;
 	
 				case idCAN2COM:
 					while(rx.hdr.DLC && !_buffer_push(canConsole->rx,rx.buf.bytes,rx.hdr.DLC))
 						_wait(2);
+				break;
+
+				case idCOM2CAN:
+					if(current && (debug & (1<<DBG_CONSOLE))) {
+						while(rx.hdr.DLC && !_buffer_push(current->tx,rx.buf.bytes,rx.hdr.DLC))
+							_wait(2);
+					}
 				break;
 
 				case _THR_LEFT_FRONT:
@@ -536,7 +545,7 @@ uint32_t 		ch=rx.buf.byte[0],
 						break;
 						case sizeof(payload):																		// device ack.
 							++ackCount;
-							_print("  v <%08X>, ser %08X, %s",rx.buf.word[0],rx.buf.word[1], strPos[rx.hdr.StdId-_ACK_LEFT_FRONT]);
+							_print("  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[rx.hdr.StdId-_ACK_LEFT_FRONT]);
 							DecodeCom(NULL);
 						break;
 						default:

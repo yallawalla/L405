@@ -112,13 +112,25 @@ void				iapRemote() {
 							Watchdog();
 						}
 												
-						Send(_ID_IAP_REQ,NULL,0);												// send iap req. as from sys
-						if(!AckWait(3000)) {														// wait for ping
-							Send(_ID_IAP_PING,NULL,0);										// send ping
-							if(!AckWait(100))															// wait for response '-'
-								return;
+//						Send(_ID_IAP_REQ,NULL,0);												// send iap req. as from sys
+//						if(!AckWait(3000)) {														// wait for ping
+//							Send(_ID_IAP_PING,NULL,0);										// send ping
+//							if(!AckWait(100))															// wait for response '-'
+//								return;
+//						}
+						
+						Send(_ID_IAP_REQ,NULL,0);												// send iap req. reset slaves
+						_wait(500);
+						ackCount=0;
+						Send(_ID_IAP_PING,NULL,0);											// send ping;	
+						_wait(500);
+						if(ackCount==0) {
+							_print("\r\nno device detected...");
+							return;
 						}
-						_print("\r\niap ping received...");
+						ackMax=ackCount;
+
+						_print("\r\n%d pings received...",ackMax);
 						_print("\r\nerasing");													// erase 5 pages (att. CubeMX ima drugacne 
 																														//oznake za sektorje !!!
 						for(k=FLASH_SECTOR_1<<3; k<FLASH_SECTOR_6<<3; k+=FLASH_SECTOR_1<<3) {
@@ -132,6 +144,7 @@ void				iapRemote() {
 						k=_FLASH_TOP;
 						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
 						while(k <= n) {
+							_wait(1);
 							Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
 							if(!AckWait(200))
 								return;
@@ -141,6 +154,7 @@ void				iapRemote() {
 							
 							k+=sizeof(payload);
 						}
+						_print(".%3d%c%c%c%c%c",100,'%','\x8','\x8','\x8','\x8');
 
 						Send(_ID_IAP_SIGN,NULL,0);											// send sign command
 						if(!AckWait(300))																// wait for ack...

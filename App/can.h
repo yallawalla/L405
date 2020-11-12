@@ -86,7 +86,8 @@ typedef enum {
 	DBG_CRC,
 	DBG_TIMING,
 	DBG_LED,
-	DBG_USEC
+	DBG_USEC,
+	DBG_CONSOLE
 };
 
 	enum tmode{    
