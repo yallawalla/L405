@@ -24,7 +24,7 @@ FRESULT		DecodeCom(char *);
 int				ff_pack(int);
 void			Parse(int);
 void			*console(void *);
-
+void 			JumpToBootloader(void);
 
 
 
