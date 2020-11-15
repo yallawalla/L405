@@ -292,10 +292,12 @@ void	*canTx(void *v) {
 					}
 					if(debug & (1<<DBG_USEC)) {
 						_io	*io=_stdio(_DBG);		
-						if(t->count % 2 == 0)
-							_print(",%3d\r\n",dt/84);
+						if(t->count % 2 == 0) {
+							if(t->count)
+								_print("%3d",dt/84);
+						}
 						else
-							_print("%d: %3d",t->sect,dt/84);
+								_print("%3d:%d\r\n",dt/84,t->ch);
 						_stdio(io);
 					}
 					
@@ -490,10 +492,10 @@ payload		p;
 					}
 				break;
 
-				case _THR_LEFT_FRONT:
-				case _THR_RIGHT_FRONT:
-				case _THR_RIGHT_REAR:
-				case _THR_LEFT_REAR:
+				case _TEST_LEFT_FRONT:
+				case _TEST_RIGHT_FRONT:
+				case _TEST_RIGHT_REAR:
+				case _TEST_LEFT_REAR:
 					if(rx.hdr.StdId - 0x010 == idPos) {
 uint32_t 		ch=rx.buf.byte[0],
 						sect=rx.buf.byte[1],
@@ -513,25 +515,7 @@ uint32_t 		ch=rx.buf.byte[0],
 							}
 					}
 				break;
-
-				case _TEST_LEFT_FRONT:
-				case _TEST_RIGHT_FRONT:
-				case _TEST_RIGHT_REAR:
-				case _TEST_LEFT_REAR:
-					if(rx.hdr.StdId - 0x020 == idPos) {
-						test *p=(test *)&rx.buf;
-						for(int i=0; i<rx.hdr.DLC; ++i) {
-							for(int j=0; j<6; ++j) {
-								if(p->mask & (1<<j))
-									for(tim *t=timStack; t->htim; ++t) {
-										if(t->sect == p->sect && t->ch == j)
-											_buffer_put(t->dma, (uint32_t *)t, sizeof(uint32_t));
-									}
-							}
-						}
-					}
-				break;
-				
+			
 				case _ACK_LEFT_FRONT:
 				case _ACK_RIGHT_FRONT:
 				case _ACK_RIGHT_REAR:
