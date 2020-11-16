@@ -12,9 +12,9 @@ struct led leds[] =
 	{{0,255,100},		0,0,{0}},
 	{{60,255,100},	0,0,{0}},
 	{{120,255,100},	0,0,{0}},
-	{{180,255,100},	0,0,{0}},
-	{{240,255,100},	0,0,{0}},
-	{{300,255,100},	0,0,{0}}
+	{{0,255,100},		0,0,{0}},
+	{{60,255,100},	0,0,{0}},
+	{{120,255,100},	0,0,{0}}
 };
 
 uint32_t	DecodeTab[4096];
@@ -131,8 +131,12 @@ void			*wsProc(void *p) {
 						for(int i=0; i<__COLS; ++i) {
 							leds[i].bit24 |= DecodeTab[leds[i].bit12];
 							for(int j=0; j < __LEDS; ++j)
-								if(leds[i].timeout[j] == 0 && leds[i].bit24 & (1 << j))
-									leds[i].timeout[j]=HAL_GetTick()+2000;
+								if(leds[i].timeout[j] == 0 && leds[i].bit24 & (1 << j)) {
+									if(testmode)
+										leds[i].timeout[j]=HAL_GetTick()+100;
+									else
+										leds[i].timeout[j]=HAL_GetTick()+2000;
+								}
 							leds[i].bit12=0;
 						}
 					}
@@ -151,7 +155,6 @@ void			*wsProc(void *p) {
 								pCount[j][i]=0;
 					}
 	
-
 					for(int i=0; i<__COLS; ++i) 
 						for(int j=0; j<__LEDS; ++j)
 							if(leds[i].timeout[j] && HAL_GetTick() > leds[i].timeout[j]) {

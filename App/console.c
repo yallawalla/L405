@@ -237,30 +237,32 @@ FRESULT fType(int argc, char *argv[]) {
 * Output				:
 * Return				:
 *******************************************************************************/
-uint16_t		dacBuf[3];
+CanTxMsg	dacMsg;
 //-----------------------------------------------------
 void	*dacProc(void *v) {
-	HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_2,(uint32_t *)dacBuf,3,DAC_ALIGN_12B_R);
-		return dacProc;
+	Send(dacMsg.hdr.StdId,&dacMsg.buf,dacMsg.hdr.DLC);
+	testmode=true;
+	return dacProc;
 }
 //-----------------------------------------------------
 FRESULT fTest(int argc, char *argv[]) {
+	_proc *p=_proc_find(dacProc,NULL);
 	if(argv[1] && argv[2]) {
-		HAL_TIM_Base_Stop(&htim7);
-		htim7.Init.Period = 8*atoi(argv[1]);
-		HAL_TIM_Base_Init(&htim7);
-		HAL_TIM_Base_Start(&htim7);
-		dacBuf[1]=atoi(argv[2]);	
-		HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_2,(uint32_t *)dacBuf,3,DAC_ALIGN_12B_R);
 		if(argv[3]) {
-			_proc *p=_proc_find(dacProc,NULL);
 			if(p)
 				p->dt=atoi(argv[3]);
 			else
 				_proc_add(dacProc,NULL,"dac",atoi(argv[3]));
-		}
-	} else
-		dacBuf[1]=0;
+		} else if(p)
+			p->f=NULL;
+		dacMsg.hdr.StdId=_TEST_DAC;
+		dacMsg.hdr.DLC=2*sizeof(uint16_t);
+		dacMsg.buf.hword[0]=atoi(argv[1]);
+		dacMsg.buf.hword[1]=atoi(argv[2]);
+		Send(dacMsg.hdr.StdId,&dacMsg.buf,dacMsg.hdr.DLC);
+		testmode=true;
+	} else if(p)
+		p->f=NULL;
 	return FR_OK;		
 }
 //-----------------------------------------------------

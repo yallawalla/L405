@@ -15,8 +15,8 @@ uint32_t	idDev=0,
 					debug,
 					idPos=_ACK_LEFT_FRONT,
 					ackCount=0, 
-					ackMax=_MAXDEV, 
-					tref=0;
+					ackMax=_MAXDEV;
+bool			testmode=false;
 payload		py={0,0};
 
 #ifdef	__DISCO__
@@ -382,26 +382,29 @@ void	*canTx(void *v) {
 					break;
 						
 					default:
-						if(t->ch == 0) {
-							if(t->count > 14)
-								py.byte[t->sect] |= (1 << 1);
-							else
-								py.byte[t->sect] |= (1 << 0);
+						if(testmode)
+							py.byte[t->sect] |= (1 << t->ch);	
+						else {
+							if(t->ch == 1 &&  t->scount > 14)
+								py.byte[t->sect] |= (1 << 2);
+							
+							if(t->ch == 4 &&  t->scount > 14)
+								py.byte[t->sect] |= (1 << 5);
+							
+							if(t->ch == 0) {
+								if(t->count > 14)
+									py.byte[t->sect] |= (1 << 1);
+								else
+									py.byte[t->sect] |= (1 << 0);
+							}
+							
+							if(t->ch == 3) {
+								if(t->count > 14)
+									py.byte[t->sect] |= (1 << 4);
+								else
+									py.byte[t->sect] |= (1 << 3);
+							}
 						}
-			
-						if(t->ch == 1 &&  t->scount > 14)
-							py.byte[t->sect] |= (1 << 2);
-						
-						
-						if(t->ch == 3) {
-							if(t->count > 14)
-								py.byte[t->sect] |= (1 << 4);
-							else
-								py.byte[t->sect] |= (1 << 3);
-						}
-			
-						if(t->ch == 4 &&  t->scount > 14)
-							py.byte[t->sect] |= (1 << 5);
 				}						
 				t->count=0;
 				t->scount=0;
@@ -413,10 +416,10 @@ void	*canTx(void *v) {
 			if(t->timeout)
 				break;
 		if(t->htim == NULL && py.word[0]) {
-			for(int k=0; k<3; ++k)
-				if((py.byte[k] & 6)==6)
-					py.byte[k]=(py.byte[k] & ~6) | 2;
-								
+//			for(int k=0; k<3; ++k)
+//				if((py.byte[k] & 6)==6)
+//					py.byte[k]=(py.byte[k] & ~6) | 2;
+			testmode=false;		
 			Send(idPos,&py,3*sizeof(uint8_t));
 			memset(&py,0,sizeof(payload));	
 		}
@@ -438,6 +441,7 @@ _io 	*out=stdout->io;
 _io 	*current=*(_io **)v;
 			_stdio(current);
 
+uint16_t	dacBuf[2];
 CanRxMsg	rx;
 payload		p;
 	
@@ -479,7 +483,17 @@ payload		p;
 						}
 					}
 					break;
-	
+					
+				case _TEST_DAC:
+					HAL_TIM_Base_Stop(&htim7);
+					htim7.Init.Period = 84*rx.buf.hword[0];
+					HAL_TIM_Base_Init(&htim7);
+					HAL_TIM_Base_Start(&htim7);
+					dacBuf[0]=rx.buf.hword[1];
+					HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_2,(uint32_t *)dacBuf,2,DAC_ALIGN_12B_R);
+					testmode=true;		
+				break;
+
 				case idCAN2COM:
 					while(rx.hdr.DLC && !_buffer_push(canConsole->rx,rx.buf.bytes,rx.hdr.DLC))
 						_wait(2);

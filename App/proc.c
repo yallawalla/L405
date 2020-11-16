@@ -44,7 +44,7 @@ void	*_proc_loop(void) {
 			_proc	*p=NULL;
 			if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
 				if(HAL_GetTick() >= p->t) {
-					if(p->f(p->arg)==NULL)
+					if(!p->f || p->f(p->arg)==NULL)
 						return NULL;
 					p->t = HAL_GetTick() + p->dt;
 				}

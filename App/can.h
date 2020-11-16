@@ -18,7 +18,9 @@ extern 		TIM_HandleTypeDef htim1,
 														htim8,
 														htim3,
 														htim4,
-														htim5;
+														htim5,
+														htim7;
+extern		DAC_HandleTypeDef hdac;
 
 extern		_io								*_CAN,
 														*_VCP,
@@ -41,7 +43,11 @@ typedef struct  {
 	uint16_t	pin[4];
 } led;
 
-extern led Leds;
+typedef enum { false, true } bool;
+
+extern led	Leds;
+extern bool	testmode;
+
 
 #define _RED(a)			Leds.t[0]=HAL_GetTick()+a
 #define _GREEN(a)		Leds.t[1]=HAL_GetTick()+a
@@ -60,7 +66,7 @@ typedef enum {
 	_TEST_LEFT_REAR		=0x213,
 
 	_ID_IAP_REQ				=0x214,
-	
+	_TEST_DAC					=0x215,
 	idCOM2CAN					=0x20C,
 	idCAN2COM					=0x24C,
 

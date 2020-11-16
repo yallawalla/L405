@@ -13,10 +13,7 @@ enum			err_parse	{
 					_PARSE_ERR_OPENFILE,
 					_PARSE_ERR_MEM
 };
-
-extern		DAC_HandleTypeDef hdac;
 extern		IWDG_HandleTypeDef hiwdg;
-extern		TIM_HandleTypeDef htim7;
 void			printVersion(void);
 int32_t		USBH_Iap(void);
 FRESULT		ff_format(char *);
