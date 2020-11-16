@@ -231,6 +231,38 @@ FRESULT fType(int argc, char *argv[]) {
 	f_close(&fs);
 	return ret;
 }
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+uint16_t		dacBuf[3];
+//-----------------------------------------------------
+void	*dacProc(void *v) {
+	HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_2,(uint32_t *)dacBuf,3,DAC_ALIGN_12B_R);
+		return dacProc;
+}
+//-----------------------------------------------------
+FRESULT fTest(int argc, char *argv[]) {
+	if(argv[1] && argv[2]) {
+		HAL_TIM_Base_Stop(&htim7);
+		htim7.Init.Period = 8*atoi(argv[1]);
+		HAL_TIM_Base_Init(&htim7);
+		HAL_TIM_Base_Start(&htim7);
+		dacBuf[1]=atoi(argv[2]);	
+		HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_2,(uint32_t *)dacBuf,3,DAC_ALIGN_12B_R);
+		if(argv[3]) {
+			_proc *p=_proc_find(dacProc,NULL);
+			if(p)
+				p->dt=atoi(argv[3]);
+			else
+				_proc_add(dacProc,NULL,"dac",atoi(argv[3]));
+		}
+	} else
+		dacBuf[1]=0;
+	return FR_OK;		
+}
 //-----------------------------------------------------
 FRESULT fRename(int argc, char *argv[]) {
 	return f_rename(argv[1],argv[2]);
@@ -298,7 +330,8 @@ struct cmd {
 	{"mkd",				mkDir},
 	{"mdir",			mkDir},
 	{"cdir",			chDir},
-	{"type",			fType}
+	{"type",			fType},
+	{"test",			fTest}
 };
 /*******************************************************************************
 * Function Name	:

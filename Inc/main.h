@@ -84,8 +84,6 @@ void Error_Handler(void);
 #define _3A2_GPIO_Port GPIOA
 #define _3B2_Pin GPIO_PIN_3
 #define _3B2_GPIO_Port GPIOA
-#define TEST1_Pin GPIO_PIN_4
-#define TEST1_GPIO_Port GPIOA
 #define TEST2_Pin GPIO_PIN_5
 #define TEST2_GPIO_Port GPIOA
 #define _1A3_Pin GPIO_PIN_6
