@@ -42,12 +42,8 @@
 /* USER CODE BEGIN PD */
 void	*console(void *);
 _io		*InitITM(void);
+adc		pwr;
 
-struct {
-	uint16_t	V45;
-	uint16_t	Vm5;
-	uint16_t	T;
-}	supply[128];
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -63,9 +59,6 @@ CAN_HandleTypeDef hcan2;
 
 CRC_HandleTypeDef hcrc;
 
-DAC_HandleTypeDef hdac;
-DMA_HandleTypeDef hdma_dac2;
-
 IWDG_HandleTypeDef hiwdg;
 
 TIM_HandleTypeDef htim1;
@@ -73,7 +66,6 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
-TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim8;
 DMA_HandleTypeDef hdma_tim1_ch1;
 DMA_HandleTypeDef hdma_tim1_ch2;
@@ -107,8 +99,6 @@ static void MX_CAN2_Init(void);
 static void MX_CRC_Init(void);
 static void MX_IWDG_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_DAC_Init(void);
-static void MX_TIM7_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
@@ -162,9 +152,7 @@ uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
   MX_CRC_Init();
   MX_IWDG_Init();
   MX_ADC1_Init();
-  MX_DAC_Init();
   MX_USB_HOST_Init();
-  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 	__ledInit;
 	__otgIdInit;
@@ -189,7 +177,7 @@ uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
 	_proc_add(canRx,&_DBG,"canRx",0);
 	_proc_add(canTx,&_DBG,"canTx",0);
 	
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)supply, sizeof(supply)/sizeof(uint16_t));
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
 	wsProcInit();
 	
 	_io *io=_stdio(InitITM());
@@ -393,44 +381,6 @@ static void MX_CRC_Init(void)
   /* USER CODE BEGIN CRC_Init 2 */
 
   /* USER CODE END CRC_Init 2 */
-
-}
-
-/**
-  * @brief DAC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_DAC_Init(void)
-{
-
-  /* USER CODE BEGIN DAC_Init 0 */
-
-  /* USER CODE END DAC_Init 0 */
-
-  DAC_ChannelConfTypeDef sConfig = {0};
-
-  /* USER CODE BEGIN DAC_Init 1 */
-
-  /* USER CODE END DAC_Init 1 */
-  /** DAC Initialization
-  */
-  hdac.Instance = DAC;
-  if (HAL_DAC_Init(&hdac) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** DAC channel OUT2 config
-  */
-  sConfig.DAC_Trigger = DAC_TRIGGER_T7_TRGO;
-  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE;
-  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN DAC_Init 2 */
-
-  /* USER CODE END DAC_Init 2 */
 
 }
 
@@ -749,44 +699,6 @@ static void MX_TIM5_Init(void)
 }
 
 /**
-  * @brief TIM7 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM7_Init(void)
-{
-
-  /* USER CODE BEGIN TIM7_Init 0 */
-
-  /* USER CODE END TIM7_Init 0 */
-
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM7_Init 1 */
-
-  /* USER CODE END TIM7_Init 1 */
-  htim7.Instance = TIM7;
-  htim7.Init.Prescaler = 0;
-  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 84;
-  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM7_Init 2 */
-
-  /* USER CODE END TIM7_Init 2 */
-
-}
-
-/**
   * @brief TIM8 Initialization Function
   * @param None
   * @retval None
@@ -872,9 +784,6 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream5_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
-  /* DMA1_Stream6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
   /* DMA1_Stream7_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream7_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);
@@ -921,6 +830,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED_G_Pin|LED_R_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(CAN_STB_GPIO_Port, CAN_STB_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -941,6 +853,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TEST_Pin */
+  GPIO_InitStruct.Pin = TEST_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(TEST_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : CAN_STB_Pin */
   GPIO_InitStruct.Pin = CAN_STB_Pin;
@@ -973,16 +892,16 @@ static void MX_GPIO_Init(void)
 * Return				:
 *******************************************************************************/
 void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-	int32_t i,v45=0,vm5=0,t=0;
-	for(i=0; i<sizeof(supply)/3/sizeof(uint16_t); ++i) {
-		v45+=supply->V45;
-		vm5+=supply->Vm5;
-		t+=supply->T;
+	pwr.T=pwr.V45=pwr.Vm5=0;
+	uint32_t i;
+	for(i=0; i<sizeof(pwr.dma)/sizeof(dma); ++i) {
+		pwr.T+=pwr.dma[i].T;
+		pwr.V45+=pwr.dma[i].V45;
+		pwr.Vm5+=pwr.dma[i].Vm5;
 	}
-//	if(abs(45000- (v45*3300/4096/i*(1200+47000)/1200)) > 1000)
-//		_RED(100);
-//	if(abs(5000 - ((3300 - vm5*3300/4096/i)*(1200+6800)/1200-3300)) > 500)
-//		_GREEN(100);
+	pwr.T/=i;
+	pwr.V45/=i;
+	pwr.Vm5/=i;
 }
 /* USER CODE END 4 */
 

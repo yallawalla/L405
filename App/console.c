@@ -105,6 +105,16 @@ FRESULT DecodePlus(char *c) {
 				break;
 				
 				case 't':
+				do {
+					c=strchr(c,' ');
+					if(c)
+						testmode |= (1<<strtoul(++c,&c,10));
+					else
+						testmode = (uint32_t)EOF;
+				} while(c && *c);
+				break;
+				
+				case 'T':
 				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_RESET);
 				_GREEN(200);
 				SaveSettings();
@@ -127,8 +137,18 @@ FRESULT DecodeMinus(char *c) {
 				for(c=strchr(c,' '); c && *c;)
 					debug &= ~(1<<strtoul(++c,&c,10));
 				break;
-		
+				
 				case 't':
+				do {
+					c=strchr(c,' ');
+					if(c)
+						testmode &= ~(1<<strtoul(++c,&c,10));
+					else
+						testmode = 0;
+				} while(c && *c);
+				break;
+		
+				case 'T':
 				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_SET);
 				_RED(200);
 				SaveSettings();
@@ -136,6 +156,33 @@ FRESULT DecodeMinus(char *c) {
 
 				default:
 				return FR_INVALID_NAME;
+	}
+	return FR_OK;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT DecodeInq(char *c) {
+				switch(*trim(&c)) {
+				case 'a':
+					while(getchar() == EOF) {
+						_print("\r%.1fV,%.1fV,%.1f'C",
+							(float)(pwr.V45*3.3/4095.0*(1.2+47)/1.2),
+							(float)(3.3 - (4095-pwr.Vm5)*((1.2+6.8)/1.2*3.3/4095.0)),
+							(float)((pwr.T*3.3/4095.0 - 0.76)/2.5e-3+25.0));
+						_wait(200);
+						}
+				break;
+		
+				case 'v':
+					printVersion();
+				break;
+
+				default:
+					return FR_INVALID_NAME;
 	}
 	return FR_OK;
 }
@@ -241,26 +288,23 @@ CanTxMsg	dacMsg;
 //-----------------------------------------------------
 void	*dacProc(void *v) {
 	Send(dacMsg.hdr.StdId,&dacMsg.buf,dacMsg.hdr.DLC);
-	testmode=true;
 	return dacProc;
 }
 //-----------------------------------------------------
 FRESULT fTest(int argc, char *argv[]) {
 	_proc *p=_proc_find(dacProc,NULL);
-	if(argv[1] && argv[2]) {
-		if(argv[3]) {
+	if(argv[1]) {
+		if(argv[2]) {
 			if(p)
-				p->dt=atoi(argv[3]);
+				p->dt=atoi(argv[2]);
 			else
-				_proc_add(dacProc,NULL,"dac",atoi(argv[3]));
+				_proc_add(dacProc,NULL,"dac",atoi(argv[2]));
 		} else if(p)
 			p->f=NULL;
 		dacMsg.hdr.StdId=_TEST_DAC;
-		dacMsg.hdr.DLC=2*sizeof(uint16_t);
+		dacMsg.hdr.DLC=1;
 		dacMsg.buf.hword[0]=atoi(argv[1]);
-		dacMsg.buf.hword[1]=atoi(argv[2]);
 		Send(dacMsg.hdr.StdId,&dacMsg.buf,dacMsg.hdr.DLC);
-		testmode=true;
 	} else if(p)
 		p->f=NULL;
 	return FR_OK;		
@@ -405,6 +449,8 @@ FATFS			fatfs;
 					} while(*c);
 					break;
 //__________________________________________________
+				case '?':
+					return DecodeInq(++c);
 				case '+':
 					return DecodePlus(++c);
 				case '-':

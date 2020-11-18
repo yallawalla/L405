@@ -18,9 +18,7 @@ extern 		TIM_HandleTypeDef htim1,
 														htim8,
 														htim3,
 														htim4,
-														htim5,
-														htim7;
-extern		DAC_HandleTypeDef hdac;
+														htim5;
 
 extern		_io								*_CAN,
 														*_VCP,
@@ -30,7 +28,8 @@ extern		_io								*_CAN,
 extern		uint32_t					idDev,
 														idPos,
 														idCrc,
-														debug;
+														debug,
+														testmode;
 
 #define 	_MAXDEV	4
 
@@ -42,11 +41,10 @@ typedef struct  {
 	GPIO_TypeDef *port;
 	uint16_t	pin[4];
 } led;
+extern led	Leds;
 
 typedef enum { false, true } bool;
 
-extern led	Leds;
-extern bool	testmode;
 
 
 #define _RED(a)			Leds.t[0]=HAL_GetTick()+a
@@ -88,7 +86,9 @@ typedef enum {
 	DBG_TIMING,
 	DBG_LED,
 	DBG_USEC,
-	DBG_CONSOLE
+	DBG_CONSOLE,
+	DBG_STAT,
+	DBG_VOLT
 };
 
 	enum tmode{    
@@ -133,8 +133,9 @@ typedef struct {
 	uint32_t					Channel;
 	uint8_t						sect,ch;
 	enum tmode				tmode;				
-	uint32_t					timeout,to,crc,count;
-	uint32_t					sum,scount;
+	uint32_t					timeout,to,crc;
+	uint32_t					cnt,longcnt,pw;
+	uint32_t					hi,lo,shi,slo;
 } tim;
 
 void				Send(int, payload *,int), iapRemote(void);

@@ -25,8 +25,19 @@ void			Parse(int);
 void			*console(void *);
 void 			JumpToBootloader(void);
 
-
-
+typedef 	struct {
+	uint16_t	V45;
+	uint16_t	Vm5;
+	uint16_t	T;
+} dma;
+	
+typedef		struct {
+	dma				dma[128];	
+	uint32_t	V45;
+	uint32_t	Vm5;
+	uint32_t	T;
+}	adc;
+extern		adc	pwr;
 
 
 

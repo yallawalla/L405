@@ -132,10 +132,7 @@ void			*wsProc(void *p) {
 							leds[i].bit24 |= DecodeTab[leds[i].bit12];
 							for(int j=0; j < __LEDS; ++j)
 								if(leds[i].timeout[j] == 0 && leds[i].bit24 & (1 << j)) {
-									if(testmode)
-										leds[i].timeout[j]=HAL_GetTick()+100;
-									else
-										leds[i].timeout[j]=HAL_GetTick()+2000;
+									leds[i].timeout[j]=HAL_GetTick()+2000;
 								}
 							leds[i].bit12=0;
 						}

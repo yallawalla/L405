@@ -15,8 +15,8 @@ uint32_t	idDev=0,
 					debug,
 					idPos=_ACK_LEFT_FRONT,
 					ackCount=0, 
-					ackMax=_MAXDEV;
-bool			testmode=false;
+					ackMax=_MAXDEV,
+					testmode=0;
 payload		py={0,0};
 
 #ifdef	__DISCO__
@@ -290,10 +290,10 @@ void	*canTx(void *v) {
 						}
 						_stdio(io);
 					}
-					if(debug & (1<<DBG_USEC)) {
+					if(debug && debug & (1<<DBG_USEC)) {
 						_io	*io=_stdio(_DBG);		
-						if(t->count % 2 == 0) {
-							if(t->count)
+						if(t->cnt % 2 == 0) {
+							if(t->cnt)
 								_print("%3d",dt/84);
 						}
 						else
@@ -313,24 +313,30 @@ void	*canTx(void *v) {
 					}
 					
 					
-					if(t->count % 2) {			// __---
-						if(t->count == 1)
-							t->sum=dt;
+					if(t->cnt % 2) {			// __---
+						if(t->cnt == 1)
+							t->pw=dt;
 						else
-							t->sum+=dt;
-						if(t->sum/84 > 50) {
-							++t->scount;
-							t->sum=0;
+							t->pw +=dt;
+						t->lo +=dt/84;
+						t->slo+=dt*dt/84/84;
+						if(t->pw/84 > 50) {
+							++t->longcnt;
+							t->pw=0;
 						}
 					} else {								// --___
 						if(dt/84 > 100)
-							t->sum=0;
+							t->pw=0;
+						if(t->cnt) {
+							t->hi += dt/84;
+							t->shi+=dt*dt/84/84;
+						}
 					}
 				}	else {
 					t->to = tcapt;
 				}
-				++t->count;
-				t->timeout=HAL_GetTick()+20;
+				++t->cnt;
+				t->timeout=HAL_GetTick()+10;
 			}
 			if(t->timeout && HAL_GetTick() > t->timeout) {
 				t->timeout=0;
@@ -383,43 +389,54 @@ void	*canTx(void *v) {
 						
 					default:
 						if(testmode)
-							py.byte[t->sect] |= (1 << t->ch);	
+							py.byte[t->sect] |= (1 << t->ch) & testmode;	
 						else {
-							if(t->ch == 1 &&  t->scount > 14)
+							if(t->ch == 1 &&  t->longcnt > 14)
 								py.byte[t->sect] |= (1 << 2);
 							
-							if(t->ch == 4 &&  t->scount > 14)
+							if(t->ch == 4 &&  t->longcnt > 14)
 								py.byte[t->sect] |= (1 << 5);
 							
 							if(t->ch == 0) {
-								if(t->count > 14)
+								if(t->cnt > 14)
 									py.byte[t->sect] |= (1 << 1);
 								else
 									py.byte[t->sect] |= (1 << 0);
 							}
 							
 							if(t->ch == 3) {
-								if(t->count > 14)
+								if(t->cnt > 14)
 									py.byte[t->sect] |= (1 << 4);
 								else
 									py.byte[t->sect] |= (1 << 3);
 							}
 						}
-				}						
-				t->count=0;
-				t->scount=0;
-				t->sum=0;
-				t->crc = 0;
+				}				
+				t->cnt/=2;
+				if(debug & (1<<DBG_STAT) && t->cnt && (1 << t->ch) & testmode) {
+					_print("%d,%d:%5d,%5d,%5d,%5d --- %d\r\n",t->sect,t->ch,t->hi/t->cnt,t->lo/t->cnt,
+					(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,
+					(int)sqrt(t->cnt*t->slo - t->lo*t->lo)/t->cnt,
+					t->cnt);
+				}
+				t->cnt=t->longcnt=t->pw=t->crc = 0;
+				t->hi=t->lo=t->shi=t->slo=0;
 			}
 		}
 		for(t=timStack; t->htim; ++t)
 			if(t->timeout)
 				break;
 		if(t->htim == NULL && py.word[0]) {
-//			for(int k=0; k<3; ++k)
-//				if((py.byte[k] & 6)==6)
-//					py.byte[k]=(py.byte[k] & ~6) | 2;
-			testmode=false;		
+			if(!testmode) {
+				for(int k=0; k<3; ++k) {
+					py.byte[k] |= py.byte[k]>>3;
+					py.byte[k] &= 7;
+					if(py.byte[k] & 2)
+						py.byte[k]=2;
+					if(py.byte[k] & 4)
+						py.byte[k]=4;
+				}
+			}	
 			Send(idPos,&py,3*sizeof(uint8_t));
 			memset(&py,0,sizeof(payload));	
 		}
@@ -441,7 +458,6 @@ _io 	*out=stdout->io;
 _io 	*current=*(_io **)v;
 			_stdio(current);
 
-uint16_t	dacBuf[2];
 CanRxMsg	rx;
 payload		p;
 	
@@ -485,13 +501,9 @@ payload		p;
 					break;
 					
 				case _TEST_DAC:
-					HAL_TIM_Base_Stop(&htim7);
-					htim7.Init.Period = 84*rx.buf.hword[0];
-					HAL_TIM_Base_Init(&htim7);
-					HAL_TIM_Base_Start(&htim7);
-					dacBuf[0]=rx.buf.hword[1];
-					HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_2,(uint32_t *)dacBuf,2,DAC_ALIGN_12B_R);
-					testmode=true;		
+					while(rx.buf.hword[0]--)
+						HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_RESET);	
 				break;
 
 				case idCAN2COM:
@@ -558,3 +570,7 @@ uint32_t 		ch=rx.buf.byte[0],
 	}
 	return v;
 }
+/*
+____-_-_-_-_-_______-_-________-_-_-_-_-_______________________-_-_-_-_-_______-_-________-_-_-_-_-___________________
+____|_|_|_|_|_______|_|________|_|_|_|_|_______________________|_|_|_|_|_______|_|________|_|_|_|_|___________________
+*/

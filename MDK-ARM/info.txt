@@ -11,5 +11,9 @@
 
 -	ce je VCP buffer 2x2048, mora biti heap 0x8000
 - TODO: https://community.st.com/s/question/0D50X00009XkgIYSAZ/unable-to-configure-serial-port-error-for-usb-cdc //Done
-- TODO CAN terminator  bootloaderju ???
+- TODO CAN terminator  bootloaderju ??? 
 
+
+- illumnator je 45Hz las. pulz !!!:)
+- modifikacija +D -D kot pri testmode
+- zakaj pri msg 210-213 zamenja hi/lo in drugega ne rcuna prav
