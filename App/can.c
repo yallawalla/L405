@@ -143,12 +143,10 @@ void	Send(int id,  payload *buf, int len) {
 		_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg));
 	_YELLOW(500);
 	if(debug & (1<<DBG_CAN_TX)) {
-		_io	*io=_stdio(_DBG);
 		_print("\r%3d: > %03X",HAL_GetTick() % 1000,tx.hdr.StdId);
 		for(int i=0; i<tx.hdr.DLC; ++i)
 			_print(" %02X",tx.buf.bytes[i]);
 		_print("\r\n");
-		_stdio(io);
 	}
 }
 /*******************************************************************************
@@ -263,11 +261,9 @@ void	*canTx(void *v) {
 		HAL_CAN_Start(&hcan2);
 /*******************************************************************************/
 	} else {
+		_io *io=_stdio(*(_io **)v);
 		tim 	*t;
-		_io		*in=stdin->io;
-		_io 	*out=stdout->io;
-		_io 	*current=*(_io **)v;
-		_stdio(current);
+		
 		for(t=timStack; t->htim; ++t) {
 			uint32_t	tcapt,dt;
 			if(t->tmode == _DMA)
@@ -280,25 +276,21 @@ void	*canTx(void *v) {
 						dt = tcapt - t->to;
 					t->to=tcapt;
 					
-					if(debug & (1<<DBG_TIMING)) {
-						_io	*io=_stdio(_DBG);				
+					if(debug & (1<<DBG_TIMING)) {		
 						if(dt/84>50) {
 							if(dt/84 > 300)
 							_print("-");
 						else
 							_print("_");
 						}
-						_stdio(io);
 					}
-					if(debug && debug & (1<<DBG_USEC)) {
-						_io	*io=_stdio(_DBG);		
+					if(debug && debug & (1<<DBG_USEC)) {	
 						if(t->cnt % 2 == 0) {
 							if(t->cnt)
 								_print("%3d",dt/84);
 						}
 						else
 								_print("%3d:%d\r\n",dt/84,t->ch);
-						_stdio(io);
 					}
 					
 
@@ -318,8 +310,8 @@ void	*canTx(void *v) {
 							t->pw=dt;
 						else
 							t->pw +=dt;
-						t->lo +=dt/84;
-						t->slo+=dt*dt/84/84;
+						t->hi +=dt/84;
+						t->shi+=dt*dt/84/84;
 						if(t->pw/84 > 50) {
 							++t->longcnt;
 							t->pw=0;
@@ -328,23 +320,23 @@ void	*canTx(void *v) {
 						if(dt/84 > 100)
 							t->pw=0;
 						if(t->cnt) {
-							t->hi += dt/84;
-							t->shi+=dt*dt/84/84;
+							t->lo += dt/84;
+							t->slo+=dt*dt/84/84;
 						}
 					}
 				}	else {
 					t->to = tcapt;
 				}
 				++t->cnt;
-				t->timeout=HAL_GetTick()+10;
+				if(t->ch==0)
+					t->timeout=HAL_GetTick()+30;
+				else
+					t->timeout=HAL_GetTick()+10;
 			}
 			if(t->timeout && HAL_GetTick() > t->timeout) {
 				t->timeout=0;
-				if(debug & (1<<DBG_CRC)) {
-					_io	*io=_stdio(_DBG);
-					_print(" %08X\r\n>",t->crc);	
-					_stdio(io);
-				}
+				if(debug & (1<<DBG_CRC))
+					_print("%d,%d:<%08X>\r\n>",t->ch,t->sect,t->crc);	
 				
 				switch(t->crc) {
 					case _VCP_CDC:
@@ -413,11 +405,18 @@ void	*canTx(void *v) {
 						}
 				}				
 				t->cnt/=2;
-				if(debug & (1<<DBG_STAT) && t->cnt && (1 << t->ch) & testmode) {
-					_print("%d,%d:%5d,%5d,%5d,%5d --- %d\r\n",t->sect,t->ch,t->hi/t->cnt,t->lo/t->cnt,
-					(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,
-					(int)sqrt(t->cnt*t->slo - t->lo*t->lo)/t->cnt,
-					t->cnt);
+				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & testmode) {
+					if(t->cnt > 1) {
+						_print("%d,%d:%5d,%5d,%5d,%5d --- %d\r\n",t->sect,t->ch,
+						t->hi/t->cnt,
+						t->lo/(t->cnt-1),
+						(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,
+						(int)sqrt((t->cnt-1)*t->slo - t->lo*t->lo)/(t->cnt-1),
+						t->cnt);
+					} else if(t->cnt > 0) {
+						_print("%d,%d:%5d,%5d,%5d,%5d --- %d\r\n",t->sect,t->ch,
+						t->hi,0,0,0,t->cnt);
+					}
 				}
 				t->cnt=t->longcnt=t->pw=t->crc = 0;
 				t->hi=t->lo=t->shi=t->slo=0;
@@ -440,8 +439,7 @@ void	*canTx(void *v) {
 			Send(idPos,&py,3*sizeof(uint8_t));
 			memset(&py,0,sizeof(payload));	
 		}
-		stdin->io=in;
-		stdout->io=out;
+		_stdio(io);
 	}
 	return v;
 }
@@ -453,13 +451,10 @@ void	*canTx(void *v) {
 *******************************************************************************/
 void	*canRx(void *v) {
 	if(_CAN) {
-_io		*in=stdin->io;
-_io 	*out=stdout->io;
-_io 	*current=*(_io **)v;
-			_stdio(current);
+	_io		*io=_stdio(*(_io **)v);
 
-CanRxMsg	rx;
-payload		p;
+	CanRxMsg	rx;
+	payload		p;
 	
 
 		if(canConsole) {
@@ -493,7 +488,7 @@ payload		p;
 				case _ID_IAP_ACK:
 					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0) {
 						++ackCount;
-						if(current && (debug & (1<<DBG_CONSOLE))) {
+						if(debug & (1<<DBG_CONSOLE)) {
 							_print("  ser %08X, boot",rx.buf.word[1]);
 							DecodeCom(NULL);
 						}
@@ -512,8 +507,8 @@ payload		p;
 				break;
 
 				case idCOM2CAN:
-					if(current && (debug & (1<<DBG_CONSOLE))) {
-						while(rx.hdr.DLC && !_buffer_push(current->tx,rx.buf.bytes,rx.hdr.DLC))
+					if((debug & (1<<DBG_CONSOLE))) {
+						while(rx.hdr.DLC && !_buffer_push(stdout->io->tx,rx.buf.bytes,rx.hdr.DLC))
 							_wait(2);
 					}
 				break;
@@ -523,12 +518,12 @@ payload		p;
 				case _TEST_RIGHT_REAR:
 				case _TEST_LEFT_REAR:
 					if(rx.hdr.StdId - 0x010 == idPos) {
-uint32_t 		ch=rx.buf.byte[0],
+uint16_t 		ch=rx.buf.byte[0],
 						sect=rx.buf.byte[1],
 						n=rx.buf.hword[1],
 						pw=rx.buf.hword[2]*84,
 						per=rx.buf.hword[3]*84,
-						to=HAL_GetTick();
+						to=HAL_GetTick() & 0xffff;
 						for(tim *t=timStack; t->htim; ++t)
 							if(t->sect == sect && (ch & (1<<(t->ch)))) {
 								while(n--) {
@@ -565,8 +560,7 @@ uint32_t 		ch=rx.buf.byte[0],
 					break;
 			}
 		}		
-		stdin->io=in;
-		stdout->io=out;
+		_stdio(io);
 	}
 	return v;
 }

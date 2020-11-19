@@ -111,14 +111,6 @@ void				iapRemote() {
 								n=k;
 							Watchdog();
 						}
-												
-//						Send(_ID_IAP_REQ,NULL,0);												// send iap req. as from sys
-//						if(!AckWait(3000)) {														// wait for ping
-//							Send(_ID_IAP_PING,NULL,0);										// send ping
-//							if(!AckWait(100))															// wait for response '-'
-//								return;
-//						}
-						
 						Send(_ID_IAP_REQ,NULL,0);												// send iap req. reset slaves
 						_wait(500);
 						ackCount=0;
@@ -144,7 +136,7 @@ void				iapRemote() {
 						k=_FLASH_TOP;
 						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
 						while(k <= n) {
-							_wait(1);
+							_wait(2);
 							Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
 							if(!AckWait(200))
 								return;

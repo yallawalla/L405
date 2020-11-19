@@ -98,13 +98,15 @@ char	*trim(char **c) {
 *******************************************************************************/
 FRESULT DecodePlus(char *c) {
 			switch(*trim(&c)) {
+				case 'd':
 				case 'D':
 				for(c=strchr(c,' '); c && *c;)
 					debug |= (1<<strtoul(++c,&c,10));
 				_DBG=stdout->io;
 				break;
-				
+
 				case 't':
+				case 'T':
 				do {
 					c=strchr(c,' ');
 					if(c)
@@ -114,7 +116,8 @@ FRESULT DecodePlus(char *c) {
 				} while(c && *c);
 				break;
 				
-				case 'T':
+				case 'r':
+				case 'R':
 				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_RESET);
 				_GREEN(200);
 				SaveSettings();
@@ -133,12 +136,21 @@ FRESULT DecodePlus(char *c) {
 *******************************************************************************/
 FRESULT DecodeMinus(char *c) {
 			switch(*trim(&c)) {
+				case 'd':
 				case 'D':
-				for(c=strchr(c,' '); c && *c;)
-					debug &= ~(1<<strtoul(++c,&c,10));
+				do {
+					c=strchr(c,' ');
+					if(c)
+						debug &= ~(1<<strtoul(++c,&c,10));
+					else
+						debug = 0;
+					if(!debug)
+						_DBG=NULL;
+				} while(c && *c);
 				break;
-				
+
 				case 't':
+				case 'T':
 				do {
 					c=strchr(c,' ');
 					if(c)
@@ -147,8 +159,9 @@ FRESULT DecodeMinus(char *c) {
 						testmode = 0;
 				} while(c && *c);
 				break;
-		
-				case 'T':
+				
+				case 'r':
+				case 'R':
 				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_SET);
 				_RED(200);
 				SaveSettings();
@@ -220,16 +233,16 @@ FRESULT fRemote(int argc, char *argv[]) {
 			_io *io=_DBG;
 			_DBG=stdout->io;
 			uint32_t dbg=debug;
-			debug |= (1<<DBG_CONSOLE);
+			debug = (1<<DBG_CONSOLE);
 
-
+			Send(idCAN2COM,(payload *)"\r",1);
 			while(remoteConsole(idCAN2COM) != __CtrlE) 
 				_wait(2);
 			
 			_DBG=io;
 			debug=dbg;
 			_print("remote console closed...");
-			DecodeCom(0);
+			DecodeCom(NULL);
 			return FR_OK;
 }
 /*******************************************************************************
@@ -393,7 +406,9 @@ FATFS			fatfs;
 			if(!c) {
 				TCHAR	c[128];
 				f_getcwd(c,sizeof(c));
-				_print("\r\n%s>",c);
+				_print("\r\n%s",c);
+				if(stdout->io == canConsole)
+					_print("/");
 			}
 			else
 //___________________________________________________________________________
@@ -496,7 +511,7 @@ char	*c;
 					_io *io=_DBG;
 					_DBG=stdout->io;
 					uint32_t dbg=debug;
-					debug |= (1<<DBG_CONSOLE);
+					debug = (1<<DBG_CONSOLE);
 					
 					ackCount=0;
 					Send(_ID_IAP_PING,NULL,0);

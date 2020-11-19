@@ -23,7 +23,9 @@ extern 		TIM_HandleTypeDef htim1,
 extern		_io								*_CAN,
 														*_VCP,
 														*_ITM,
-														*_DBG;
+														*_DBG,
+														*canConsole;
+
 
 extern		uint32_t					idDev,
 														idPos,
