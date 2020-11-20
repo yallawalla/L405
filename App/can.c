@@ -276,7 +276,7 @@ void	*canTx(void *v) {
 						dt = tcapt - t->to;
 					t->to=tcapt;
 					
-					if(debug & (1<<DBG_TIMING) && (1 << t->ch) & testmode) {		
+					if(debug & (1<<DBG_TIMING) 	&& (1 << t->ch) & testmode) {		
 						if(dt/84>50) {
 							if(dt/84 > 300)
 							_print("-");
@@ -285,12 +285,12 @@ void	*canTx(void *v) {
 						}
 					}
 					
-					if(debug & (1<<DBG_USEC) && (1 << t->ch) & testmode) {	
+					if(debug & (1<<DBG_USEC)		&& (1 << t->ch) & testmode) {	
 						if(t->cnt % 2)															// __--
-								_print("%d:%3d",t->ch,dt/84);
+								_print("\r\n%d:%3d",t->ch,dt/84);
 						else {
 							if(t->cnt)																//--__
-								_print(",%3d\r\n",dt/84);
+								_print(",%3d",dt/84);
 						}
 					}
 					
@@ -298,31 +298,32 @@ void	*canTx(void *v) {
 						__HAL_CRC_DR_RESET(&hcrc);
 						hcrc.Instance->DR = t->crc;
 						if(dt/84 > 300)
-							hcrc.Instance->DR=0;
-						else
 							hcrc.Instance->DR=1;
+						else
+							hcrc.Instance->DR=0;
 						t->crc = hcrc.Instance->DR;
 					}
-					
 					
 					if(t->cnt % 2) {			// __---
 						if(t->cnt == 1)
 							t->pw=dt;
 						else
 							t->pw +=dt;
+						
 						t->hi +=dt/84;
 						t->shi+=dt*dt/84/84;
+						
 						if(t->pw/84 > 50) {
 							++t->longcnt;
-							t->pw=0;
 						}
 					} else {								// --___
-						if(dt/84 > 100)
-							t->pw=0;
-						if(t->cnt) {
-							t->lo += dt/84;
-							t->slo+=dt*dt/84/84;
-						}
+							if(dt/84 < 100) {
+								if(t->pw/84 > 50)
+									--t->longcnt;
+							} else
+								t->pw=0;
+						t->lo += dt/84;
+						t->slo+=dt*dt/84/84;
 					}
 				}	else {
 					t->to = tcapt;
@@ -336,10 +337,8 @@ void	*canTx(void *v) {
 			if(t->timeout && HAL_GetTick() > t->timeout) {
 				t->timeout=0;
 				
-				if(debug & (1<<DBG_CRC))
-					_print("%d,%d:<%08X>\r\n>",t->ch,t->sect,t->crc);	
-				if(debug & ((1<<DBG_USEC)|(1<<DBG_TIMING)) && testmode & (1 << t->ch))
-					_print("\r\n");
+				if(debug & (1<<DBG_CRC) && (1 << t->ch) & testmode)
+					_print("\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);	
 				
 				switch(t->crc) {
 					case _VCP_CDC:
@@ -351,9 +350,6 @@ void	*canTx(void *v) {
 							VCP_USB_DEVICE_Init();
 						}
 					break;
-							
-					case _IAP_REQ:
-						while(1);
 							
 					case _LEFT_FRONT:
 						idPos=_ACK_LEFT_FRONT;
@@ -410,15 +406,15 @@ void	*canTx(void *v) {
 				t->cnt/=2;
 				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & testmode) {
 					if(t->cnt > 1) {
-						_print("%d,%d:%5d,%5d,%5d,%5d --- %d\r\n",t->sect,t->ch,
+						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->sect,t->ch,
 						t->hi/t->cnt,
 						t->lo/(t->cnt-1),
 						(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,
 						(int)sqrt((t->cnt-1)*t->slo - t->lo*t->lo)/(t->cnt-1),
-						t->cnt);
+						t->cnt,t->longcnt);
 					} else if(t->cnt > 0) {
-						_print("%d,%d:%5d,%5d,%5d,%5d --- %d\r\n",t->sect,t->ch,
-						t->hi,0,0,0,t->cnt);
+						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->sect,t->ch,
+						t->hi,0,0,0,t->cnt,t->longcnt);
 					}
 				}
 				t->cnt=t->longcnt=t->pw=t->crc = 0;
@@ -492,7 +488,7 @@ void	*canRx(void *v) {
 					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0) {
 						++ackCount;
 						if(debug & (1<<DBG_CONSOLE)) {
-							_print("  ser %08X, boot",rx.buf.word[1]);
+							_print("\r\n  ser %08X, boot",rx.buf.word[1]);
 							DecodeCom(NULL);
 						}
 					}

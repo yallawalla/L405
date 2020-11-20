@@ -98,14 +98,13 @@ typedef enum {
 	_IT
 };
 
-#define	_REPEAT				0x6904BB59
-#define	_VCP_CDC			0x5578913D
-#define	_IAP_REQ			0x8407235F
+#define	_REPEAT				0x6DC5A6EE
+#define	_VCP_CDC			0x784183D7
 
-#define	_LEFT_FRONT		0x2AA65689
-#define	_RIGHT_FRONT	0xFBD9E4EB
-#define	_RIGHT_REAR		0xDAF5192F
-#define	_LEFT_REAR		0x0B8AAB4D
+#define	_LEFT_FRONT		0xD6E0F601
+#define	_RIGHT_FRONT	0x079F4463
+#define	_RIGHT_REAR		0x26B3B9A7
+#define	_LEFT_REAR		0xF7CC0BC5
 
 typedef struct {
 	unsigned mask:6;
