@@ -276,7 +276,7 @@ void	*canTx(void *v) {
 						dt = tcapt - t->to;
 					t->to=tcapt;
 					
-					if(debug & (1<<DBG_TIMING)) {		
+					if(debug & (1<<DBG_TIMING) && (1 << t->ch) & testmode) {		
 						if(dt/84>50) {
 							if(dt/84 > 300)
 							_print("-");
@@ -284,16 +284,16 @@ void	*canTx(void *v) {
 							_print("_");
 						}
 					}
-					if(debug && debug & (1<<DBG_USEC)) {	
-						if(t->cnt % 2 == 0) {
-							if(t->cnt)
-								_print("%3d",dt/84);
+					
+					if(debug & (1<<DBG_USEC) && (1 << t->ch) & testmode) {	
+						if(t->cnt % 2)															// __--
+								_print("%d:%3d",t->ch,dt/84);
+						else {
+							if(t->cnt)																//--__
+								_print(",%3d\r\n",dt/84);
 						}
-						else
-								_print("%3d:%d\r\n",dt/84,t->ch);
 					}
 					
-
 					if(dt/84>50) {
 						__HAL_CRC_DR_RESET(&hcrc);
 						hcrc.Instance->DR = t->crc;
@@ -335,8 +335,11 @@ void	*canTx(void *v) {
 			}
 			if(t->timeout && HAL_GetTick() > t->timeout) {
 				t->timeout=0;
+				
 				if(debug & (1<<DBG_CRC))
 					_print("%d,%d:<%08X>\r\n>",t->ch,t->sect,t->crc);	
+				if(debug & ((1<<DBG_USEC)|(1<<DBG_TIMING)) && testmode & (1 << t->ch))
+					_print("\r\n");
 				
 				switch(t->crc) {
 					case _VCP_CDC:

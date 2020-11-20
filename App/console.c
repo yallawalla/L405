@@ -526,15 +526,15 @@ char	*c;
 				break;				
 				case __f9:
 				case __F9:
-							VCP_USB_DEVICE_Init();
+					VCP_USB_DEVICE_Init();
 				break;
 				case __f10:
 				case __F10:
-							MSC_USB_DEVICE_Init();
+					MSC_USB_DEVICE_Init();
 				break;
 				case __f11:
 				case __F11:
-							MX_USB_HOST_Init();
+					MX_USB_HOST_Init();
 				break;
 				
 				case __f12:

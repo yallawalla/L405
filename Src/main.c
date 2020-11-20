@@ -29,6 +29,7 @@
 #include "ws.h"
 #include "can.h"
 #include "console.h"
+#include "usbh_platform.h"
 //#include "usbd_def.h"
 
 /* USER CODE END Includes */
@@ -118,7 +119,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 FIL				f;
 FATFS			fatfs;
-uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
+uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 
   /* USER CODE END 1 */
 
@@ -154,9 +155,12 @@ uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
   MX_ADC1_Init();
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
+
 	__ledInit;
 	__otgIdInit;
 	__otgPwrInit;
+	
+	
 	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
 		ff_format("FLASH:");
 		f_chdrive("FLASH:");
@@ -202,10 +206,12 @@ uint32_t	otgDeviceId=(uint32_t)EOF, otgDeviceTimeout=0;
 		}
 		if(otgDeviceTimeout && HAL_GetTick() > otgDeviceTimeout) {
 			otgDeviceTimeout=0;
-			if(otgDeviceId)
+			if(otgDeviceId) {
+				MX_DriverVbusFS(false);
 				Parse(__f9);
-			else
+			} else {
 				Parse(__f11);
+		}
 		}	
 	}
   /* USER CODE END 3 */
@@ -447,7 +453,7 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
@@ -552,7 +558,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
@@ -612,7 +618,7 @@ static void MX_TIM4_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
@@ -672,7 +678,7 @@ static void MX_TIM5_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
@@ -733,7 +739,7 @@ static void MX_TIM8_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
