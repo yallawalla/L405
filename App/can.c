@@ -10,13 +10,12 @@
 _io				*_CAN,*_DBG, *canConsole;
 //______________________________________________________________________________________
 char			*strPos[]={"front left","front right","rear right","rear left"};
-uint32_t	idDev=0, 
-					idCrc=0,
+uint32_t	idDev,
+					nDev,
+					idCrc,
 					debug,
 					idPos=_ACK_LEFT_FRONT,
-					ackCount=0, 
-					ackMax=_MAXDEV,
-					testmode=0;
+					testmode=0,flush=0;
 payload		py={0,0};
 
 #ifdef	__DISCO__
@@ -143,7 +142,7 @@ void	Send(int id,  payload *buf, int len) {
 		_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg));
 	_YELLOW(500);
 	if(debug & (1<<DBG_CAN_TX)) {
-		_print("\r%3d: > %03X",HAL_GetTick() % 1000,tx.hdr.StdId);
+		_print("\r%4d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
 		for(int i=0; i<tx.hdr.DLC; ++i)
 			_print(" %02X",tx.buf.bytes[i]);
 		_print("\r\n");
@@ -227,6 +226,24 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef* hcan) {
 * Output				:
 * Return				:
 *******************************************************************************/
+void	Flush(tim *t) {
+	if(testmode)
+		py.byte[t->sect] |= (1 << t->ch) & testmode;	
+	else {
+		if(t->cnt==1)
+		py.byte[t->sect] |= 1;
+		if(t->cnt > 14 && t->longcnt==0)
+		py.byte[t->sect] |= 2;
+		if(t->longcnt > 14)
+		py.byte[t->sect] |= 4;
+	}
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void	*canTx(void *v) {
 	for(int i=0;i<4;++i) {
 		if(!Leds.t[i])
@@ -271,14 +288,13 @@ void	*canTx(void *v) {
 			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) {
 				if(t->timeout) {
 					if(tcapt < t->to)
-						dt = 0x10000 + tcapt - t->to;
+						dt = (0x10000 + tcapt - t->to)/uS;
 					else
-						dt = tcapt - t->to;
+						dt = (tcapt - t->to)/uS;
 					t->to=tcapt;
-					
 					if(debug & (1<<DBG_TIMING) 	&& (1 << t->ch) & testmode) {		
-						if(dt/84>50) {
-							if(dt/84 > 300)
+						if(dt>MIN_BURST) {
+							if(dt > 300)
 							_print("-");
 						else
 							_print("_");
@@ -287,17 +303,17 @@ void	*canTx(void *v) {
 					
 					if(debug & (1<<DBG_USEC)		&& (1 << t->ch) & testmode) {	
 						if(t->cnt % 2)															// __--
-								_print("\r\n%d:%3d",t->ch,dt/84);
+								_print("\r\n%d:%3d",t->ch,dt);
 						else {
 							if(t->cnt)																//--__
-								_print(",%3d",dt/84);
+								_print(",%3d",dt);
 						}
 					}
 					
-					if(dt/84>50) {
+					if(dt>MIN_BURST) {
 						__HAL_CRC_DR_RESET(&hcrc);
 						hcrc.Instance->DR = t->crc;
-						if(dt/84 > 300)
+						if(dt > CRC_THRHOLD)
 							hcrc.Instance->DR=1;
 						else
 							hcrc.Instance->DR=0;
@@ -310,32 +326,32 @@ void	*canTx(void *v) {
 						else
 							t->pw +=dt;
 						
-						t->hi +=dt/84;
-						t->shi+=dt*dt/84/84;
+						t->hi +=dt;
+						t->shi+=dt*dt;
 						
-						if(t->pw/84 > 50) {
+						if(t->pw > MIN_BURST) {
 							++t->longcnt;
 						}
 					} else {								// --___
-							if(dt/84 < 100) {
-								if(t->pw/84 > 50)
+							if(dt < MAX_BURST) {
+								if(t->pw > MIN_BURST)
 									--t->longcnt;
 							} else
 								t->pw=0;
-						t->lo += dt/84;
-						t->slo+=dt*dt/84/84;
+						t->lo += dt;
+						t->slo+=dt*dt;
 					}
 				}	else {
 					t->to = tcapt;
 				}
 				++t->cnt;
-				if(t->ch==0)
-					t->timeout=HAL_GetTick()+30;
-				else
-					t->timeout=HAL_GetTick()+10;
+				t->timeout=HAL_GetTick()+MAX__INT;
+				if(!flush)
+					flush=HAL_GetTick()+MAX_FLUSH;
 			}
 			if(t->timeout && HAL_GetTick() > t->timeout) {
 				t->timeout=0;
+				t->cnt/=2;
 				
 				if(debug & (1<<DBG_CRC) && (1 << t->ch) & testmode)
 					_print("\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);	
@@ -349,61 +365,44 @@ void	*canTx(void *v) {
 							MSC_USB_DEVICE_DeInit();
 							VCP_USB_DEVICE_Init();
 						}
+						py.word[0]=flush=0;
 					break;
 							
 					case _LEFT_FRONT:
 						idPos=_ACK_LEFT_FRONT;
 						Send(idPos,NULL,0);
 						SaveSettings();
+						py.word[0]=flush=0;
 					break;
 						
 					case _RIGHT_FRONT:
 						idPos=_ACK_RIGHT_FRONT;
 						Send(idPos,NULL,0);
 						SaveSettings();
+						py.word[0]=flush=0;
 					break;
 						
 					case _RIGHT_REAR:
 						idPos=_ACK_RIGHT_REAR;
 						Send(idPos,NULL,0);
 						SaveSettings();
+						py.word[0]=flush=0;
 					break;
 						
 					case _LEFT_REAR:
 						idPos=_ACK_LEFT_REAR;
 						Send(idPos,NULL,0);
 						SaveSettings();
+						py.word[0]=flush=0;
 					break;
 			
 					case _REPEAT:
+						py.word[0]=flush=0;
 					break;
 						
 					default:
-						if(testmode)
-							py.byte[t->sect] |= (1 << t->ch) & testmode;	
-						else {
-							if(t->ch == 1 &&  t->longcnt > 14)
-								py.byte[t->sect] |= (1 << 2);
-							
-							if(t->ch == 4 &&  t->longcnt > 14)
-								py.byte[t->sect] |= (1 << 5);
-							
-							if(t->ch == 0) {
-								if(t->cnt > 14)
-									py.byte[t->sect] |= (1 << 1);
-								else
-									py.byte[t->sect] |= (1 << 0);
-							}
-							
-							if(t->ch == 3) {
-								if(t->cnt > 14)
-									py.byte[t->sect] |= (1 << 4);
-								else
-									py.byte[t->sect] |= (1 << 3);
-							}
-						}
+						Flush(t);
 				}				
-				t->cnt/=2;
 				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & testmode) {
 					if(t->cnt > 1) {
 						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->sect,t->ch,
@@ -421,22 +420,22 @@ void	*canTx(void *v) {
 				t->hi=t->lo=t->shi=t->slo=0;
 			}
 		}
+			
+		if(flush && HAL_GetTick() > flush) {		
+			flush=0;
+			for(t=timStack; t->htim; ++t)
+				Flush(t);
+			Send(idPos,&py,3*sizeof(uint8_t));
+		}
+
 		for(t=timStack; t->htim; ++t)
 			if(t->timeout)
 				break;
+			
 		if(t->htim == NULL && py.word[0]) {
-			if(!testmode) {
-				for(int k=0; k<3; ++k) {
-					py.byte[k] |= py.byte[k]>>3;
-					py.byte[k] &= 7;
-					if(py.byte[k] & 2)
-						py.byte[k]=2;
-					if(py.byte[k] & 4)
-						py.byte[k]=4;
-				}
-			}	
 			Send(idPos,&py,3*sizeof(uint8_t));
 			memset(&py,0,sizeof(payload));	
+			flush=0;
 		}
 		_stdio(io);
 	}
@@ -465,7 +464,7 @@ void	*canRx(void *v) {
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
 			_BLUE(500);
 			if(debug & (1<<DBG_CAN_RX)) {
-				_print("\r%3d: < %03X",HAL_GetTick() % 1000,rx.hdr.StdId);
+				_print("\r%4d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
 				for(int i=0; i<rx.hdr.DLC; ++i)
 					_print(" %02X",rx.buf.bytes[i]);
 				_print("\r\n");
@@ -486,7 +485,7 @@ void	*canRx(void *v) {
 
 				case _ID_IAP_ACK:
 					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0) {
-						++ackCount;
+						++nDev;
 						if(debug & (1<<DBG_CONSOLE)) {
 							_print("\r\n  ser %08X, boot",rx.buf.word[1]);
 							DecodeCom(NULL);
@@ -520,8 +519,8 @@ void	*canRx(void *v) {
 uint16_t 		ch=rx.buf.byte[0],
 						sect=rx.buf.byte[1],
 						n=rx.buf.hword[1],
-						pw=rx.buf.hword[2]*84,
-						per=rx.buf.hword[3]*84,
+						pw=rx.buf.hword[2]*uS,
+						per=rx.buf.hword[3]*uS,
 						to=HAL_GetTick() & 0xffff;
 						for(tim *t=timStack; t->htim; ++t)
 							if(t->sect == sect && (ch & (1<<(t->ch)))) {
@@ -548,7 +547,7 @@ uint16_t 		ch=rx.buf.byte[0],
 							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,rx.buf.bytes);		
 						break;
 						case sizeof(payload):																		// device ack.
-							++ackCount;
+							++nDev;
 							_print("  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[rx.hdr.StdId-_ACK_LEFT_FRONT]);
 							DecodeCom(NULL);
 						break;

@@ -508,16 +508,15 @@ char	*c;
 //__________________________________________________
 				case __CtrlD:
 				{
-					_io *io=_DBG;
+_io 			*io=_DBG;
 					_DBG=stdout->io;
 					uint32_t dbg=debug;
 					debug = (1<<DBG_CONSOLE);
 					
-					ackCount=0;
+					nDev=0;
 					Send(_ID_IAP_PING,NULL,0);
 					_wait(500);
-					ackMax=ackCount;
-					_print("%3d dev. found",ackMax);
+					_print("%3d dev. found",nDev);
 					DecodeCom(NULL);
 					_DBG=io;
 					debug=dbg;

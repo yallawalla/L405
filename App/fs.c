@@ -15,13 +15,13 @@
 * Return         : IAP message or EOF (not successful...)
 *******************************************************************************/
 int					AckWait(int t) {
-						int to;
+						int to,n=nDev;
 						if(t == 0)
 							return EOF;
 						to = HAL_GetTick() + t;																// nastavi cakalni nterval
-						for(ackCount=0; HAL_GetTick() < to; _proc_loop()) {
+						for(nDev=0; HAL_GetTick() < to; _proc_loop()) {
 							Watchdog();
-							if(ackCount == ackMax)
+							if(n == nDev)
 								return EOF;
 						}
 						return 0;
@@ -113,16 +113,15 @@ void				iapRemote() {
 						}
 						Send(_ID_IAP_REQ,NULL,0);												// send iap req. reset slaves
 						_wait(500);
-						ackCount=0;
+						nDev=0;
 						Send(_ID_IAP_PING,NULL,0);											// send ping;	
 						_wait(500);
-						if(ackCount==0) {
+						if(nDev==0) {
 							_print("\r\nno device detected...");
 							return;
 						}
-						ackMax=ackCount;
 
-						_print("\r\n%d pings received...",ackMax);
+						_print("\r\n%d pings received...",nDev);
 						_print("\r\nerasing");													// erase 5 pages (att. CubeMX ima drugacne 
 																														//oznake za sektorje !!!
 						for(k=FLASH_SECTOR_1<<3; k<FLASH_SECTOR_6<<3; k+=FLASH_SECTOR_1<<3) {

@@ -4,6 +4,21 @@
 #include	"stm32f4xx_hal.h"
 #include	"io.h"
 
+#define 	uS						84
+#define		MIN_BURST			50					
+#define		CRC_THRHOLD		300				
+#define		MAX_BURST			100
+#define		MAX__INT			20					
+#define		MAX_FLUSH			100
+
+#define		_REPEAT				0x6DC5A6EE
+#define		_VCP_CDC			0x784183D7
+
+#define		_LEFT_FRONT		0xD6E0F601
+#define		_RIGHT_FRONT	0x079F4463
+#define		_RIGHT_REAR		0x26B3B9A7
+#define		_LEFT_REAR		0xF7CC0BC5
+
 void			VCP_USB_DEVICE_Init(void),
 					VCP_USB_DEVICE_DeInit(void),
 					MSC_USB_DEVICE_Init(void),
@@ -27,13 +42,12 @@ extern		_io								*_CAN,
 														*canConsole;
 
 
-extern		uint32_t					idDev,
+extern		uint32_t					nDev,
+														idDev,
 														idPos,
 														idCrc,
 														debug,
 														testmode;
-
-#define 	_MAXDEV	4
 
 void			*canRx(void *),
 					*canTx(void *);
@@ -98,14 +112,6 @@ typedef enum {
 	_IT
 };
 
-#define	_REPEAT				0x6DC5A6EE
-#define	_VCP_CDC			0x784183D7
-
-#define	_LEFT_FRONT		0xD6E0F601
-#define	_RIGHT_FRONT	0x079F4463
-#define	_RIGHT_REAR		0x26B3B9A7
-#define	_LEFT_REAR		0xF7CC0BC5
-
 typedef struct {
 	unsigned mask:6;
 	unsigned sect:2;
@@ -134,14 +140,13 @@ typedef struct {
 	uint32_t					Channel;
 	uint8_t						sect,ch;
 	enum tmode				tmode;				
-	uint32_t					timeout,to,crc;
+	uint32_t					timeout,N,to,crc;
 	uint32_t					cnt,longcnt,pw;
 	uint32_t					hi,lo,shi,slo;
 } tim;
 
 void				Send(int, payload *,int), iapRemote(void);
 int					AckWait(int);
-extern			uint32_t ackCount,ackMax;
 
 #define			_SIGN_PAGE			FLASH_Sector_1
 #define			_FLASH_TOP			0x08008000
