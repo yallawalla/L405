@@ -232,9 +232,9 @@ void	Flush(tim *t) {
 	else {
 		if(t->cnt==1)
 		py.byte[t->sect] |= 1;
-		if(t->cnt > 14 && t->longcnt==0)
+		if(t->cnt > N_CH0 && t->longcnt==0)
 		py.byte[t->sect] |= 2;
-		if(t->longcnt > 14)
+		if(t->longcnt > N_CH1)
 		py.byte[t->sect] |= 4;
 	}
 }
@@ -343,13 +343,16 @@ void	*canTx(void *v) {
 					}
 				}	else {
 					t->to = tcapt;
+					flush=HAL_GetTick()+MAX_FLUSH;
 				}
 				++t->cnt;
 				t->timeout=HAL_GetTick()+MAX__INT;
-				if(!flush)
-					flush=HAL_GetTick()+MAX_FLUSH;
 			}
-			if(t->timeout && HAL_GetTick() > t->timeout) {
+			
+			if(flush && HAL_GetTick() > flush)	
+				t->timeout=HAL_GetTick();			
+
+			if(t->timeout && HAL_GetTick() >= t->timeout) {
 				t->timeout=0;
 				t->cnt/=2;
 				
@@ -421,13 +424,6 @@ void	*canTx(void *v) {
 			}
 		}
 			
-		if(flush && HAL_GetTick() > flush) {		
-			flush=0;
-			for(t=timStack; t->htim; ++t)
-				Flush(t);
-			Send(idPos,&py,3*sizeof(uint8_t));
-		}
-
 		for(t=timStack; t->htim; ++t)
 			if(t->timeout)
 				break;
@@ -437,6 +433,7 @@ void	*canTx(void *v) {
 			memset(&py,0,sizeof(payload));	
 			flush=0;
 		}
+		
 		_stdio(io);
 	}
 	return v;

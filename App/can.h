@@ -9,7 +9,10 @@
 #define		CRC_THRHOLD		300				
 #define		MAX_BURST			100
 #define		MAX__INT			20					
-#define		MAX_FLUSH			100
+#define		MAX_FLUSH			90
+
+#define 	N_CH0					8
+#define 	N_CH1					8
 
 #define		_REPEAT				0x6DC5A6EE
 #define		_VCP_CDC			0x784183D7
