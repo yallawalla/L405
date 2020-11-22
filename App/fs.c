@@ -103,7 +103,7 @@ payload 		pyld;
 * Return         : 0 ce je checksum error sicer eof(-1). bootloader asinhrono odgovarja z ACK message
 *				 				 : za vsakih 8 bytov !!!
 *******************************************************************************/
-void				iapRemote() {
+FRESULT			iapRemote() {
 						uint32_t n,k;																		// misc
 																														// count lines >>>> n
 						for(k=n=_FLASH_TOP; k<FATFS_ADDRESS; k+=sizeof(uint32_t)) {
@@ -118,7 +118,7 @@ void				iapRemote() {
 						_wait(500);
 						if(nDev==0) {
 							_print("\r\nno device detected...");
-							return;
+							return FR_NOT_READY;
 						}
 
 						_print("\r\n%d pings received...",nDev);
@@ -127,7 +127,7 @@ void				iapRemote() {
 						for(k=FLASH_SECTOR_1<<3; k<FLASH_SECTOR_6<<3; k+=FLASH_SECTOR_1<<3) {
 							Send(_ID_IAP_ERASE,(payload *)&k,sizeof(int));
 							if(!AckWait(3000))														// send erase page, wait for ack
-								return;
+								return FR_NOT_READY;
 							_print(".");
 						}
 						
@@ -138,7 +138,7 @@ void				iapRemote() {
 							_wait(2);
 							Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
 							if(!AckWait(200))
-								return;
+								return FR_NOT_READY;
 
 							if((k-_FLASH_TOP) % (8*((n-_FLASH_TOP)/8/20)) == 0)
 								_print(".%3d%c%c%c%c%c",(100*(k-_FLASH_TOP))/(n-_FLASH_TOP),'%','\x8','\x8','\x8','\x8');
@@ -149,12 +149,12 @@ void				iapRemote() {
 
 						Send(_ID_IAP_SIGN,NULL,0);											// send sign command
 						if(!AckWait(300))																// wait for ack...
-							return;
+							return FR_NOT_READY;
 						_print("\r\nsign ...");
 						Send(_ID_IAP_GO,NULL,0);												// send <go> command
 						AckWait(0);
 						_print("and RUN :)\r\n");
-						return;
+						return FR_OK;
 }
 /*******************************************************************************
 * Function Name  : CanHexProg request, server

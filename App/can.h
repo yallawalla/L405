@@ -148,7 +148,7 @@ typedef struct {
 	uint32_t					hi,lo,shi,slo;
 } tim;
 
-void				Send(int, payload *,int), iapRemote(void);
+void				Send(int, payload *,int);
 int					AckWait(int);
 
 #define			_SIGN_PAGE			FLASH_Sector_1

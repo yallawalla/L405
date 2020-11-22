@@ -230,9 +230,9 @@ void	Flush(tim *t) {
 	if(testmode)
 		py.byte[t->sect] |= (1 << t->ch) & testmode;	
 	else {
-		if(t->cnt==1)
+		if(t->cnt==2)
 			py.byte[t->sect] |= 1;
-		if(t->cnt > N_CH0 && t->longcnt==0)
+		if(t->cnt > 2*N_CH0 && t->longcnt==0)
 			py.byte[t->sect] |= 2;
 		if(t->longcnt > N_CH1)
 			py.byte[t->sect] |= 4;
@@ -349,12 +349,11 @@ void	*canTx(void *v) {
 				t->timeout=HAL_GetTick()+MAX__INT;
 			}
 			
-			if(flush && HAL_GetTick() > flush)	
+			if(t->timeout && flush && HAL_GetTick() > flush)	
 				t->timeout=HAL_GetTick();			
 
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
 				t->timeout=0;
-				t->cnt/=2;
 				
 				if(debug & (1<<DBG_CRC) && (1 << t->ch) & testmode)
 					_print("\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);	
@@ -406,6 +405,7 @@ void	*canTx(void *v) {
 					default:
 						Flush(t);
 				}				
+				t->cnt/=2;
 				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & testmode) {
 					if(t->cnt > 1) {
 						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,

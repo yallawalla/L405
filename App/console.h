@@ -20,6 +20,8 @@ FRESULT		ff_format(char *);
 FRESULT		LoadSettings(void),
 					SaveSettings(void);
 FRESULT		DecodeCom(char *);
+FRESULT		iapRemote(void);
+
 int				ff_pack(int);
 void			Parse(int);
 void			*console(void *);

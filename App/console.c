@@ -107,13 +107,11 @@ FRESULT DecodePlus(char *c) {
 
 				case 't':
 				case 'T':
-				do {
-					c=strchr(c,' ');
-					if(c)
-						testmode |= (1<<strtoul(++c,&c,10));
-					else
-						testmode = (uint32_t)EOF;
-				} while(c && *c);
+				c=strchr(c,' ');
+				if(!c)
+					testmode=(uint32_t)EOF;
+				while(c && *c)
+					testmode |= (1<<strtoul(++c,&c,10));
 				break;
 				
 				case 'r':
@@ -138,26 +136,22 @@ FRESULT DecodeMinus(char *c) {
 			switch(*trim(&c)) {
 				case 'd':
 				case 'D':
-				do {
-					c=strchr(c,' ');
-					if(c)
-						debug &= ~(1<<strtoul(++c,&c,10));
-					else
-						debug = 0;
-					if(!debug)
-						_DBG=NULL;
-				} while(c && *c);
+				c=strchr(c,' ');
+				if(!c)
+					debug=0;
+				while(c && *c)
+					debug &= ~(1<<strtoul(++c,&c,10));
+				if(!debug)
+					_DBG=NULL;
 				break;
 
 				case 't':
 				case 'T':
-				do {
-					c=strchr(c,' ');
-					if(c)
-						testmode &= ~(1<<strtoul(++c,&c,10));
-					else
-						testmode = 0;
-				} while(c && *c);
+				c=strchr(c,' ');
+				if(!c)
+					testmode=0;
+				while(c && *c)
+					testmode &= ~(1<<strtoul(++c,&c,10));
 				break;
 				
 				case 'r':
@@ -233,7 +227,7 @@ FRESULT fRemote(int argc, char *argv[]) {
 			_io *io=_DBG;
 			_DBG=stdout->io;
 			uint32_t dbg=debug;
-			debug = (1<<DBG_CONSOLE);
+			debug |= (1<<DBG_CONSOLE);
 
 			Send(idCAN2COM,(payload *)"\r",1);
 			while(remoteConsole(idCAN2COM) != __CtrlE) 
@@ -290,6 +284,15 @@ FRESULT fType(int argc, char *argv[]) {
 	}
 	f_close(&fs);
 	return ret;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT fIap(int argc, char *argv[]) {
+	return iapRemote();
 }
 /*******************************************************************************
 * Function Name	:
@@ -390,7 +393,8 @@ struct cmd {
 	{"mdir",			mkDir},
 	{"cdir",			chDir},
 	{"type",			fType},
-	{"test",			fTest}
+	{"test",			fTest},
+	{"iap",				fIap}
 };
 /*******************************************************************************
 * Function Name	:
@@ -511,7 +515,7 @@ char	*c;
 _io 			*io=_DBG;
 					_DBG=stdout->io;
 					uint32_t dbg=debug;
-					debug = (1<<DBG_CONSOLE);
+					debug |= (1<<DBG_CONSOLE);
 					
 					nDev=0;
 					Send(_ID_IAP_PING,NULL,0);
