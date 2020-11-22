@@ -72,7 +72,7 @@ _io 		*io=*(_io **)v;
 }
 //______________________________________________________________________________________
 _io			*InitITM(void) {
-				_ITM=_io_init(1024,1024);
+				_ITM=_io_init(128,128);
 				_proc_add(console,&_ITM,"console",0);
 				_proc_add(itm,&_ITM,"itm",2);
 				return _ITM;

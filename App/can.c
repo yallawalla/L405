@@ -231,11 +231,11 @@ void	Flush(tim *t) {
 		py.byte[t->sect] |= (1 << t->ch) & testmode;	
 	else {
 		if(t->cnt==1)
-		py.byte[t->sect] |= 1;
+			py.byte[t->sect] |= 1;
 		if(t->cnt > N_CH0 && t->longcnt==0)
-		py.byte[t->sect] |= 2;
+			py.byte[t->sect] |= 2;
 		if(t->longcnt > N_CH1)
-		py.byte[t->sect] |= 4;
+			py.byte[t->sect] |= 4;
 	}
 }
 /*******************************************************************************
@@ -303,7 +303,7 @@ void	*canTx(void *v) {
 					
 					if(debug & (1<<DBG_USEC)		&& (1 << t->ch) & testmode) {	
 						if(t->cnt % 2)															// __--
-								_print("\r\n%d:%3d",t->ch,dt);
+								_print("\r\n%d,%d:%3d",t->ch,t->sect,dt);
 						else {
 							if(t->cnt)																//--__
 								_print(",%3d",dt);
@@ -408,14 +408,14 @@ void	*canTx(void *v) {
 				}				
 				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & testmode) {
 					if(t->cnt > 1) {
-						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->sect,t->ch,
+						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,
 						t->hi/t->cnt,
 						t->lo/(t->cnt-1),
 						(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,
 						(int)sqrt((t->cnt-1)*t->slo - t->lo*t->lo)/(t->cnt-1),
 						t->cnt,t->longcnt);
 					} else if(t->cnt > 0) {
-						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->sect,t->ch,
+						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,
 						t->hi,0,0,0,t->cnt,t->longcnt);
 					}
 				}
