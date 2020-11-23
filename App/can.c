@@ -9,7 +9,7 @@
 *******************************************************************************/
 _io				*_CAN,*_DBG, *canConsole;
 //______________________________________________________________________________________
-char			*strPos[]={"front left","front right","rear right","rear left"};
+const char *strPos[]={"front left","front right","rear right","rear left","console","console","console","console","console","console","console","console","console","console","console","console"};
 uint32_t	idDev,
 					nDev,
 					idCrc,
@@ -17,6 +17,8 @@ uint32_t	idDev,
 					idPos=_ACK_LEFT_FRONT,
 					testmode=0,flush=0;
 payload		py={0,0};
+uint32_t	devices[_MAX_DEV];
+
 
 #ifdef	__DISCO__
 		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
@@ -33,30 +35,6 @@ payload		py={0,0};
 		led Leds = {{0,0,0,0},LED_R_GPIO_Port,{LED_R_Pin,LED_G_Pin,LED_R_Pin,LED_G_Pin}};
 	#endif
 #endif
-
-//tim timStack[] = {
-//	{NULL,&htim1,TIM_CHANNEL_1,0,5,_DMA},					//PA8
-//	{NULL,&htim1,TIM_CHANNEL_2,1,5,_DMA},					//PA9 ---
-//	{NULL,&htim1,TIM_CHANNEL_3,2,5,_DMA},					//PA10
-//	{NULL,&htim3,TIM_CHANNEL_2,0,4,_DMA},					//PA7
-//	{NULL,&htim4,TIM_CHANNEL_2,1,4,_DMA},					//PB7
-//	{NULL,&htim5,TIM_CHANNEL_1,2,4,_DMA},					//PA0
-//	{NULL,&htim5,TIM_CHANNEL_2,0,0,_DMA},					//PA1 A1 1
-//	{NULL,&htim5,TIM_CHANNEL_3,1,0,_DMA},					//PA2 A1 2
-//	{NULL,&htim5,TIM_CHANNEL_4,2,0,_DMA},					//PA3 A1 3
-//	{NULL,&htim8,TIM_CHANNEL_2,0,3,_DMA},					//PC7
-//	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA},					//PC8 -
-//	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA},					//PC9 -
-
-//	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT},					//PA6
-//	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT},					//PB0 -
-//	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT},					//PB1 - 
-//	
-//	{NULL,&htim4,TIM_CHANNEL_1,0,1,_IT},					//PB6 A2 1
-//	{NULL,&htim4,TIM_CHANNEL_3,1,1,_IT},					//PB8 A2 2
-//	{NULL,&htim4,TIM_CHANNEL_4,2,1,_IT},					//PB9 A2 3
-//	{NULL,NULL,0,0,0,_IT}
-//};
 
 tim timStack[] = {
 	{NULL,&htim1,TIM_CHANNEL_1,0,0,_DMA},					//PA8		1A1
@@ -258,8 +236,6 @@ void	*canTx(void *v) {
 /*******************************************************************************/	
 	if(!_CAN) {
 		_CAN	=	_io_init(100*sizeof(CanRxMsg), 100*sizeof(CanTxMsg));
-		canConsole=_io_init(128,128);
-		_proc_add(console,&canConsole,"can console",0);
 
 		canFilterCfg(_ACK_LEFT_FRONT,	0x780, _ID_IAP_GO, 0x7f0);
 		idDev=(uint32_t)HAL_CRC_Calculate(&hcrc,(uint32_t *)0x1FFF7A10,3);
@@ -490,15 +466,27 @@ void	*canRx(void *v) {
 					}
 					break;
 					
-				case _TEST_DAC:
+				case _TEST_REQ:
 					while(rx.buf.hword[0]--)
 						HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_SET);
 					HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_RESET);	
 				break;
 
+				case	_REMOTE_REQ:
+					if(rx.hdr.DLC==0 && canConsole) {
+						_proc_find(console,&canConsole)->f=NULL;
+						canConsole=_io_close(canConsole);
+					}
+					else if(rx.buf.word[0]==idDev && !canConsole) {
+						canConsole=_io_init(128,128);
+						_proc_add(console,&canConsole,"can console",0);				
+					}
+					break;
+
 				case idCAN2COM:
-					while(rx.hdr.DLC && !_buffer_push(canConsole->rx,rx.buf.bytes,rx.hdr.DLC))
-						_wait(2);
+					if(canConsole)
+						while(rx.hdr.DLC && !_buffer_push(canConsole->rx,rx.buf.bytes,rx.hdr.DLC))
+							_wait(2);
 				break;
 
 				case idCOM2CAN:
@@ -544,7 +532,7 @@ uint16_t 		ch=rx.buf.byte[0],
 							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,rx.buf.bytes);		
 						break;
 						case sizeof(payload):																		// device ack.
-							++nDev;
+							devices[nDev++]=rx.buf.word[1];
 							_print("  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[rx.hdr.StdId-_ACK_LEFT_FRONT]);
 							DecodeCom(NULL);
 						break;

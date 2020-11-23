@@ -30,6 +30,7 @@ void			VCP_USB_DEVICE_Init(void),
 					MX_USB_HOST_DeInit(void),
 					canFilterCfg(int, int, int, int);
 					
+extern		const char *			strPos[];
 extern		CAN_HandleTypeDef hcan2;
 extern		CRC_HandleTypeDef hcrc;
 extern 		TIM_HandleTypeDef htim1,
@@ -64,12 +65,13 @@ extern led	Leds;
 
 typedef enum { false, true } bool;
 
-
-
 #define _RED(a)			Leds.t[0]=HAL_GetTick()+a
 #define _GREEN(a)		Leds.t[1]=HAL_GetTick()+a
 #define _BLUE(a)		Leds.t[2]=HAL_GetTick()+a
 #define _YELLOW(a)	Leds.t[3]=HAL_GetTick()+a
+
+#define	_MAX_DEV		4
+extern	uint32_t	devices[];
 
 typedef enum {    
 	_ACK_LEFT_FRONT		=0x200,
@@ -83,7 +85,8 @@ typedef enum {
 	_TEST_LEFT_REAR		=0x213,
 
 	_ID_IAP_REQ				=0x214,
-	_TEST_DAC					=0x215,
+	_TEST_REQ					=0x215,
+	_REMOTE_REQ				=0x216,
 	idCOM2CAN					=0x20C,
 	idCAN2COM					=0x24C,
 

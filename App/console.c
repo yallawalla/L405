@@ -4,6 +4,7 @@
 #include	"can.h"
 #include	"ws.h"
 #include	<stdlib.h>
+
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -208,12 +209,12 @@ FRESULT DecodeEq(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-int 	remoteConsole(int stdid) {
-	payload buf;
-	int			m,n=0;
+int 	remoteConsole(uint32_t stdid, uint32_t ex) {
+	payload 	buf;
+	uint32_t	m,n=0;
 	while(n<8) {
-		m=getchar();
-		if(m==EOF || m==__CtrlE)
+		m=Escape();
+		if(m==(uint32_t)EOF || m==ex)
 			break;
 		else
 			buf.byte[n++]=m;
@@ -223,21 +224,31 @@ int 	remoteConsole(int stdid) {
 	return m;
 }
 //-----------------------------------------------------
-FRESULT fRemote(int argc, char *argv[]) {
-			_io *io=_DBG;
-			_DBG=stdout->io;
-			uint32_t dbg=debug;
-			debug |= (1<<DBG_CONSOLE);
+FRESULT Remote(int id, uint32_t ex) {
+				if(!devices[id]) {
+					Parse(__Esc);
+					if(!devices[id]) {
+						_print("... no devices");
+						DecodeCom(0);
+						return FR_INVALID_PARAMETER;
+					}
+				}
+				_io *io=_DBG;
+				_DBG=stdout->io;
+				uint32_t dbg=debug;
+				debug |= (1<<DBG_CONSOLE);
+				Send(_REMOTE_REQ,(payload *)&devices[id%4],sizeof(int32_t));
+				_print("  remote console open...");
 
-			Send(idCAN2COM,(payload *)"\r",1);
-			while(remoteConsole(idCAN2COM) != __CtrlE) 
-				_wait(2);
-			
-			_DBG=io;
-			debug=dbg;
-			_print("remote console closed...");
-			DecodeCom(NULL);
-			return FR_OK;
+				Send(idCAN2COM,(payload *)"\r",1);
+				while(remoteConsole(idCAN2COM,ex) != ex) 
+					_wait(2);
+				Send(_REMOTE_REQ,NULL,0);
+				_DBG=io;
+				debug=dbg;
+				_print(" remote console closed...");
+				DecodeCom(NULL);
+				return FR_OK;
 }
 /*******************************************************************************
 * Function Name	:
@@ -317,7 +328,7 @@ FRESULT fTest(int argc, char *argv[]) {
 				_proc_add(dacProc,NULL,"dac",atoi(argv[2]));
 		} else if(p)
 			p->f=NULL;
-		dacMsg.hdr.StdId=_TEST_DAC;
+		dacMsg.hdr.StdId=_TEST_REQ;
 		dacMsg.hdr.DLC=1;
 		dacMsg.buf.hword[0]=atoi(argv[1]);
 		Send(dacMsg.hdr.StdId,&dacMsg.buf,dacMsg.hdr.DLC);
@@ -328,6 +339,18 @@ FRESULT fTest(int argc, char *argv[]) {
 //-----------------------------------------------------
 FRESULT fRename(int argc, char *argv[]) {
 	return f_rename(argv[1],argv[2]);
+}
+//-----------------------------------------------------
+FRESULT fAddress(int argc, char *argv[]) {
+	if(argv[1]) {
+		if(0 >= atoi(argv[1]) || atoi(argv[1]) >= 15)
+			return FR_INVALID_PARAMETER;
+		idPos=_ACK_LEFT_FRONT+atoi(argv[1]);
+		SaveSettings();
+	}		
+	DecodeCom(0);
+	_print("  device address set to %d, %s",atoi(argv[1]), strPos[idPos-_ACK_LEFT_FRONT]);	
+	return FR_OK;
 }
 //-----------------------------------------------------
 FRESULT fDelete(int argc, char *argv[]) {
@@ -386,7 +409,6 @@ struct cmd {
 {
 	{"copy",			fCopy},
 	{"rename",		fRename},
-	{"remote",		fRemote},
 	{"delete",		fDelete},
 	{"directory",	Dir},
 	{"mkd",				mkDir},
@@ -394,6 +416,7 @@ struct cmd {
 	{"cdir",			chDir},
 	{"type",			fType},
 	{"test",			fTest},
+	{"address",		fAddress},
 	{"iap",				fIap}
 };
 /*******************************************************************************
@@ -416,8 +439,12 @@ FATFS			fatfs;
 			}
 			else
 //___________________________________________________________________________
-				switch(*c) {
-//__________________________________________________SW version query_________
+				switch(*trim(&c)) {
+//__________________________________________________
+					case 'v':
+					case 'V':
+						printVersion();
+					break;
 //__________________________________________________
 				case '0':
 					ret=f_mount(&fatfs,"FLASH:",1);
@@ -510,6 +537,7 @@ char	*c;
 				case __CtrlY:																		// call system reset
 					NVIC_SystemReset();	
 //__________________________________________________
+				case __Esc:
 				case __CtrlD:
 				{
 _io 			*io=_DBG;
@@ -524,9 +552,18 @@ _io 			*io=_DBG;
 					DecodeCom(NULL);
 					_DBG=io;
 					debug=dbg;
-					printVersion();
 				}
 				break;				
+				
+				case __f1: Remote(0,__f1); break;
+				case __F1: Remote(0,__F1); break;
+				case __f2: Remote(1,__f2); break;
+				case __F2: Remote(1,__F2); break;
+				case __f3: Remote(2,__f3); break;
+				case __F3: Remote(2,__F3); break;
+				case __f4: Remote(3,__f4); break;
+				case __F4: Remote(3,__F4); break;
+
 				case __f9:
 				case __F9:
 					VCP_USB_DEVICE_Init();
@@ -545,7 +582,7 @@ _io 			*io=_DBG;
 					iapRemote();
 				break;
 				
-				case __Esc:
+				case __Delete:
 					JumpToBootloader();
 				break;
 				
@@ -583,11 +620,11 @@ _io 	*current=*(_io **)v;
 * Return				:
 ****************************f***************************************************/
 void	printVersion() {
-			_print("\rV%d.%02d %s <%08X>",
+			DecodeCom(0);
+			_print("  %d.%02d %s <%08X>",
 				SW_version/100,SW_version%100,
 					__DATE__,
 						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));	
-			DecodeCom(NULL);
 }
 /*******************************************************************************
 * Function Name	: 
