@@ -8,7 +8,7 @@
 #define		MIN_BURST			50					
 #define		CRC_THRHOLD		300				
 #define		MAX_BURST			100
-#define		MAX__INT			20					
+#define		MAX__INT			10					
 #define		MAX_FLUSH			90
 
 #define 	N_CH0					8

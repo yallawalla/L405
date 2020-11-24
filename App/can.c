@@ -15,7 +15,7 @@ uint32_t	idDev,
 					idCrc,
 					debug,
 					idPos=_ACK_LEFT_FRONT,
-					testmode=0,flush=0;
+					testmode=0;
 payload		py={0,0};
 uint32_t	devices[_MAX_DEV];
 
@@ -204,17 +204,30 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef* hcan) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	Flush(tim *t) {
-	if(testmode)
-		py.byte[t->sect] |= (1 << t->ch) & testmode;	
-	else {
-		if(t->cnt==2)
-			py.byte[t->sect] |= 1;
-		if(t->cnt > 2*N_CH0 && t->longcnt==0)
-			py.byte[t->sect] |= 2;
-		if(t->longcnt > N_CH1)
-			py.byte[t->sect] |= 4;
+uint32_t	flushFilter(uint32_t *ch) {
+	#define N_FLUSH 4
+	static uint32_t old = 0, cnt = 0, cnteq = 0, tout = 0;
+	uint32_t ret = 0;
+	if (ch) {
+		tout = HAL_GetTick() + 30;
+		++cnt;
+		if (*ch == old || cnt==1)
+			++cnteq;
+		else
+			cnteq = 0;
+		old = *ch;
+		if (cnteq && !(cnteq % N_FLUSH))
+			ret=cnteq;
 	}
+	else if (tout && HAL_GetTick() > tout) {
+		tout=0;
+		if (cnt == cnteq)
+			ret = cnteq;
+		cnt = cnteq = 0;
+		
+
+	}
+	return ret;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -319,14 +332,10 @@ void	*canTx(void *v) {
 					}
 				}	else {
 					t->to = tcapt;
-					flush=HAL_GetTick()+MAX_FLUSH;
 				}
 				++t->cnt;
 				t->timeout=HAL_GetTick()+MAX__INT;
 			}
-			
-			if(t->timeout && flush && HAL_GetTick() > flush)	
-				t->timeout=HAL_GetTick();			
 
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
 				t->timeout=0;
@@ -343,43 +352,43 @@ void	*canTx(void *v) {
 							MSC_USB_DEVICE_DeInit();
 							VCP_USB_DEVICE_Init();
 						}
-						py.word[0]=flush=0;
 					break;
 							
 					case _LEFT_FRONT:
 						idPos=_ACK_LEFT_FRONT;
 						Send(idPos,NULL,0);
 						SaveSettings();
-						py.word[0]=flush=0;
 					break;
 						
 					case _RIGHT_FRONT:
 						idPos=_ACK_RIGHT_FRONT;
 						Send(idPos,NULL,0);
 						SaveSettings();
-						py.word[0]=flush=0;
 					break;
 						
 					case _RIGHT_REAR:
 						idPos=_ACK_RIGHT_REAR;
 						Send(idPos,NULL,0);
 						SaveSettings();
-						py.word[0]=flush=0;
 					break;
 						
 					case _LEFT_REAR:
 						idPos=_ACK_LEFT_REAR;
 						Send(idPos,NULL,0);
 						SaveSettings();
-						py.word[0]=flush=0;
 					break;
 			
 					case _REPEAT:
-						py.word[0]=flush=0;
 					break;
-						
-					default:
-						Flush(t);
+					
+					default: // signature
+						if(t->longcnt)
+							py.byte[t->sect] |=4;
+						else if(t->cnt == 2)
+								py.byte[t->sect] |=1;
+							else
+								py.byte[t->sect] |=2;
+					break;
 				}				
 				t->cnt/=2;
 				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & testmode) {
@@ -404,12 +413,26 @@ void	*canTx(void *v) {
 			if(t->timeout)
 				break;
 			
-		if(t->htim == NULL && py.word[0]) {
-			Send(idPos,&py,3*sizeof(uint8_t));
-			memset(&py,0,sizeof(payload));	
-			flush=0;
+		if(t->htim == NULL) { 
+			int	k;
+			if(py.word[0]) {
+				py.word[1]=py.word[0];								// backup :/
+				k=flushFilter(&py.word[0]);
+				py.word[0]=0;
+			} else
+				k=flushFilter(NULL);
+			if(k > 1) {
+				if(py.byte[4]==1)	py.byte[4]=2;
+				if(py.byte[5]==1)	py.byte[5]=2;
+				if(py.byte[6]==1)	py.byte[6]=2;
+			}
+			if(k)
+				Send(idPos,(payload *)&py.word[1],3*sizeof(uint8_t));
 		}
-		
+			
+//				if(debug & (1<<10))
+//					_print("\r\n%3d:%d",HAL_GetTick()%1000,k);
+
 		_stdio(io);
 	}
 	return v;

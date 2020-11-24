@@ -246,7 +246,7 @@ FRESULT Remote(int id, uint32_t ex) {
 				Send(_REMOTE_REQ,NULL,0);
 				_DBG=io;
 				debug=dbg;
-				_print(" remote console closed...");
+				_print("  remote console closed...");
 				DecodeCom(NULL);
 				return FR_OK;
 }
@@ -343,13 +343,13 @@ FRESULT fRename(int argc, char *argv[]) {
 //-----------------------------------------------------
 FRESULT fAddress(int argc, char *argv[]) {
 	if(argv[1]) {
-		if(0 >= atoi(argv[1]) || atoi(argv[1]) >= 15)
+		if(0 > atoi(argv[1]) || atoi(argv[1]) > 15)
 			return FR_INVALID_PARAMETER;
 		idPos=_ACK_LEFT_FRONT+atoi(argv[1]);
 		SaveSettings();
 	}		
 	DecodeCom(0);
-	_print("  device address set to %d, %s",atoi(argv[1]), strPos[idPos-_ACK_LEFT_FRONT]);	
+	_print("  device address set to %d, %s",idPos-_ACK_LEFT_FRONT, strPos[idPos-_ACK_LEFT_FRONT]);	
 	return FR_OK;
 }
 //-----------------------------------------------------
@@ -433,9 +433,11 @@ FATFS			fatfs;
 			if(!c) {
 				TCHAR	c[128];
 				f_getcwd(c,sizeof(c));
-				_print("\r\n%s",c);
-				if(stdout->io == canConsole)
-					_print("/");
+				_print("\r\n%X/",idPos-_ACK_LEFT_FRONT);
+				if(!strncmp(c,"1:/",3))
+					_print("USB/");
+//				if(stdout->io == canConsole)
+//					_print("/");
 			}
 			else
 //___________________________________________________________________________
@@ -446,13 +448,14 @@ FATFS			fatfs;
 						printVersion();
 					break;
 //__________________________________________________
-				case '0':
+				case '/':
 					ret=f_mount(&fatfs,"FLASH:",1);
 					if(ret==FR_OK)
 						ret=f_chdrive("FLASH:");
 					break;
 //__________________________________________________
-				case '1':
+				case 'u':
+				case 'U':
 					ret=f_mount(&fatfs,"USB:",1);
 					if(ret==FR_OK)
 						ret=f_chdrive("USB:");
