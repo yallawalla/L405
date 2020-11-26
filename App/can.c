@@ -387,7 +387,7 @@ void	*canTx(void *v) {
 					default: // signature
 						if(t->longcnt)
 							py.byte[t->sect] |=4;
-						else if(t->cnt > 2)
+						else if(t->cnt > 4)						// >4 (dva pulta ) za izogib dvojnega pulza pri 
 								py.byte[t->sect] |=2;
 							else
 								py.byte[t->sect] |=1;
@@ -417,20 +417,24 @@ void	*canTx(void *v) {
 				break;
 			
 		if(t->htim == NULL) { 
-			int	k;
 			if(py.word[0]) {
-				py.word[1]=py.word[0];								// backup :/
-				k=flushFilter(&py.word[0]);
-				py.word[0]=0;
-			} else
-				k=flushFilter(NULL);
-			if(k > 1) {
-				if(py.byte[4]==1)	py.byte[4]=2;
-				if(py.byte[5]==1)	py.byte[5]=2;
-				if(py.byte[6]==1)	py.byte[6]=2;
+				if(flushFilter(&py.word[0]) > 8) {
+					if(py.byte[0]==1)	py.byte[0]=2;
+					if(py.byte[1]==1)	py.byte[1]=2;
+					if(py.byte[2]==1)	py.byte[2]=2;
+					Send(idPos,(payload *)&py.word[0],3*sizeof(uint8_t));
+				}
+				py.word[1]=py.word[0];																			//backuo za timeout
+			} else {
+				py.word[0]=py.word[1];
+				if(flushFilter(NULL) == 1) {																// osamljen pulz je laser
+//					if(py.byte[0])	py.byte[0]=1;
+//					if(py.byte[1])	py.byte[1]=1;
+//					if(py.byte[2])	py.byte[2]=1;
+					Send(idPos,(payload *)&py.word[0],3*sizeof(uint8_t));
+				}
 			}
-			if(k)
-				Send(idPos,(payload *)&py.word[1],3*sizeof(uint8_t));
+			py.word[0]=0;
 		}
 		_stdio(io);
 	}
