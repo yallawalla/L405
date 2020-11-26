@@ -326,7 +326,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
-            <uGnu>0</uGnu>
+            <uGnu>1</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -653,11 +653,6 @@
         <Group>
           <GroupName>App</GroupName>
           <Files>
-            <File>
-              <FileName>readme.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\readme.txt</FilePath>
-            </File>
             <File>
               <FileName>io.c</FileName>
               <FileType>1</FileType>
@@ -1404,11 +1399,6 @@
           <GroupName>App</GroupName>
           <Files>
             <File>
-              <FileName>readme.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\readme.txt</FilePath>
-            </File>
-            <File>
               <FileName>io.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\io.c</FilePath>
@@ -2102,11 +2092,6 @@
         <Group>
           <GroupName>App</GroupName>
           <Files>
-            <File>
-              <FileName>readme.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\readme.txt</FilePath>
-            </File>
             <File>
               <FileName>io.c</FileName>
               <FileType>1</FileType>

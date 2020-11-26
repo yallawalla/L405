@@ -343,13 +343,13 @@ FRESULT fRename(int argc, char *argv[]) {
 //-----------------------------------------------------
 FRESULT fAddress(int argc, char *argv[]) {
 	if(argv[1]) {
-		if(0 > atoi(argv[1]) || atoi(argv[1]) > 15)
+		if(0 > atoi(argv[1]) || atoi(argv[1]) > _MAX_DEV)
 			return FR_INVALID_PARAMETER;
 		idPos=_ACK_LEFT_FRONT+atoi(argv[1]);
 		SaveSettings();
 	}		
 	DecodeCom(0);
-	_print("  device address set to %d, %s",idPos-_ACK_LEFT_FRONT, strPos[idPos-_ACK_LEFT_FRONT]);	
+	_print("  device address set to %d, %s",idPos-_ACK_LEFT_FRONT, strPos[min(4,idPos-_ACK_LEFT_FRONT)]);	
 	return FR_OK;
 }
 //-----------------------------------------------------

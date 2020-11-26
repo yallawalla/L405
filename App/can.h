@@ -64,40 +64,37 @@ typedef struct  {
 extern led	Leds;
 
 typedef enum { false, true } bool;
+#define max(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a > _b ? _a : _b; })
+#define min(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a < _b ? _a : _b; })
 
 #define _RED(a)			Leds.t[0]=HAL_GetTick()+a
 #define _GREEN(a)		Leds.t[1]=HAL_GetTick()+a
 #define _BLUE(a)		Leds.t[2]=HAL_GetTick()+a
 #define _YELLOW(a)	Leds.t[3]=HAL_GetTick()+a
 
-#define	_MAX_DEV		4
 extern	uint32_t	devices[];
+
+#define	_MAX_DEV		8
 
 typedef enum {    
 	_ACK_LEFT_FRONT		=0x200,
-	_ACK_RIGHT_FRONT	=0x201,
-	_ACK_RIGHT_REAR		=0x202,
-	_ACK_LEFT_REAR		=0x203,
-	
-	_TEST_LEFT_FRONT	=0x210,
-	_TEST_RIGHT_FRONT	=0x211,
-	_TEST_RIGHT_REAR	=0x212,
-	_TEST_LEFT_REAR		=0x213,
 
-	_ID_IAP_REQ				=0x214,
-	_TEST_REQ					=0x215,
-	_REMOTE_REQ				=0x216,
-	idCOM2CAN					=0x20C,
-	idCAN2COM					=0x24C,
+	_TEST_LEFT_FRONT	=0x208,
+
+	_TEST_REQ					=0x210,
+	_REMOTE_REQ,
+   idCOM2CAN,
+	 idCAN2COM,
+	_ID_IAP_REQ,
 
 	_ID_IAP_GO				=0xA0,
-	_ID_IAP_ERASE			=0xA1,
-	_ID_IAP_ADDRESS		=0xA2,
-	_ID_IAP_DWORD			=0xA3,
-	_ID_IAP_ACK				=0xA4,
-	_ID_IAP_SIGN			=0xA5,
-	_ID_IAP_STRING		=0xA6,
-	_ID_IAP_PING			=0xA7
+	_ID_IAP_ERASE,
+	_ID_IAP_ADDRESS,
+	_ID_IAP_DWORD,
+	_ID_IAP_ACK,
+	_ID_IAP_SIGN,
+	_ID_IAP_STRING,
+	_ID_IAP_PING,
 } _StdId;
 
 

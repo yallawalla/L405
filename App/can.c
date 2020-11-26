@@ -9,7 +9,7 @@
 *******************************************************************************/
 _io				*_CAN,*_DBG, *canConsole;
 //______________________________________________________________________________________
-const char *strPos[]={"front left","front right","rear right","rear left","console","console","console","console","console","console","console","console","console","console","console","console"};
+const char *strPos[]={"front left","front right","rear right","rear left","console"};
 uint32_t	idDev,
 					nDev,
 					idCrc,
@@ -73,35 +73,28 @@ int		filter_count=0;
 *******************************************************************************/
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	uint32_t	i;
-	tim				*p;
+	tim				*p=NULL;
 	
-	switch((uint32_t)htim->Instance) {
-		case (uint32_t)TIM3:
-			p=&timStack[12];
-		break;
-		case (uint32_t)TIM4:
-			p=&timStack[15];
-		break;
-		default:
-			return;
-	}
-			
-	switch(htim->Channel) {
-		case HAL_TIM_ACTIVE_CHANNEL_1:
-			i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_1);
-			_buffer_push(p[0].dma, &i, sizeof(uint32_t));
-		break;
-		case HAL_TIM_ACTIVE_CHANNEL_3:
-			i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_3);
-			_buffer_push(p[1].dma, &i, sizeof(uint32_t));
-		break;
-		case HAL_TIM_ACTIVE_CHANNEL_4:
-			i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_4);
-			_buffer_push(p[2].dma, &i, sizeof(uint32_t));
-		break;
-		default:
+	if(htim->Instance==TIM3)	p=&timStack[12];
+	if(htim->Instance==TIM4)	p=&timStack[15];
+
+	if(p)
+		switch(htim->Channel) {
+			case HAL_TIM_ACTIVE_CHANNEL_1:
+				i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_1);
+				_buffer_push(p[0].dma, &i, sizeof(uint32_t));
 			break;
-	}
+			case HAL_TIM_ACTIVE_CHANNEL_3:
+				i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_3);
+				_buffer_push(p[1].dma, &i, sizeof(uint32_t));
+			break;
+			case HAL_TIM_ACTIVE_CHANNEL_4:
+				i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_4);
+				_buffer_push(p[2].dma, &i, sizeof(uint32_t));
+			break;
+			default:
+				break;
+		}
 }
 /*******************************************************************************
 * Function Name	: 
@@ -364,19 +357,19 @@ void	*canTx(void *v) {
 					break;
 						
 					case _RIGHT_FRONT:
-						idPos=_ACK_RIGHT_FRONT;
+						idPos=_ACK_LEFT_FRONT+1;
 						Send(idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _RIGHT_REAR:
-						idPos=_ACK_RIGHT_REAR;
+						idPos=_ACK_LEFT_FRONT+2;
 						Send(idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _LEFT_REAR:
-						idPos=_ACK_LEFT_REAR;
+						idPos=_ACK_LEFT_FRONT+3;
 						Send(idPos,NULL,0);
 						SaveSettings();
 					break;
@@ -427,10 +420,7 @@ void	*canTx(void *v) {
 				py.word[1]=py.word[0];																			//backuo za timeout
 			} else {
 				py.word[0]=py.word[1];
-				if(flushFilter(NULL) == 1) {																// osamljen pulz je laser
-//					if(py.byte[0])	py.byte[0]=1;
-//					if(py.byte[1])	py.byte[1]=1;
-//					if(py.byte[2])	py.byte[2]=1;
+				if(flushFilter(NULL) == 1) {																// osamljen pulz je nespremenjen !!!
 					Send(idPos,(payload *)&py.word[0],3*sizeof(uint8_t));
 				}
 			}
@@ -529,10 +519,7 @@ void	*canRx(void *v) {
 					}
 				break;
 
-				case _TEST_LEFT_FRONT:
-				case _TEST_RIGHT_FRONT:
-				case _TEST_RIGHT_REAR:
-				case _TEST_LEFT_REAR:
+				case _TEST_LEFT_FRONT ... _TEST_LEFT_FRONT+_MAX_DEV-1:
 					if(rx.hdr.StdId - 0x010 == idPos) {
 uint16_t 		ch=rx.buf.byte[0],
 						sect=rx.buf.byte[1],
@@ -553,10 +540,7 @@ uint16_t 		ch=rx.buf.byte[0],
 					}
 				break;
 			
-				case _ACK_LEFT_FRONT:
-				case _ACK_RIGHT_FRONT:
-				case _ACK_RIGHT_REAR:
-				case _ACK_LEFT_REAR:
+				case _ACK_LEFT_FRONT ... _ACK_LEFT_FRONT+_MAX_DEV-1:
 					switch(rx.hdr.DLC) {
 						case 0:																									// quadrant id.
 							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);						
@@ -566,7 +550,7 @@ uint16_t 		ch=rx.buf.byte[0],
 						break;
 						case sizeof(payload):																		// device ack.
 							devices[nDev++]=rx.buf.word[1];
-							_print("  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[rx.hdr.StdId-_ACK_LEFT_FRONT]);
+							_print("  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ACK_LEFT_FRONT)]);
 							DecodeCom(NULL);
 						break;
 						default:
