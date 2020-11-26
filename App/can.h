@@ -51,7 +51,7 @@ extern		uint32_t					nDev,
 														idPos,
 														idCrc,
 														debug,
-														testmode;
+														testMask;
 
 void			*canRx(void *),
 					*canTx(void *);

@@ -106,13 +106,13 @@ FRESULT DecodePlus(char *c) {
 				_DBG=stdout->io;
 				break;
 
-				case 't':
-				case 'T':
+				case 'm':
+				case 'M':
 				c=strchr(c,' ');
 				if(!c)
-					testmode=(uint32_t)EOF;
+					testMask=(uint32_t)EOF;
 				while(c && *c)
-					testmode |= (1<<strtoul(++c,&c,10));
+					testMask |= (1<<strtoul(++c,&c,10));
 				break;
 				
 				case 'r':
@@ -146,13 +146,13 @@ FRESULT DecodeMinus(char *c) {
 					_DBG=NULL;
 				break;
 
-				case 't':
-				case 'T':
+				case 'm':
+				case 'M':
 				c=strchr(c,' ');
 				if(!c)
-					testmode=0;
+					testMask=0;
 				while(c && *c)
-					testmode &= ~(1<<strtoul(++c,&c,10));
+					testMask &= ~(1<<strtoul(++c,&c,10));
 				break;
 				
 				case 'r':

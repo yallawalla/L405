@@ -15,7 +15,7 @@ uint32_t	idDev,
 					idCrc,
 					debug,
 					idPos=_ACK_LEFT_FRONT,
-					testmode=0;
+					testMask=0;
 payload		py={0,0};
 uint32_t	devices[_MAX_DEV];
 
@@ -281,7 +281,7 @@ void	*canTx(void *v) {
 					else
 						dt = (tcapt - t->to)/uS;
 					t->to=tcapt;
-					if(debug & (1<<DBG_TIMING) 	&& (1 << t->ch) & testmode) {		
+					if(debug & (1<<DBG_TIMING) 	&& (1 << t->ch) & ~testMask) {		
 						if(dt>MIN_BURST) {
 							if(dt > 300)
 							_print("-");
@@ -290,7 +290,7 @@ void	*canTx(void *v) {
 						}
 					}
 					
-					if(debug & (1<<DBG_USEC)		&& (1 << t->ch) & testmode) {	
+					if(debug & (1<<DBG_USEC)		&& (1 << t->ch) & ~testMask) {	
 						if(t->cnt % 2)															// __--
 								_print("\r\n%d,%d:%3d",t->ch,t->sect,dt);
 						else {
@@ -333,15 +333,18 @@ void	*canTx(void *v) {
 				}	else {
 					t->to = tcapt;
 				}
-				++t->cnt;
-				t->timeout=HAL_GetTick()+MAX__INT;
+				if((1 << t->ch) & ~testMask) {
+					++t->cnt;
+					t->timeout=HAL_GetTick()+MAX__INT;
+				}
 			}
 
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
 				t->timeout=0;
 				
-				if(debug & (1<<DBG_CRC) && (1 << t->ch) & testmode)
+				if(debug & (1<<DBG_CRC) && (1 << t->ch) & ~testMask) {
 					_print("\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);	
+				}
 				
 				switch(t->crc) {
 					case _VCP_CDC:
@@ -384,14 +387,14 @@ void	*canTx(void *v) {
 					default: // signature
 						if(t->longcnt)
 							py.byte[t->sect] |=4;
-						else if(t->cnt == 2)
-								py.byte[t->sect] |=1;
-							else
+						else if(t->cnt > 2)
 								py.byte[t->sect] |=2;
+							else
+								py.byte[t->sect] |=1;
 					break;
 				}				
 				t->cnt/=2;
-				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & testmode) {
+				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & ~testMask) {
 					if(t->cnt > 1) {
 						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,
 						t->hi/t->cnt,
@@ -429,10 +432,6 @@ void	*canTx(void *v) {
 			if(k)
 				Send(idPos,(payload *)&py.word[1],3*sizeof(uint8_t));
 		}
-			
-//				if(debug & (1<<10))
-//					_print("\r\n%3d:%d",HAL_GetTick()%1000,k);
-
 		_stdio(io);
 	}
 	return v;
@@ -490,9 +489,16 @@ void	*canRx(void *v) {
 					break;
 					
 				case _TEST_REQ:
-					while(rx.buf.hword[0]--)
-						HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_SET);
-					HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_RESET);	
+//						HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_SET);
+//					HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_RESET);	
+				{
+					register int i __asm("r3");
+					i=rx.buf.hword[0];
+					while(i--)
+						TEST_GPIO_Port->BSRR = TEST_Pin;
+					TEST_GPIO_Port->BSRR = (TEST_Pin<<16);
+				}
+					
 				break;
 
 				case	_REMOTE_REQ:
