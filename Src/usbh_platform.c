@@ -60,7 +60,7 @@ void MX_DriverVbusFS(uint8_t state)
 #endif
   }
   /* USER CODE END PREPARE_GPIO_DATA_VBUS_FS */
-  HAL_GPIO_WritePin(OTG_VBUS_GPIO_Port,OTG_VBUS_Pin,(GPIO_PinState)data);
+  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,(GPIO_PinState)data);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

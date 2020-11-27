@@ -319,15 +319,15 @@ void HAL_CRC_MspDeInit(CRC_HandleTypeDef* hcrc)
 }
 
 /**
-* @brief TIM_IC MSP Initialization
+* @brief TIM_Base MSP Initialization
 * This function configures the hardware resources used in this example
-* @param htim_ic: TIM_IC handle pointer
+* @param htim_base: TIM_Base handle pointer
 * @retval None
 */
-void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(htim_ic->Instance==TIM1)
+  if(htim_base->Instance==TIM1)
   {
   /* USER CODE BEGIN TIM1_MspInit 0 */
 
@@ -365,7 +365,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC1],hdma_tim1_ch1);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC1],hdma_tim1_ch1);
 
     /* TIM1_CH2 Init */
     hdma_tim1_ch2.Instance = DMA2_Stream2;
@@ -383,7 +383,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC2],hdma_tim1_ch2);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC2],hdma_tim1_ch2);
 
     /* TIM1_CH3 Init */
     hdma_tim1_ch3.Instance = DMA2_Stream6;
@@ -401,13 +401,13 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC3],hdma_tim1_ch3);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC3],hdma_tim1_ch3);
 
   /* USER CODE BEGIN TIM1_MspInit 1 */
 
   /* USER CODE END TIM1_MspInit 1 */
   }
-  else if(htim_ic->Instance==TIM3)
+  else if(htim_base->Instance==TIM3)
   {
   /* USER CODE BEGIN TIM3_MspInit 0 */
 
@@ -454,7 +454,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC2],hdma_tim3_ch2);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC2],hdma_tim3_ch2);
 
     /* TIM3 interrupt Init */
     HAL_NVIC_SetPriority(TIM3_IRQn, 3, 0);
@@ -463,7 +463,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
   /* USER CODE END TIM3_MspInit 1 */
   }
-  else if(htim_ic->Instance==TIM4)
+  else if(htim_base->Instance==TIM4)
   {
   /* USER CODE BEGIN TIM4_MspInit 0 */
 
@@ -502,7 +502,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC2],hdma_tim4_ch2);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC2],hdma_tim4_ch2);
 
     /* TIM4 interrupt Init */
     HAL_NVIC_SetPriority(TIM4_IRQn, 3, 0);
@@ -511,7 +511,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
   /* USER CODE END TIM4_MspInit 1 */
   }
-  else if(htim_ic->Instance==TIM5)
+  else if(htim_base->Instance==TIM5)
   {
   /* USER CODE BEGIN TIM5_MspInit 0 */
 
@@ -552,8 +552,8 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
     /* Several peripheral DMA handle pointers point to the same DMA handle.
      Be aware that there is only one stream to perform all the requested DMAs. */
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC4],hdma_tim5_ch4_trig);
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_TRIGGER],hdma_tim5_ch4_trig);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC4],hdma_tim5_ch4_trig);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_TRIGGER],hdma_tim5_ch4_trig);
 
     /* TIM5_CH1 Init */
     hdma_tim5_ch1.Instance = DMA1_Stream2;
@@ -571,7 +571,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC1],hdma_tim5_ch1);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC1],hdma_tim5_ch1);
 
     /* TIM5_CH2 Init */
     hdma_tim5_ch2.Instance = DMA1_Stream4;
@@ -589,7 +589,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC2],hdma_tim5_ch2);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC2],hdma_tim5_ch2);
 
     /* TIM5_CH3_UP Init */
     hdma_tim5_ch3_up.Instance = DMA1_Stream0;
@@ -609,14 +609,14 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
     /* Several peripheral DMA handle pointers point to the same DMA handle.
      Be aware that there is only one stream to perform all the requested DMAs. */
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC3],hdma_tim5_ch3_up);
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_UPDATE],hdma_tim5_ch3_up);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC3],hdma_tim5_ch3_up);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_UPDATE],hdma_tim5_ch3_up);
 
   /* USER CODE BEGIN TIM5_MspInit 1 */
 
   /* USER CODE END TIM5_MspInit 1 */
   }
-  else if(htim_ic->Instance==TIM8)
+  else if(htim_base->Instance==TIM8)
   {
   /* USER CODE BEGIN TIM8_MspInit 0 */
 
@@ -654,7 +654,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC2],hdma_tim8_ch2);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC2],hdma_tim8_ch2);
 
     /* TIM8_CH3 Init */
     hdma_tim8_ch3.Instance = DMA2_Stream4;
@@ -672,7 +672,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC3],hdma_tim8_ch3);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC3],hdma_tim8_ch3);
 
     /* TIM8_CH4_TRIG_COM Init */
     hdma_tim8_ch4_trig_com.Instance = DMA2_Stream7;
@@ -692,9 +692,9 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
     /* Several peripheral DMA handle pointers point to the same DMA handle.
      Be aware that there is only one stream to perform all the requested DMAs. */
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_CC4],hdma_tim8_ch4_trig_com);
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_TRIGGER],hdma_tim8_ch4_trig_com);
-    __HAL_LINKDMA(htim_ic,hdma[TIM_DMA_ID_COMMUTATION],hdma_tim8_ch4_trig_com);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC4],hdma_tim8_ch4_trig_com);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_TRIGGER],hdma_tim8_ch4_trig_com);
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_COMMUTATION],hdma_tim8_ch4_trig_com);
 
   /* USER CODE BEGIN TIM8_MspInit 1 */
 
@@ -778,14 +778,14 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
 }
 /**
-* @brief TIM_IC MSP De-Initialization
+* @brief TIM_Base MSP De-Initialization
 * This function freeze the hardware resources used in this example
-* @param htim_ic: TIM_IC handle pointer
+* @param htim_base: TIM_Base handle pointer
 * @retval None
 */
-void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 {
-  if(htim_ic->Instance==TIM1)
+  if(htim_base->Instance==TIM1)
   {
   /* USER CODE BEGIN TIM1_MspDeInit 0 */
 
@@ -801,14 +801,14 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
     HAL_GPIO_DeInit(GPIOA, _1A1_Pin|_2A1_Pin|_3A1_Pin);
 
     /* TIM1 DMA DeInit */
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC1]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC2]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC3]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC1]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
   /* USER CODE BEGIN TIM1_MspDeInit 1 */
 
   /* USER CODE END TIM1_MspDeInit 1 */
   }
-  else if(htim_ic->Instance==TIM3)
+  else if(htim_base->Instance==TIM3)
   {
   /* USER CODE BEGIN TIM3_MspDeInit 0 */
 
@@ -827,7 +827,7 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
     HAL_GPIO_DeInit(GPIOB, _2A3_Pin|_3A3_Pin);
 
     /* TIM3 DMA DeInit */
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC2]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
 
     /* TIM3 interrupt DeInit */
     HAL_NVIC_DisableIRQ(TIM3_IRQn);
@@ -835,7 +835,7 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
 
   /* USER CODE END TIM3_MspDeInit 1 */
   }
-  else if(htim_ic->Instance==TIM4)
+  else if(htim_base->Instance==TIM4)
   {
   /* USER CODE BEGIN TIM4_MspDeInit 0 */
 
@@ -852,7 +852,7 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
     HAL_GPIO_DeInit(GPIOB, _1B3_Pin|_1B2_Pin|_2B3_Pin|_3B3_Pin);
 
     /* TIM4 DMA DeInit */
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC2]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
 
     /* TIM4 interrupt DeInit */
     HAL_NVIC_DisableIRQ(TIM4_IRQn);
@@ -860,7 +860,7 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
 
   /* USER CODE END TIM4_MspDeInit 1 */
   }
-  else if(htim_ic->Instance==TIM5)
+  else if(htim_base->Instance==TIM5)
   {
   /* USER CODE BEGIN TIM5_MspDeInit 0 */
 
@@ -877,17 +877,17 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
     HAL_GPIO_DeInit(GPIOA, _2A2_Pin|_2B2_Pin|_3A2_Pin|_3B2_Pin);
 
     /* TIM5 DMA DeInit */
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC4]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_TRIGGER]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC1]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC2]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC3]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_UPDATE]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC4]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_TRIGGER]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC1]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_UPDATE]);
   /* USER CODE BEGIN TIM5_MspDeInit 1 */
 
   /* USER CODE END TIM5_MspDeInit 1 */
   }
-  else if(htim_ic->Instance==TIM8)
+  else if(htim_base->Instance==TIM8)
   {
   /* USER CODE BEGIN TIM8_MspDeInit 0 */
 
@@ -903,11 +903,11 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
     HAL_GPIO_DeInit(GPIOC, _1B1_Pin|_2B1_Pin|_3B1_Pin);
 
     /* TIM8 DMA DeInit */
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC2]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC3]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_CC4]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_TRIGGER]);
-    HAL_DMA_DeInit(htim_ic->hdma[TIM_DMA_ID_COMMUTATION]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC4]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_TRIGGER]);
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_COMMUTATION]);
   /* USER CODE BEGIN TIM8_MspDeInit 1 */
 
   /* USER CODE END TIM8_MspDeInit 1 */

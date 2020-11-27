@@ -20,3 +20,7 @@
 > 210 01 01 01 00 05 00 01 00
 
 ce bi illuminator definirali samo na izhodu iz kont. filtra, enojni pulz p na izhodu iz timeouta ???
+
+- tim2 je trigger za vse druge timerje na ITR1... za tim2 pa itr0!!!
+- ini. TIM2 na konec v main.c
+- zamenjaj vrstni red fatfs inic. v fatfs.c
