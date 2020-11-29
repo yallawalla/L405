@@ -51,7 +51,8 @@ extern		uint32_t					nDev,
 														idPos,
 														idCrc,
 														debug,
-														testMask;
+														testMask,
+														timingTest;
 
 void			*canRx(void *),
 					*canTx(void *);
@@ -86,6 +87,8 @@ typedef enum {
    idCOM2CAN,
 	 idCAN2COM,
 	_ID_IAP_REQ,
+	_ID_TIMING_REQ,
+	_ID_TIMING_ACK,
 
 	_ID_IAP_GO				=0xA0,
 	_ID_IAP_ERASE,
@@ -143,7 +146,7 @@ typedef struct {
 	uint32_t					Channel;
 	uint8_t						sect,ch;
 	enum tmode				tmode;				
-	uint32_t					timeout,N,to,crc;
+	uint32_t					timeout,N,to,tref,crc;
 	uint32_t					cnt,longcnt,pw;
 	uint32_t					hi,lo,shi,slo;
 } tim;

@@ -8,6 +8,7 @@
 * Return				:
 *******************************************************************************/
 _io				*_CAN,*_DBG, *canConsole;
+uint32_t	timingTest;
 //______________________________________________________________________________________
 const char *strPos[]={"front left","front right","rear right","rear left","console"};
 uint32_t	idDev,
@@ -18,7 +19,7 @@ uint32_t	idDev,
 					testMask=0;
 payload		py={0,0};
 uint32_t	devices[_MAX_DEV];
-
+uint32_t	tref=0;
 
 #ifdef	__DISCO__
 		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
@@ -149,8 +150,17 @@ CAN_FilterTypeDef  sFilterConfig;
 *******************************************************************************/
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
 	CanRxMsg msg;
+	uint32_t	mailbox;
 	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&msg.hdr,(uint8_t *)&msg.buf);
-	_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
+	if(msg.hdr.StdId==_ID_TIMING_REQ) {
+		msg.hdr.StdId=_ID_TIMING_ACK;
+		HAL_CAN_AddTxMessage(&hcan2, (CAN_TxHeaderTypeDef *)&msg.hdr, (uint8_t *)&msg.buf, &mailbox);
+	}
+	else if(msg.hdr.StdId==_ID_TIMING_ACK) {
+		timingTest=TIM1->CNT;
+	}
+	else
+		_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
 }
 /*******************************************************************************
 * Function Name	: 
@@ -324,7 +334,9 @@ void	*canTx(void *v) {
 						t->slo+=dt*dt;
 					}
 				}	else {
-					t->to = tcapt;
+					t->tref=t->to = tcapt;
+					if(!tref || tcapt<tref)
+						tref=tcapt;
 				}
 				if((1 << t->ch) & ~testMask) {
 					++t->cnt;
@@ -337,6 +349,9 @@ void	*canTx(void *v) {
 				
 				if(debug & (1<<DBG_CRC) && (1 << t->ch) & ~testMask) {
 					_print("\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);	
+				}
+				if(debug & (1<<10) && (1 << t->ch) & ~testMask) {
+					_print("\r\n%d,%d:%d",t->ch,t->sect,t->tref-tref);	
 				}
 				
 				switch(t->crc) {
@@ -402,6 +417,7 @@ void	*canTx(void *v) {
 				}
 				t->cnt=t->longcnt=t->pw=t->crc = 0;
 				t->hi=t->lo=t->shi=t->slo=0;
+				t->tref=0;
 			}
 		}
 			
@@ -410,6 +426,7 @@ void	*canTx(void *v) {
 				break;
 			
 		if(t->htim == NULL) { 
+			tref=0;
 			if(py.word[0]) {
 				if(flushFilter(&py.word[0]) > 8) {
 					if(py.byte[0]==1)	py.byte[0]=2;
@@ -453,7 +470,7 @@ void	*canRx(void *v) {
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
 			_BLUE(500);
 			if(debug & (1<<DBG_CAN_RX)) {
-				_print("\r%4d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
+				_print("\r%5d: < %03X",rx.hdr.Timestamp,rx.hdr.StdId);
 				for(int i=0; i<rx.hdr.DLC; ++i)
 					_print(" %02X",rx.buf.bytes[i]);
 				_print("\r\n");

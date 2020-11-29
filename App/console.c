@@ -4,7 +4,6 @@
 #include	"can.h"
 #include	"ws.h"
 #include	<stdlib.h>
-
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -587,6 +586,15 @@ _io 			*io=_DBG;
 				
 				case __Delete:
 					JumpToBootloader();
+				break;
+				
+				case __PageUp:
+				{
+					uint32_t to=TIM1->CNT;
+					Send(_ID_TIMING_REQ,NULL,0);
+					_wait(100);
+					_print("\r\n%6.1f",(float)((timingTest-to) % 0x10000)/84);
+				}
 				break;
 				
 				default:
