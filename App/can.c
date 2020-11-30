@@ -275,7 +275,7 @@ void	*canTx(void *v) {
 		
 		for(t=timStack; t->htim; ++t) {
 			uint32_t	tcapt,dt;
-			if(t->tmode == _DMA)
+			if(t->htim->Instance && t->tmode == _DMA)
 				t->dma->_push = &t->dma->_buf[(t->dma->size - t->htim->hdma[((t->Channel)>>2)+1]->Instance->NDTR*sizeof(uint32_t))];
 			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) {
 				if(t->timeout) {
