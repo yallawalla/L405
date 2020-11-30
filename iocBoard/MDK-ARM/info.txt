@@ -1,0 +1,48 @@
+-	pri relociranju zablokirati spremembo VTOR v system_stm32f4xx.c					Done
+
+-	remote funkcionalnosti:
+	-	preklop VCP-CDC																Done
+	-	dolocanje kvadranta															Done
+
+-	pri dekodiranju remote crc rešiti problem veckratnih identicnih(istih) 			Done
+	komand na vec senzorjih
+-	error meesages med iap 
+-	debug CANa
+
+-	ce je VCP buffer 2x2048, mora biti heap 0x8000
+- TODO: https://community.st.com/s/question/0D50X00009XkgIYSAZ/unable-to-configure-serial-port-error-for-usb-cdc //Done
+- TODO: CAN terminator  bootloaderju ??? 
+
+- TODO: izklop LED pri CAN tx,rx, vnesi funkcionalnost !!!
+
+.....44444444444441100........
+.....0123401234
+_____----|----|---------|_____
+0        5    5         0
+
+- ob spremembi na vrednost, razlicno od nic startaš timer
+- ce se iztece, preveriš enakost za štvilo vzorcev
+- ce je enakost, ponovno timer in izpišeš
+
+i=input from Flush
+pycount=0;
+
+if(i != py[pyidx])
+	set timer
+pyidx = ++pyidx % pylen;
+py[pyidx]=i
+if(++pycont > pylen)
+	pycount=pylen;
+
+
+timer elapsed
+
+for(i=0; i<pylen; ++i)
+	if(py[pyidx] != py[(pyidx-i) & pylen]
+		break;
+	if(i == pylen)
+		izpis
+	restart timer
+	
+	
+
