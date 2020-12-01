@@ -100,7 +100,9 @@ void			wsProcInit(void) {
 		
 					for(int i=0; i<(__LEDS+8)*24; ++i)
 						*p++=__TL;
-					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_leds,sizeof(_leds)/sizeof(uint32_t));
+	
+					HAL_TIM_Base_Start_IT(&htim2);																												// to open update interrupt
+					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_leds,sizeof(_leds)/sizeof(uint32_t));			// to start DMA 
 	
 					for (int i = 1; i < 4095; ++i) {
 						int j = i,n = 0;

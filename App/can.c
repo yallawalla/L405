@@ -72,6 +72,15 @@ int		filter_count=0;
 * Output				:
 * Return				:
 *******************************************************************************/
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if(htim->Instance==TIM2)	HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	uint32_t	i;
 	tim				*p=NULL;
