@@ -103,7 +103,7 @@ static void MX_ADC1_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
-
+void	MX_TIM2_ReInit(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -182,7 +182,10 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	_proc_add(canTx,&_DBG,"canTx",0);
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
-	wsProcInit();
+	if((idPos-_ACK_LEFT_FRONT) < 4) 
+		MX_TIM2_ReInit();
+	else
+		wsProcInit();
 	
 	_io *io=_stdio(InitITM());
 	printVersion();

@@ -693,6 +693,11 @@
               <FileType>5</FileType>
               <FilePath>.\info.txt</FilePath>
             </File>
+            <File>
+              <FileName>ledsReconfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ledsReconfig.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1387,6 +1392,11 @@
               <FileType>5</FileType>
               <FilePath>.\info.txt</FilePath>
             </File>
+            <File>
+              <FileName>ledsReconfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ledsReconfig.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2080,6 +2090,11 @@
               <FileName>info.txt</FileName>
               <FileType>5</FileType>
               <FilePath>.\info.txt</FilePath>
+            </File>
+            <File>
+              <FileName>ledsReconfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ledsReconfig.c</FilePath>
             </File>
           </Files>
         </Group>
