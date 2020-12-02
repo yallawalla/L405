@@ -2,6 +2,7 @@
 #define		_CONSOLE_H
 #include	"stm32f4xx_hal.h"
 #include	"ff.h"
+#include	"io.h"
 
 int				Escape(void);
 enum			err_parse	{
@@ -39,13 +40,10 @@ typedef		struct {
 	uint32_t	Vm5;
 	uint32_t	T;
 }	adc;
-extern		adc	pwr;
 
-
-
-
-
-
+extern adc			pwr;
+extern uint32_t debug;
+extern _io*			_DBG;
 
 #endif
 

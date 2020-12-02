@@ -1,6 +1,7 @@
 #include	"ws.h"
 #include	"can.h"
 
+#define		SW_version			100
 
 __ALIGN_BEGIN 
 uint32_t	_leds[(__LEDS+8+8)*24]; 
@@ -83,11 +84,7 @@ uint32_t	*p = &_leds[(sect+8+4)*24];
 					
 					
 					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_leds,sizeof(_leds)/sizeof(uint32_t));
-					if(debug & (1<<DBG_LED)) {
-						_io	*io=_stdio(_DBG);
-						_print("\r%3d: * %02X %02X %02X %02X %02X %2d\r\n",HAL_GetTick() % 1000, sect, rgb.r,rgb.g,rgb.b,n,colour);
-						_stdio(io);
-					}
+					_DEBUG(DBG_LED,"\r%3d: * %02X %02X %02X %02X %02X %2d\r\n",HAL_GetTick() % 1000, sect, rgb.r,rgb.g,rgb.b,n,colour);
 }
 /*******************************************************************************
 * Function Name	: 

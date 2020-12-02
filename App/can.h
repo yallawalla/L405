@@ -166,5 +166,16 @@ int					AckWait(int);
 #define			_FLASH_BLANK		((int)-1)
 	
 #define			SW_version			100
+
+#define _DEBUG(n,f, ...) 				\
+	do {													\
+		if(debug & (1<<(n))) {			\
+			_io *io=_stdio(_DBG);			\
+			_print(f,__VA_ARGS__);		\
+			_stdio(io);								\
+		} 													\
+	} while(0)	
+
+
 #endif
 

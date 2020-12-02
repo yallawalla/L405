@@ -122,12 +122,10 @@ void	Send(int id,  payload *buf, int len) {
 	if(HAL_CAN_AddTxMessage(&hcan2, &tx.hdr, (uint8_t *)&tx.buf, &mailbox) != HAL_OK)
 		_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg));
 	_YELLOW(500);
-	if(debug & (1<<DBG_CAN_TX)) {
-		_print("\r%4d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
-		for(int i=0; i<tx.hdr.DLC; ++i)
-			_print(" %02X",tx.buf.bytes[i]);
-		_print("\r\n");
-	}
+	_DEBUG(DBG_CAN_TX,"\r%5d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
+	for(int i=0; i<tx.hdr.DLC; ++i)
+		_DEBUG(DBG_CAN_TX," %02X",tx.buf.bytes[i]);
+	_DEBUG(DBG_CAN_TX,"%s","\r\n");
 }
 /*******************************************************************************
 * Function Name  : CAN_Initialize
@@ -286,83 +284,72 @@ void	*canTx(void *v) {
 			uint32_t	tcapt,dt;
 			if(t->htim->Instance && t->tmode == _DMA)
 				t->dma->_push = &t->dma->_buf[(t->dma->size - t->htim->hdma[((t->Channel)>>2)+1]->Instance->NDTR*sizeof(uint32_t))];
-			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) {
-				if(t->timeout) {
-					if(tcapt < t->to)
-						dt = (0x10000 + tcapt - t->to)/uS;
-					else
-						dt = (tcapt - t->to)/uS;
-					t->to=tcapt;
-					if(debug & (1<<DBG_TIMING) 	&& (1 << t->ch) & ~testMask) {		
+			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) 
+				if((1 << t->ch) & ~testMask) {
+					if(t->timeout) {
+						if(tcapt < t->to)
+							dt = (0x10000 + tcapt - t->to)/uS;
+						else
+							dt = (tcapt - t->to)/uS;
+						t->to=tcapt;
 						if(dt>MIN_BURST) {
 							if(dt > 300)
-							_print("-");
+							_DEBUG(DBG_TIMING,"%c",'-');
 						else
-							_print("_");
+							_DEBUG(DBG_TIMING,"%c",'_');
 						}
-					}
-					
-					if(debug & (1<<DBG_USEC)		&& (1 << t->ch) & ~testMask) {	
+						
 						if(t->cnt % 2)															// __--
-								_print("\r\n%d,%d:%3d",t->ch,t->sect,dt);
+							_DEBUG(DBG_USEC,"\r\n%d,%d:%3d",t->ch,t->sect,dt);
 						else {
 							if(t->cnt)																//--__
-								_print(",%3d",dt);
+							_DEBUG(DBG_USEC,",%3d",dt);
 						}
-					}
-					
-					if(dt>MIN_BURST) {
-						__HAL_CRC_DR_RESET(&hcrc);
-						hcrc.Instance->DR = t->crc;
-						if(dt > CRC_THRHOLD)
-							hcrc.Instance->DR=1;
-						else
-							hcrc.Instance->DR=0;
-						t->crc = hcrc.Instance->DR;
-					}
-					
-					if(t->cnt % 2) {			// __---
-						if(t->cnt == 1)
-							t->pw=dt;
-						else
-							t->pw +=dt;
 						
-						t->hi +=dt;
-						t->shi+=dt*dt;
-						
-						if(t->pw > MIN_BURST) {
-							++t->longcnt;
+						if(dt>MIN_BURST) {
+							__HAL_CRC_DR_RESET(&hcrc);
+							hcrc.Instance->DR = t->crc;
+							if(dt > CRC_THRHOLD)
+								hcrc.Instance->DR=1;
+							else
+								hcrc.Instance->DR=0;
+							t->crc = hcrc.Instance->DR;
 						}
-					} else {								// --___
-							if(dt < MAX_BURST) {
-								if(t->pw > MIN_BURST)
-									--t->longcnt;
-							} else
-								t->pw=0;
-						t->lo += dt;
-						t->slo+=dt*dt;
+						
+						if(t->cnt % 2) {			// __---
+							if(t->cnt == 1)
+								t->pw=dt;
+							else
+								t->pw +=dt;
+							
+							t->hi +=dt;
+							t->shi+=dt*dt;
+							
+							if(t->pw > MIN_BURST) {
+								++t->longcnt;
+							}
+						} else {								// --___
+								if(dt < MAX_BURST) {
+									if(t->pw > MIN_BURST)
+										--t->longcnt;
+								} else
+									t->pw=0;
+							t->lo += dt;
+							t->slo+=dt*dt;
+						}
+					}	else {
+						t->tref=t->to = tcapt;
+						if(!tref || tcapt<tref)
+							tref=tcapt;
 					}
-				}	else {
-					t->tref=t->to = tcapt;
-					if(!tref || tcapt<tref)
-						tref=tcapt;
-				}
-				if((1 << t->ch) & ~testMask) {
 					++t->cnt;
 					t->timeout=HAL_GetTick()+MAX__INT;
 				}
-			}
 
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
 				t->timeout=0;
-				
-				if(debug & (1<<DBG_CRC) && (1 << t->ch) & ~testMask) {
-					_print("\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);	
-				}
-				if(debug & (1<<10) && (1 << t->ch) & ~testMask) {
-					_print("\r\n%d,%d:%d",t->ch,t->sect,t->tref-tref);	
-				}
-				
+				_DEBUG(DBG_CRC,"\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);
+				_DEBUG(10,"\r\n%d,%d:%d",t->ch,t->sect,t->tref-tref);
 				switch(t->crc) {
 					case _VCP_CDC:
 						if(_VCP) {
@@ -411,19 +398,10 @@ void	*canTx(void *v) {
 					break;
 				}				
 				t->cnt/=2;
-				if(debug & (1<<DBG_STAT)&& (1 << t->ch) & ~testMask) {
-					if(t->cnt > 1) {
-						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,
-						t->hi/t->cnt,
-						t->lo/(t->cnt-1),
-						(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,
-						(int)sqrt((t->cnt-1)*t->slo - t->lo*t->lo)/(t->cnt-1),
-						t->cnt,t->longcnt);
-					} else if(t->cnt > 0) {
-						_print("\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,
-						t->hi,0,0,0,t->cnt,t->longcnt);
-					}
-				}
+				if(t->cnt > 1)
+					_DEBUG(DBG_STAT,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,t->hi/t->cnt,t->lo/(t->cnt-1),(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,(int)sqrt((t->cnt-1)*t->slo - t->lo*t->lo)/(t->cnt-1),t->cnt,t->longcnt);
+				else if(t->cnt > 0)
+					_DEBUG(DBG_STAT,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,	t->hi,0,0,0,t->cnt,t->longcnt);
 				t->cnt=t->longcnt=t->pw=t->crc = 0;
 				t->hi=t->lo=t->shi=t->slo=0;
 				t->tref=0;
@@ -478,12 +456,11 @@ void	*canRx(void *v) {
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
 			_BLUE(500);
-			if(debug & (1<<DBG_CAN_RX)) {
-				_print("\r%5d: < %03X",rx.hdr.Timestamp,rx.hdr.StdId);
-				for(int i=0; i<rx.hdr.DLC; ++i)
-					_print(" %02X",rx.buf.bytes[i]);
-				_print("\r\n");
-			}
+			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",rx.hdr.Timestamp,rx.hdr.StdId);
+			for(int i=0; i<rx.hdr.DLC; ++i)
+				_DEBUG(DBG_CAN_RX," %02X",rx.buf.bytes[i]);
+			_DEBUG(DBG_CAN_RX,"%s","\r\n");
+
 			switch(rx.hdr.StdId) {
 				
 				case _ID_IAP_PING:
@@ -501,16 +478,11 @@ void	*canRx(void *v) {
 				case _ID_IAP_ACK:
 					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0) {
 						++nDev;
-						if(debug & (1<<DBG_CONSOLE)) {
-							_print("\r\n  ser %08X, boot",rx.buf.word[1]);
-							DecodeCom(NULL);
-						}
+						_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
 					}
 					break;
 					
 				case _TEST_REQ:
-//						HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_SET);
-//					HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_RESET);	
 				{
 					register int i __asm("r3");
 					i=rx.buf.hword[0];
@@ -539,10 +511,7 @@ void	*canRx(void *v) {
 				break;
 
 				case idCOM2CAN:
-					if((debug & (1<<DBG_CONSOLE))) {
-						while(rx.hdr.DLC && !_buffer_push(stdout->io->tx,rx.buf.bytes,rx.hdr.DLC))
-							_wait(2);
-					}
+					_DEBUG(DBG_CONSOLE,"%.*s",rx.hdr.DLC,rx.buf.bytes);
 				break;
 
 				case _TEST_LEFT_FRONT ... _TEST_LEFT_FRONT+_MAX_DEV-1:
