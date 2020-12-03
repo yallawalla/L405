@@ -176,10 +176,10 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 		}
 	}
 	f_close(&f);
-	_proc_add(Watchdog,NULL,"watchdog",0); 
+	_proc_add(canRx,NULL,"canRx",0);
+	_proc_add(canTx,NULL,"canTx",0);
 	_proc_add(console,&_VCP,"console",0); 
-	_proc_add(canRx,&_DBG,"canRx",0);
-	_proc_add(canTx,&_DBG,"canTx",0);
+	_proc_add(Watchdog,NULL,"watchdog",0); 
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
 	if((idPos-_ACK_LEFT_FRONT) < 4) 
@@ -187,7 +187,8 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	else
 		wsProcInit();
 	
-	_stdio(InitITM());
+	InitITM();
+	_stdio(&_ITM);
 	printVersion();
 	_stdio(NULL);
 	

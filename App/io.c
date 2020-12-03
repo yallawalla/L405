@@ -13,8 +13,8 @@
 */
 #include 	"io.h"
 //_________________________________________________________________________________
-_io			*_stdio(_io	*p) {
-_io			*io=stdin->io;
+_io			**_stdio(_io	**p) {
+_io			**io=stdin->io;
 				stdin->io=stdout->io=p;
 				return(io);
 }
@@ -172,14 +172,14 @@ char		*t=p->_pull;
 //______________________________________________________________________________________
 int 		ungets(char *c) {
 				if(__stdin.io)
-					return _buffer_put(__stdin.io->rx,c,strlen(c));
+					return _buffer_put((*stdin->io)->rx,c,strlen(c));
 				else
 					return EOF;
 }
 //______________________________________________________________________________________
 int 		ungetch(int c) {
 				if(__stdin.io)
-					return _buffer_put(__stdin.io->rx,&c,1);
+					return _buffer_put((*stdin->io)->rx,&c,1);
 				else
 					return EOF;
 }

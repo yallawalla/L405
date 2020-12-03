@@ -34,7 +34,7 @@ _buffer	*_buffer_init(int),
 				*_buffer_close(_buffer *);
 _io			*_io_init(int, int),
 				*_io_close(_io *),
-				*_stdio(_io	*);
+				**_stdio(_io	**);
 
 int			_buffer_push(_buffer *, void *,int),
 				_buffer_put(_buffer *, void *,int),
@@ -54,7 +54,7 @@ void		Watchdog_init(int);
 //______________________________________________________________________________________
 struct	__FILE
 { 
-				_io		*io;
+				_io		**io;
 };
 //______________________________________________________________________________________
 int		_print(const char *format, ...);

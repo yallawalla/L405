@@ -10,20 +10,20 @@
 * Output				:
 * Return				:
 *******************************************************************************/
-int		Escape(void) {
+int			Escape(void) {
 int		i=fgetc(stdin);
-			if(stdin->io->esc == NULL)
-				stdin->io->esc=calloc(1,sizeof(esc));
+			if((*stdin->io)->esc == NULL)
+				(*stdin->io)->esc=calloc(1,sizeof(esc));
 			if(i==__Esc) {
-				stdin->io->esc->seq=i;
-				stdin->io->esc->timeout=HAL_GetTick()+10;
+				(*stdin->io)->esc->seq=i;
+				(*stdin->io)->esc->timeout=HAL_GetTick()+10;
 			} else if(i==EOF) {
-				if(stdin->io->esc->timeout && (HAL_GetTick() > stdin->io->esc->timeout)) {
-					stdin->io->esc->timeout=0;
-					return stdin->io->esc->seq;
+				if((*stdin->io)->esc->timeout && (HAL_GetTick() > (*stdin->io)->esc->timeout)) {
+					(*stdin->io)->esc->timeout=0;
+					return (*stdin->io)->esc->seq;
 				}
-			} else if(stdin->io->esc->timeout) {
-				stdin->io->esc->seq=((stdin->io->esc->seq) << 8) | i;
+			} else if((*stdin->io)->esc->timeout) {
+				(*stdin->io)->esc->seq=(((*stdin->io)->esc->seq) << 8) | i;
 			} else {
 				return i;
 			}
@@ -35,12 +35,11 @@ int		i=fgetc(stdin);
 * Output				:
 * Return				:
 *******************************************************************************/
-char	*cgets(int c, int mode)
-{
-_buffer		*p=__stdin.io->gets;
+char		*cgets(int c, int mode) {
+_buffer		*p=(*stdin->io)->gets;
 			
 			if(!p)
-				p=__stdin.io->gets=_buffer_init(__stdin.io->rx->size);
+				p=(*stdin->io)->gets=_buffer_init((*stdin->io)->rx->size);
 			switch(c) {
 				case EOF:		
 				case '\n':
@@ -81,7 +80,7 @@ _buffer		*p=__stdin.io->gets;
 * Output				:
 * Return				:
 *******************************************************************************/
-char	*trim(char **c) {
+char		*trim(char **c) {
 			if(!c)
 				return NULL;
 			if(*c) {
@@ -208,7 +207,7 @@ FRESULT DecodeEq(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-int 	remoteConsole(uint32_t stdid, uint32_t ex) {
+uint32_t	remoteConsole(uint32_t stdid, uint32_t ex) {
 	payload 	buf;
 	uint32_t	m,n=0;
 	while(n<8) {
@@ -232,7 +231,7 @@ FRESULT Remote(int id, uint32_t ex) {
 						return FR_INVALID_PARAMETER;
 					}
 				}
-				_io *io=_DBG;
+				_io **io=_DBG;
 				_DBG=stdout->io;
 				uint32_t dbg=debug;
 				debug |= (1<<DBG_CONSOLE);
@@ -310,29 +309,37 @@ FRESULT fIap(int argc, char *argv[]) {
 * Output				:
 * Return				:
 *******************************************************************************/
-CanTxMsg	dacMsg;
-//-----------------------------------------------------
-void	*dacProc(void *v) {
-	Send(dacMsg.hdr.StdId,&dacMsg.buf,dacMsg.hdr.DLC);
-	return dacProc;
+void		*testProc(void *v) {
+	CanTxMsg *m=(CanTxMsg *)v;
+	Send(m->hdr.StdId,&m->buf,m->hdr.DLC);
+	return testProc;
 }
 //-----------------------------------------------------
 FRESULT fTest(int argc, char *argv[]) {
-	_proc *p=_proc_find(dacProc,NULL);
+	_proc *p=_proc_find(testProc,NULL);
 	if(argv[1]) {
+		CanTxMsg	*m=malloc(sizeof(CanTxMsg));
+		m->hdr.StdId=_TEST_REQ;
+		m->hdr.DLC=1;
+		m->buf.hword[0]=atoi(argv[1]);				
 		if(argv[2]) {
-			if(p)
+			if(p) {
 				p->dt=atoi(argv[2]);
-			else
-				_proc_add(dacProc,NULL,"dac",atoi(argv[2]));
-		} else if(p)
-			p->f=NULL;
-		dacMsg.hdr.StdId=_TEST_REQ;
-		dacMsg.hdr.DLC=1;
-		dacMsg.buf.hword[0]=atoi(argv[1]);
-		Send(dacMsg.hdr.StdId,&dacMsg.buf,dacMsg.hdr.DLC);
-	} else if(p)
+				free(m);
+			} else
+				_proc_add(testProc,m,"test",atoi(argv[2]));
+		} else {			
+			Send(m->hdr.StdId,&m->buf,m->hdr.DLC);
+			free(m);
+			if(p) {
+				p->f=NULL;
+				free(p->arg);
+			}
+		}
+	} else if(p) {
 		p->f=NULL;
+		free(p->arg);
+	}
 	return FR_OK;		
 }
 //-----------------------------------------------------
@@ -435,8 +442,6 @@ FATFS			fatfs;
 				_print("\r\n%X/",idPos-_ACK_LEFT_FRONT);
 				if(!strncmp(c,"1:/",3))
 					_print("USB/");
-//				if(stdout->io == canConsole)
-//					_print("/");
 			}
 			else
 //___________________________________________________________________________
@@ -542,7 +547,7 @@ char	*c;
 				case __Esc:
 				case __CtrlD:
 				{
-_io 			*io=_DBG;
+_io 			**io=_DBG;
 					_DBG=stdout->io;
 					uint32_t dbg=debug;
 					debug |= (1<<DBG_CONSOLE);
@@ -615,9 +620,9 @@ _io 			*io=_DBG;
 * Return				:
 *******************************************************************************/
 void	*console(void *v) {
-_io		*in=stdin->io;
-_io 	*out=stdout->io;
-			_stdio(*(_io **)v);
+_io		**in=stdin->io;
+_io 	**out=stdout->io;
+			_stdio((_io **)v);
 			Parse(Escape());
 			stdin->io=in;
 			stdout->io=out;

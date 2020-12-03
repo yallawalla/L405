@@ -55,7 +55,7 @@ void	*_proc_loop(void) {
 //______________________________________________________________________________
 __weak 	int	_print(const char *format, ...) {
 			int			ret=0;
-			if(stdout->io) {
+			if(*stdout->io) {
 				char buf[128];	
 				va_list	aptr;
 				va_start(aptr, format);

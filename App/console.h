@@ -43,7 +43,7 @@ typedef		struct {
 
 extern adc			pwr;
 extern uint32_t debug;
-extern _io*			_DBG;
+extern _io**		_DBG;
 
 enum dbg {    
 	DBG_CAN_RX=0,
@@ -60,7 +60,7 @@ enum dbg {
 #define _DEBUG(n,f, ...) 				\
 	do {													\
 		if(debug & (1<<(n))) {			\
-			_io *io=_stdio(_DBG);			\
+			_io **io=_stdio(_DBG);		\
 			_print(f,__VA_ARGS__);		\
 			_stdio(io);								\
 		} 													\

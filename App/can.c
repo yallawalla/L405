@@ -7,7 +7,7 @@
 * Output				: 
 * Return				:
 *******************************************************************************/
-_io				*_CAN,*_DBG, *canConsole;
+_io				*_CAN, *canConsole,**_DBG;
 uint32_t	timingTest;
 //______________________________________________________________________________________
 const char *strPos[]={"front left","front right","rear right","rear left","console"};
@@ -277,9 +277,7 @@ void	*canTx(void *v) {
 		HAL_CAN_Start(&hcan2);
 /*******************************************************************************/
 	} else {
-		_io *io=_stdio(*(_io **)v);
 		tim 	*t;
-		
 		for(t=timStack; t->htim; ++t) {
 			uint32_t	tcapt,dt;
 			if(t->htim->Instance && t->tmode == _DMA)
@@ -430,9 +428,8 @@ void	*canTx(void *v) {
 			}
 			py.word[0]=0;
 		}
-		_stdio(io);
 	}
-	return v;
+	return canTx;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -442,8 +439,6 @@ void	*canTx(void *v) {
 *******************************************************************************/
 void	*canRx(void *v) {
 	if(_CAN) {
-	_io		*io=_stdio(*(_io **)v);
-
 	CanRxMsg	rx;
 	payload		p;
 	
@@ -545,7 +540,7 @@ uint16_t 		ch=rx.buf.byte[0],
 						break;
 						case sizeof(payload):																		// device ack.
 							devices[nDev++]=rx.buf.word[1];
-							_print("  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ACK_LEFT_FRONT)]);
+							_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ACK_LEFT_FRONT)]);
 							DecodeCom(NULL);
 						break;
 						default:
@@ -555,9 +550,8 @@ uint16_t 		ch=rx.buf.byte[0],
 					break;
 			}
 		}		
-		_stdio(io);
 	}
-	return v;
+	return canRx;
 }
 /*
 ____-_-_-_-_-_______-_-________-_-_-_-_-_______________________-_-_-_-_-_______-_-________-_-_-_-_-___________________
