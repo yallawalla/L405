@@ -54,16 +54,18 @@ void	*_proc_loop(void) {
 }
 //______________________________________________________________________________
 __weak 	int	_print(const char *format, ...) {
+			int			ret=0;
+			if(stdout->io) {
 				char buf[128];	
 				va_list	aptr;
-				int			ret;
 				va_start(aptr, format);
 				ret = vsnprintf(buf, 128, format, aptr);
 				va_end(aptr);
 				for(char *p=buf; *p; ++p)
-					while(fputc(*p,&__stdout)==EOF)
+					while(fputc(*p,stdout)==EOF)
 						_wait(2);
-				return(ret);
+			}
+			return(ret);
 }
 //______________________________________________________________________________
 void	_wait(int t) {

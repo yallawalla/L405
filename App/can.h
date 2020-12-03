@@ -42,7 +42,6 @@ extern 		TIM_HandleTypeDef htim1,
 extern		_io								*_CAN,
 														*_VCP,
 														*_ITM,
-														*_DBG,
 														*canConsole;
 
 
@@ -100,19 +99,6 @@ typedef enum {
 	_ID_IAP_PING,
 } _StdId;
 
-
-	enum dbg {    
-	DBG_CAN_RX=0,
-	DBG_CAN_TX,
-	DBG_CRC,
-	DBG_TIMING,
-	DBG_LED,
-	DBG_USEC,
-	DBG_CONSOLE,
-	DBG_STAT,
-	DBG_VOLT
-};
-
 	enum tmode{    
 	_DMA,
 	_IT
@@ -166,16 +152,6 @@ int					AckWait(int);
 #define			_FLASH_BLANK		((int)-1)
 	
 #define			SW_version			100
-
-#define _DEBUG(n,f, ...) 				\
-	do {													\
-		if(debug & (1<<(n))) {			\
-			_io *io=_stdio(_DBG);			\
-			_print(f,__VA_ARGS__);		\
-			_stdio(io);								\
-		} 													\
-	} while(0)	
-
 
 #endif
 

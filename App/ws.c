@@ -1,5 +1,5 @@
 #include	"ws.h"
-#include	"can.h"
+#include	"console.h"
 
 #define		SW_version			100
 

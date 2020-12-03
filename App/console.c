@@ -11,7 +11,7 @@
 * Return				:
 *******************************************************************************/
 int		Escape(void) {
-int		i=getchar();
+int		i=fgetc(stdin);
 			if(stdin->io->esc == NULL)
 				stdin->io->esc=calloc(1,sizeof(esc));
 			if(i==__Esc) {
@@ -175,7 +175,7 @@ FRESULT DecodeMinus(char *c) {
 FRESULT DecodeInq(char *c) {
 				switch(*trim(&c)) {
 				case 'a':
-					while(getchar() == EOF) {
+					while(fgetc(stdin) == EOF) {
 						_print("\r%.1fV,%.1fV,%.1f'C",
 							(float)(pwr.V45*3.3/4095.0*(1.2+47)/1.2),
 							(float)(3.3 - (4095-pwr.Vm5)*((1.2+6.8)/1.2*3.3/4095.0)),
@@ -617,8 +617,7 @@ _io 			*io=_DBG;
 void	*console(void *v) {
 _io		*in=stdin->io;
 _io 	*out=stdout->io;
-_io 	*current=*(_io **)v;
-			_stdio(current);
+			_stdio(*(_io **)v);
 			Parse(Escape());
 			stdin->io=in;
 			stdout->io=out;

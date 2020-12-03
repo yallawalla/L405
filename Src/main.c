@@ -187,9 +187,9 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	else
 		wsProcInit();
 	
-	_io *io=_stdio(InitITM());
+	_stdio(InitITM());
 	printVersion();
-	_stdio(io);
+	_stdio(NULL);
 	
   /* USER CODE END 2 */
 
