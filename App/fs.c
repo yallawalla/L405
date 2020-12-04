@@ -123,7 +123,7 @@ FRESULT			iapRemote() {
 
 						_print("\r\n%d pings received...",nDev);
 						_print("\r\nerasing");													// erase 5 pages (att. CubeMX ima drugacne 
-																														//oznake za sektorje !!!
+																														// oznake za sektorje kot bootloader!!!
 						for(k=FLASH_SECTOR_1<<3; k<FLASH_SECTOR_6<<3; k+=FLASH_SECTOR_1<<3) {
 							Send(_ID_IAP_ERASE,(payload *)&k,sizeof(int));
 							if(!AckWait(3000))														// send erase page, wait for ack

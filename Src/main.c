@@ -182,10 +182,12 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	_proc_add(Watchdog,NULL,"watchdog",0); 
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
-	if((idPos-_ACK_LEFT_FRONT) < 4) 
+	if((idPos) < 4) 
 		MX_TIM2_ReInit();
-	else
+	else {
 		wsProcInit();
+		__HAL_TIM_ENABLE_IT(&htim1,TIM_IT_UPDATE);
+	}
 	
 	InitITM();
 	_stdio(&_ITM);
@@ -898,10 +900,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, TREF_Pin|TEST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CAN_STB_GPIO_Port, CAN_STB_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, CAN_STB_Pin|CAN_TERM_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(OTG_VBUS_GPIO_Port, OTG_VBUS_Pin, GPIO_PIN_RESET);

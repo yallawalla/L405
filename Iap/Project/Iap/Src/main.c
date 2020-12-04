@@ -518,9 +518,9 @@ GPIO_InitTypeDef				GPIO_InitStructure;
 						else
 							CAN_InitStructure.CAN_Mode=CAN_Mode_Normal;
 
-						CAN_InitStructure.CAN_SJW=CAN_SJW_4tq;
-						CAN_InitStructure.CAN_BS1=CAN_BS1_10tq;
-						CAN_InitStructure.CAN_BS2=CAN_BS2_3tq;
+						CAN_InitStructure.CAN_SJW=CAN_SJW_1tq;
+						CAN_InitStructure.CAN_BS1=CAN_BS1_11tq;
+						CAN_InitStructure.CAN_BS2=CAN_BS2_2tq;
 						CAN_InitStructure.CAN_Prescaler=6;
 						CAN_Init(__CAN__,&CAN_InitStructure);
 

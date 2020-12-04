@@ -111,6 +111,7 @@ FRESULT DecodePlus(char *c) {
 					testMask=(uint32_t)EOF;
 				while(c && *c)
 					testMask |= (1<<strtoul(++c,&c,10));
+				SaveSettings();
 				break;
 				
 				case 'r':
@@ -151,6 +152,7 @@ FRESULT DecodeMinus(char *c) {
 					testMask=0;
 				while(c && *c)
 					testMask &= ~(1<<strtoul(++c,&c,10));
+				SaveSettings();
 				break;
 				
 				case 'r':
@@ -351,11 +353,11 @@ FRESULT fAddress(int argc, char *argv[]) {
 	if(argv[1]) {
 		if(0 > atoi(argv[1]) || atoi(argv[1]) > _MAX_DEV)
 			return FR_INVALID_PARAMETER;
-		idPos=_ACK_LEFT_FRONT+atoi(argv[1]);
+		idPos=atoi(argv[1]);
 		SaveSettings();
 	}		
 	DecodeCom(0);
-	_print("  device address set to %d, %s",idPos-_ACK_LEFT_FRONT, strPos[min(4,idPos-_ACK_LEFT_FRONT)]);	
+	_print("  device address %d, %s",idPos, strPos[min(4,idPos)]);	
 	return FR_OK;
 }
 //-----------------------------------------------------
@@ -439,7 +441,7 @@ FATFS			fatfs;
 			if(!c) {
 				TCHAR	c[128];
 				f_getcwd(c,sizeof(c));
-				_print("\r\n%X/",idPos-_ACK_LEFT_FRONT);
+				_print("\r\n%X/",idPos);
 				if(!strncmp(c,"1:/",3))
 					_print("USB/");
 			}
@@ -660,6 +662,9 @@ FRESULT	LoadSettings(void) {
 				sscanf(c,"%03X\n", &state);
 				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin,(GPIO_PinState)state);
 				
+				f_gets(c,sizeof(c),&f);
+				sscanf(c,"%08X\n", &testMask);
+
 				f_close(&f);
 			}
 			return err;
@@ -674,8 +679,9 @@ FRESULT	SaveSettings(void) {
 			FIL f;
 			FRESULT err=f_open(&f,"/L405.ini",FA_WRITE | FA_CREATE_ALWAYS);
 			if(err==FR_OK) {
-				f_printf(&f,"%03X\n", idPos);
-				f_printf(&f,"%03X\n",HAL_GPIO_ReadPin(CAN_TERM_GPIO_Port, CAN_TERM_Pin));
+				f_printf(&f,"%-10d;dev. address\n", idPos);
+				f_printf(&f,"%-10d;term. pin\n",HAL_GPIO_ReadPin(CAN_TERM_GPIO_Port, CAN_TERM_Pin));
+				f_printf(&f,"%08X  ;mask\n", testMask);
 				f_close(&f);
 			}
 			return err;

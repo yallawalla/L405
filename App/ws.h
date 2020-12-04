@@ -4,11 +4,8 @@
 #include	"stm32f4xx_hal.h"
 #include	<math.h>
 #include	"proc.h"
+#include	"main.h"
 
-#define		__TH		94
-#define		__TL		36
-#define 	__TP		130
-#define 	__LEDS	24
 #define 	__COLS	6
 
 typedef		struct	{uint8_t r; uint8_t g; uint8_t b; }	RGB;
@@ -22,7 +19,7 @@ struct led {
 	uint32_t	row[__LEDS];
 };
 
-extern		TIM_HandleTypeDef htim2;
+extern		TIM_HandleTypeDef htim1,htim2;
 extern		uint32_t	DecodeTab[];
 
 void			wsProcInit(void),

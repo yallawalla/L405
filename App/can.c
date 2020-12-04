@@ -15,11 +15,11 @@ uint32_t	idDev,
 					nDev,
 					idCrc,
 					debug,
-					idPos=_ACK_LEFT_FRONT,
-					testMask=0;
-payload		py={0,0};
+					idPos,
+					testMask;
+payload		py;
 uint32_t	devices[_MAX_DEV];
-uint32_t	tref=0;
+uint32_t	tref, tref_cnt;
 
 #ifdef	__DISCO__
 		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
@@ -65,7 +65,7 @@ tim timStack[] = {
 	{NULL,NULL,0,0,0,_IT}
 };
 
-int		filter_count=0;
+uint32_t	filter_count;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -73,7 +73,8 @@ int		filter_count=0;
 * Return				:
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if(htim->Instance==TIM2)	HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
+	if(htim == &htim1)
+		HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
 }
 /*******************************************************************************
 * Function Name	: 
@@ -84,6 +85,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	uint32_t	i;
 	tim				*p=NULL;
+	
+	if(htim->Instance==TIM2 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_4)
+		++tref_cnt;
 	
 	if(htim->Instance==TIM3)	p=&timStack[12];
 	if(htim->Instance==TIM4)	p=&timStack[15];
@@ -258,7 +262,7 @@ void	*canTx(void *v) {
 	}
 /*******************************************************************************/	
 	if(!_CAN) {
-		_CAN	=	_io_init(100*sizeof(CanRxMsg), 100*sizeof(CanTxMsg));
+		_CAN	=	_io_init(100*sizeof(CanTxMsg), 100*sizeof(CanTxMsg));
 
 		canFilterCfg(_ACK_LEFT_FRONT,	0x780, _ID_IAP_GO, 0x7f0);
 		idDev=(uint32_t)HAL_CRC_Calculate(&hcrc,(uint32_t *)0x1FFF7A10,3);
@@ -336,9 +340,16 @@ void	*canTx(void *v) {
 							t->slo+=dt*dt;
 						}
 					}	else {
-						t->tref=t->to = tcapt;
-						if(!tref || tcapt<tref)
-							tref=tcapt;
+						t->to=tcapt;
+//----------------------------------------------------------------						
+						if(tcapt < htim2.Instance->CCR4)												// najprej podelaš preskok
+							t->tref = tcapt + 0x10000 - htim2.Instance->CCR4;			// counterja
+						else
+							t->tref = tcapt - htim2.Instance->CCR4;
+						if(!t->cnt)																							// prvi pulz na kanalu ?
+							t->trefcnt=tref_cnt;																	// referencni count
+						_DEBUG(10,"\r\n%d,%d,%8d,%8d",t->ch, t->sect,t->trefcnt,t->tref);
+//----------------------------------------------------------------						
 					}
 					++t->cnt;
 					t->timeout=HAL_GetTick()+MAX__INT;
@@ -347,7 +358,6 @@ void	*canTx(void *v) {
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
 				t->timeout=0;
 				_DEBUG(DBG_CRC,"\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);
-				_DEBUG(10,"\r\n%d,%d:%d",t->ch,t->sect,t->tref-tref);
 				switch(t->crc) {
 					case _VCP_CDC:
 						if(_VCP) {
@@ -360,26 +370,26 @@ void	*canTx(void *v) {
 					break;
 							
 					case _LEFT_FRONT:
-						idPos=_ACK_LEFT_FRONT;
-						Send(idPos,NULL,0);
+						idPos=0;
+						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _RIGHT_FRONT:
-						idPos=_ACK_LEFT_FRONT+1;
-						Send(idPos,NULL,0);
+						idPos=1;
+						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _RIGHT_REAR:
-						idPos=_ACK_LEFT_FRONT+2;
-						Send(idPos,NULL,0);
+						idPos=2;
+						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _LEFT_REAR:
-						idPos=_ACK_LEFT_FRONT+3;
-						Send(idPos,NULL,0);
+						idPos=3;
+						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 			
@@ -411,19 +421,22 @@ void	*canTx(void *v) {
 				break;
 			
 		if(t->htim == NULL) { 
-			tref=0;
 			if(py.word[0]) {
 				if(flushFilter(&py.word[0]) > 8) {
 					if(py.byte[0]==1)	py.byte[0]=2;
 					if(py.byte[1]==1)	py.byte[1]=2;
 					if(py.byte[2]==1)	py.byte[2]=2;
-					Send(idPos,(payload *)&py.word[0],3*sizeof(uint8_t));
+					py.word[1]=tref;
+					Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
+					tref=tref=0;
 				}
 				py.word[1]=py.word[0];																			//backuo za timeout
 			} else {
 				py.word[0]=py.word[1];
 				if(flushFilter(NULL) == 1) {																// osamljen pulz je nespremenjen !!!
-					Send(idPos,(payload *)&py.word[0],3*sizeof(uint8_t));
+					py.word[1]=tref;
+					Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
+					tref=tref=0;
 				}
 			}
 			py.word[0]=0;
@@ -451,17 +464,23 @@ void	*canRx(void *v) {
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
 			_BLUE(500);
-			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",rx.hdr.Timestamp,rx.hdr.StdId);
+			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
 			for(int i=0; i<rx.hdr.DLC; ++i)
 				_DEBUG(DBG_CAN_RX," %02X",rx.buf.bytes[i]);
 			_DEBUG(DBG_CAN_RX,"%s","\r\n");
 
 			switch(rx.hdr.StdId) {
 				
-				case _ID_IAP_PING:
-					p.word[0]=idCrc;
-					p.word[1]=idDev;
-					Send(idPos,&p,sizeof(payload));
+				case _ID_IAP_PING ... _ID_IAP_PING+_MAX_DEV-1:
+					if(rx.hdr.DLC) {
+						devices[nDev++]=rx.buf.word[1];
+						_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ID_IAP_PING)]);
+						_DEBUG(DBG_CONSOLE,"%s","\r\n");
+					} else {			
+						p.word[0]=idCrc;
+						p.word[1]=idDev;
+						Send(_ID_IAP_PING+idPos,&p,sizeof(payload));
+					}
 				break;
 
 				case _ID_IAP_REQ:
@@ -471,10 +490,8 @@ void	*canRx(void *v) {
 					while(1);
 
 				case _ID_IAP_ACK:
-					if(rx.hdr.DLC==sizeof(payload) &&  rx.buf.word[0]==0) {
-						++nDev;
-						_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
-					}
+					++nDev;
+					_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
 					break;
 					
 				case _TEST_REQ:
@@ -510,7 +527,7 @@ void	*canRx(void *v) {
 				break;
 
 				case _TEST_LEFT_FRONT ... _TEST_LEFT_FRONT+_MAX_DEV-1:
-					if(rx.hdr.StdId - 0x010 == idPos) {
+					if(rx.hdr.StdId - _TEST_LEFT_FRONT == idPos) {
 uint16_t 		ch=rx.buf.byte[0],
 						sect=rx.buf.byte[1],
 						n=rx.buf.hword[1],
@@ -531,21 +548,12 @@ uint16_t 		ch=rx.buf.byte[0],
 				break;
 			
 				case _ACK_LEFT_FRONT ... _ACK_LEFT_FRONT+_MAX_DEV-1:
-					switch(rx.hdr.DLC) {
-						case 0:																									// quadrant id.
-							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);						
-						break;
-						case 3*sizeof(uint8_t):																	// thread
-							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,rx.buf.bytes);		
-						break;
-						case sizeof(payload):																		// device ack.
-							devices[nDev++]=rx.buf.word[1];
-							_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ACK_LEFT_FRONT)]);
-							DecodeCom(NULL);
-						break;
-						default:
-							break;
-					}					
+					if(rx.hdr.DLC)
+						Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,rx.buf.bytes);		
+					else
+						Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);
+					break;	
+					
 				default:
 					break;
 			}
