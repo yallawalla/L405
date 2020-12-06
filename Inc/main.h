@@ -63,7 +63,7 @@ void Error_Handler(void);
 #define __TP 130
 #define __TL 36
 #define __TH 94
-#define __LEDS 24
+#define __NWS 24
 #define __RXLEN 128
 #define __TXLEN 128
 #define OTG_ID_Pin GPIO_PIN_13

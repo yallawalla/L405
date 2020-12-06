@@ -4,11 +4,16 @@
 #define		SW_version			100
 
 __ALIGN_BEGIN 
-uint32_t	_leds[(__LEDS+8+8)*24]; 
+uint32_t	_ws[(__NWS+8+8)*24]; 
 __ALIGN_END;
 
 
-struct led leds[] =
+struct  {
+	HSV				colour;
+	uint32_t	bit12;
+	uint32_t	bit24;
+	uint32_t	timeout[__NWS];
+} ws[] =
 {
 	{{0,255,100},		0,0,{0}},
 	{{60,255,100},	0,0,{0}},
@@ -20,7 +25,7 @@ struct led leds[] =
 };
 
 uint32_t	DecodeTab[4096];
-uint32_t	pTimeout,pCount[__COLS][__LEDS];
+uint32_t	pTimeout,pCount[__COLS][__NWS];
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -32,15 +37,15 @@ void			Decode(int sect,uint8_t *p) {
 						if(!pTimeout)
 							pTimeout=HAL_GetTick()+20;
 						
-						for(int i=0; i<__LEDS/8; ++i)
+						for(int i=0; i<__NWS/8; ++i)
 							for(int j=0; j<__COLS; ++j)
 								if(p[i] & (1<<j)) {
-									leds[j].bit12 |= 1 << (sect*__LEDS/8+i);
+									ws[j].bit12 |= 1 << (sect*__NWS/8+i);
 								}
 					}	else {
-						wsStream(sect*__LEDS/4,0,__LEDS/4-1);
-						for(int i=0; i<__LEDS/4; ++i)
-							leds[0].timeout[sect*__LEDS/4+i]=HAL_GetTick()+1000;
+						wsStream(sect*__NWS/4,0,__NWS/4-1);
+						for(int i=0; i<__NWS/4; ++i)
+							ws[0].timeout[sect*__NWS/4+i]=HAL_GetTick()+1000;
 					}
 }
 /*******************************************************************************
@@ -51,9 +56,9 @@ void			Decode(int sect,uint8_t *p) {
 *******************************************************************************/
 void			wsStream(int32_t sect, int32_t colour, int32_t n) {
 RGB				rgb={0,0,0};
-uint32_t	*p = &_leds[(sect+8+4)*24];
+uint32_t	*p = &_ws[(sect+8+4)*24];
 					if(colour >= 0)
-						HSV2RGB(leds[colour].colour, &rgb);
+						HSV2RGB(ws[colour].colour, &rgb);
 					
 					for(int i=0; i<n; ++i) {
 						for(int k=0; k<8; ++k)
@@ -68,7 +73,7 @@ uint32_t	*p = &_leds[(sect+8+4)*24];
 						int i=colour;
 						if(i<0)
 							i=-i-1;
-						p = &_leds[(8+i-2)*24];
+						p = &_ws[(8+i-2)*24];
 						for(int k=0; k<8; ++k)
 							(rgb.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 						for(int k=0; k<8; ++k)
@@ -78,7 +83,7 @@ uint32_t	*p = &_leds[(sect+8+4)*24];
 					}
 					
 					
-					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_leds,sizeof(_leds)/sizeof(uint32_t));
+					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_ws,sizeof(_ws)/sizeof(uint32_t));
 					_DEBUG(DBG_LED,"\r%3d: * %02X %02X %02X %02X %02X %2d\r\n",HAL_GetTick() % 1000, sect, rgb.r,rgb.g,rgb.b,n,colour);
 }
 /*******************************************************************************
@@ -88,12 +93,12 @@ uint32_t	*p = &_leds[(sect+8+4)*24];
 * Return				:
 *******************************************************************************/
 void			wsProcInit(void) {
-					uint32_t *p = &_leds[4*24];
+					uint32_t *p = &_ws[4*24];
 		
-					for(int i=0; i<(__LEDS+8)*24; ++i)
+					for(int i=0; i<(__NWS+8)*24; ++i)
 						*p++=__TL;
 																													// to open update interrupt
-					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_leds,sizeof(_leds)/sizeof(uint32_t));			// to start DMA 
+					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_ws,sizeof(_ws)/sizeof(uint32_t));			// to start DMA 
 					for (int i = 1; i < 4095; ++i) {
 						int j = i,n = 0;
 						while (j % 2)
@@ -127,19 +132,19 @@ void			*wsProc(void *p) {
 					if(pTimeout && HAL_GetTick() > pTimeout) {
 						pTimeout=0;
 						for(int i=0; i<__COLS; ++i) {
-							leds[i].bit24 |= DecodeTab[leds[i].bit12];
-							for(int j=0; j < __LEDS; ++j)
-								if(leds[i].timeout[j] == 0 && leds[i].bit24 & (1 << j)) {
-									leds[i].timeout[j]=HAL_GetTick()+2000;
+							ws[i].bit24 |= DecodeTab[ws[i].bit12];
+							for(int j=0; j < __NWS; ++j)
+								if(ws[i].timeout[j] == 0 && ws[i].bit24 & (1 << j)) {
+									ws[i].timeout[j]=HAL_GetTick()+2000;
 								}
-							leds[i].bit12=0;
+							ws[i].bit12=0;
 						}
 					}
 						
-					for(int i=0; i < __LEDS; ++i) {
+					for(int i=0; i < __NWS; ++i) {
 						int j;
 						for(j=0; j < __COLS; ++j) {
-							if((leds[j].bit24 & (1 << i)) && pCount[j][i] < 5) {
+							if((ws[j].bit24 & (1 << i)) && pCount[j][i] < 5) {
 								if(!pCount[j][i]++)
 									wsStream(i,j,1);
 								break;
@@ -151,11 +156,11 @@ void			*wsProc(void *p) {
 					}
 	
 					for(int i=0; i<__COLS; ++i) 
-						for(int j=0; j<__LEDS; ++j)
-							if(leds[i].timeout[j] && HAL_GetTick() > leds[i].timeout[j]) {
+						for(int j=0; j<__NWS; ++j)
+							if(ws[i].timeout[j] && HAL_GetTick() > ws[i].timeout[j]) {
 								wsStream(j,-i-1,1);
-								leds[i].timeout[j]=0;
-								leds[i].bit24 &= ~(1<<j);
+								ws[i].timeout[j]=0;
+								ws[i].bit24 &= ~(1<<j);
 								pCount[i][j]=0;
 							}
 					return wsProc;

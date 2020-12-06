@@ -3,6 +3,7 @@
 #include	"io.h"
 #include	"can.h"
 #include	"ws.h"
+#include	"leds.h"
 #include	<stdlib.h>
 /*******************************************************************************
 * Function Name	: 

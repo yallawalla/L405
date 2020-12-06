@@ -5,7 +5,7 @@ extern	TIM_HandleTypeDef htim2;
   * @param None
   * @retval None
   */
-void MX_TIM2_ReInit(void)
+void MX_TIM2_Cfg(void)
 {
 
   /* USER CODE BEGIN TIM2_Init 0 */

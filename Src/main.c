@@ -29,6 +29,7 @@
 #include "ws.h"
 #include "can.h"
 #include "console.h"
+#include "leds.h"
 #include "usbh_platform.h"
 //#include "usbd_def.h"
 
@@ -103,7 +104,7 @@ static void MX_ADC1_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
-void	MX_TIM2_ReInit(void);
+void	MX_TIM2_Cfg(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -179,11 +180,12 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	_proc_add(canRx,NULL,"canRx",0);
 	_proc_add(canTx,NULL,"canTx",0);
 	_proc_add(console,&_VCP,"console",0); 
-	_proc_add(Watchdog,NULL,"watchdog",0); 
+	_proc_add(Watchdog,NULL,"watchdog",100); 
+	_proc_add(ledProc,NULL,"leds",10); 
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
 	if((idPos) < 4) 
-		MX_TIM2_ReInit();
+		MX_TIM2_Cfg();
 	else {
 		wsProcInit();
 		__HAL_TIM_ENABLE_IT(&htim1,TIM_IT_UPDATE);

@@ -11,14 +11,6 @@
 typedef		struct	{uint8_t r; uint8_t g; uint8_t b; }	RGB;
 typedef		struct	{int16_t h; uint8_t s; uint8_t v; }	HSV;
 
-struct led {
-	HSV	colour;
-	uint32_t	bit12;
-	uint32_t	bit24;
-	uint32_t	timeout[__LEDS];
-	uint32_t	row[__LEDS];
-};
-
 extern		TIM_HandleTypeDef htim1,htim2;
 extern		uint32_t	DecodeTab[];
 

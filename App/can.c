@@ -1,6 +1,7 @@
 #include	"can.h"
 #include	"console.h"
 #include	"ws.h"
+#include	"leds.h"
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -20,22 +21,6 @@ uint32_t	idDev,
 payload		py,py_backup;
 uint32_t	devices[_MAX_DEV];
 uint32_t	ref_cnt;
-
-#ifdef	__DISCO__
-		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
-		#define ledOn(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_SET)
-		led Leds = {{0,0,0,0},GPIOD,{GPIO_PIN_14,GPIO_PIN_12,GPIO_PIN_15,GPIO_PIN_13}};
-#else 
-	#ifdef	__NUCLEO__
-		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
-		#define ledOn(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_SET)
-		led Leds = {{0,0,0,0},GPIOB,{GPIO_PIN_14,GPIO_PIN_0,GPIO_PIN_7,GPIO_PIN_7}};
-	#else
-		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_SET)
-		#define ledOn(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
-		led Leds = {{0,0,0,0},LED_R_GPIO_Port,{LED_R_Pin,LED_G_Pin,LED_R_Pin,LED_G_Pin}};
-	#endif
-#endif
 
 tim timStack[] = {
 	{NULL,&htim1,TIM_CHANNEL_1,0,0,_DMA},					//PA8		1A1
@@ -238,8 +223,6 @@ uint32_t	flushFilter(uint32_t *ch) {
 		if (cnt == cnteq)
 			ret = cnteq;
 		cnt = cnteq = 0;
-		
-
 	}
 	return ret;
 }
@@ -250,17 +233,6 @@ uint32_t	flushFilter(uint32_t *ch) {
 * Return				:
 *******************************************************************************/
 void	*canTx(void *v) {
-	for(int i=0;i<4;++i) {
-		if(!Leds.t[i])
-			continue;
-		if(HAL_GetTick() > Leds.t[i]) {
-			ledOff(Leds.port, Leds.pin[i]);
-			Leds.t[i]=0;
-		}
-		else
-			ledOn(Leds.port, Leds.pin[i]);
-	}
-/*******************************************************************************/	
 	if(!_CAN) {
 		_CAN	=	_io_init(100*sizeof(CanTxMsg), 100*sizeof(CanTxMsg));
 
@@ -345,7 +317,7 @@ void	*canTx(void *v) {
 							t->tref = tcapt + 0x10000 - htim2.Instance->CCR4;		// counterja
 						else
 							t->tref = tcapt - htim2.Instance->CCR4;
-						_DEBUG(10,"\r\n%d,%d,%8d,%8d",t->ch, t->sect,t->trefcnt,t->tref);
+						_DEBUG(10,"\r\n%d,%d,%3d,%5d",t->ch, t->sect,t->trefcnt % 1000,t->tref);
 //----------------------------------------------------------------						
 					}
 					++t->cnt;
@@ -440,7 +412,7 @@ void	*canTx(void *v) {
 			if(py.word[0]) {
 				py.hword[2]=first->tref;
 				py.hword[3]=first->trefcnt;
-				if(flushFilter(&py.word[0]) > 8) {
+				if(flushFilter(&py.word[0]) > 4) {
 					if(py.byte[0]==1)	py.byte[0]=2;
 					if(py.byte[1]==1)	py.byte[1]=2;
 					if(py.byte[2]==1)	py.byte[2]=2;

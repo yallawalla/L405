@@ -56,21 +56,9 @@ extern		uint32_t					nDev,
 void			*canRx(void *),
 					*canTx(void *);
 
-typedef struct  {
-	uint32_t	t[4];
-	GPIO_TypeDef *port;
-	uint16_t	pin[4];
-} led;
-extern led	Leds;
-
 typedef enum { false, true } bool;
 #define max(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a > _b ? _a : _b; })
 #define min(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a < _b ? _a : _b; })
-
-#define _RED(a)			Leds.t[0]=HAL_GetTick()+a
-#define _GREEN(a)		Leds.t[1]=HAL_GetTick()+a
-#define _BLUE(a)		Leds.t[2]=HAL_GetTick()+a
-#define _YELLOW(a)	Leds.t[3]=HAL_GetTick()+a
 
 extern	uint32_t	devices[];
 
