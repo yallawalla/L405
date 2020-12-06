@@ -37,11 +37,6 @@ void			Decode(int sect,uint8_t *p) {
 								if(p[i] & (1<<j)) {
 									leds[j].bit12 |= 1 << (sect*__LEDS/8+i);
 								}
-								
-//						wsStream(sect*__LEDS/4,6,__LEDS/4-1);
-//						for(int i=0; i<__LEDS/4; ++i)
-//							leds[0].timeout[sect*__LEDS/4+i]=HAL_GetTick()+1000;
-
 					}	else {
 						wsStream(sect*__LEDS/4,0,__LEDS/4-1);
 						for(int i=0; i<__LEDS/4; ++i)

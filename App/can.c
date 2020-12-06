@@ -17,9 +17,9 @@ uint32_t	idDev,
 					debug,
 					idPos,
 					testMask;
-payload		py;
+payload		py,py_backup;
 uint32_t	devices[_MAX_DEV];
-uint32_t	tref, tref_cnt;
+uint32_t	ref_cnt;
 
 #ifdef	__DISCO__
 		#define ledOff(a,b)		HAL_GPIO_WritePin(a,b,GPIO_PIN_RESET)
@@ -87,7 +87,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	tim				*p=NULL;
 	
 	if(htim->Instance==TIM2 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_4)
-		++tref_cnt;
+		++ref_cnt;
 	
 	if(htim->Instance==TIM3)	p=&timStack[12];
 	if(htim->Instance==TIM4)	p=&timStack[15];
@@ -294,20 +294,19 @@ void	*canTx(void *v) {
 						else
 							dt = (tcapt - t->to)/uS;
 						t->to=tcapt;
+					
 						if(dt>MIN_BURST) {
 							if(dt > 300)
-							_DEBUG(DBG_TIMING,"%c",'-');
-						else
-							_DEBUG(DBG_TIMING,"%c",'_');
+								_DEBUG(DBG_TIMING,"%c",'-');
+							else
+								_DEBUG(DBG_TIMING,"%c",'_');
 						}
 						
-						if(t->cnt % 2)															// __--
+						if(t->cnt % 2)														// __--
 							_DEBUG(DBG_USEC,"\r\n%d,%d:%3d",t->ch,t->sect,dt);
-						else {
-							if(t->cnt)																//--__
-							_DEBUG(DBG_USEC,",%3d",dt);
-						}
-						
+						else 
+							_DEBUG(DBG_USEC,",%3d",dt);							//--__
+		
 						if(dt>MIN_BURST) {
 							__HAL_CRC_DR_RESET(&hcrc);
 							hcrc.Instance->DR = t->crc;
@@ -318,11 +317,8 @@ void	*canTx(void *v) {
 							t->crc = hcrc.Instance->DR;
 						}
 						
-						if(t->cnt % 2) {			// __---
-							if(t->cnt == 1)
-								t->pw=dt;
-							else
-								t->pw +=dt;
+						if(t->cnt % 2) {													// __---
+							t->pw +=dt;
 							
 							t->hi +=dt;
 							t->shi+=dt*dt;
@@ -330,7 +326,7 @@ void	*canTx(void *v) {
 							if(t->pw > MIN_BURST) {
 								++t->longcnt;
 							}
-						} else {								// --___
+						} else {																	// --___
 								if(dt < MAX_BURST) {
 									if(t->pw > MIN_BURST)
 										--t->longcnt;
@@ -341,13 +337,14 @@ void	*canTx(void *v) {
 						}
 					}	else {
 						t->to=tcapt;
+						t->cnt=t->longcnt=t->pw=t->crc = 0;
+						t->hi=t->lo=t->shi=t->slo=0;
 //----------------------------------------------------------------						
-						if(tcapt < htim2.Instance->CCR4)												// najprej podelaš preskok
-							t->tref = tcapt + 0x10000 - htim2.Instance->CCR4;			// counterja
+						t->trefcnt=ref_cnt;																		// referencni count
+						if(tcapt < htim2.Instance->CCR4)											// najprej podelaš preskok
+							t->tref = tcapt + 0x10000 - htim2.Instance->CCR4;		// counterja
 						else
 							t->tref = tcapt - htim2.Instance->CCR4;
-						if(!t->cnt)																							// prvi pulz na kanalu ?
-							t->trefcnt=tref_cnt;																	// referencni count
 						_DEBUG(10,"\r\n%d,%d,%8d,%8d",t->ch, t->sect,t->trefcnt,t->tref);
 //----------------------------------------------------------------						
 					}
@@ -396,47 +393,63 @@ void	*canTx(void *v) {
 					case _REPEAT:
 					break;
 					
-					default: // signature
-						if(t->longcnt)
-							py.byte[t->sect] |=4;
-						else if(t->cnt > 4)						// >4 (dva pulta ) za izogib dvojnega pulza pri 
-								py.byte[t->sect] |=2;
-							else
-								py.byte[t->sect] |=1;
+					default: 												// signature
+//						if(t->longcnt)
+//							py.byte[t->sect] |=4;
+//						else if(t->cnt > 4)						// >4 (dva pulta ) za izogib dvojnega pulza pri 
+//								py.byte[t->sect] |=2;
+//							else
+//								py.byte[t->sect] |=1;
 					break;
 				}				
-				t->cnt/=2;
-				if(t->cnt > 1)
-					_DEBUG(DBG_STAT,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,t->hi/t->cnt,t->lo/(t->cnt-1),(int)sqrt(t->cnt*t->shi - t->hi*t->hi)/t->cnt,(int)sqrt((t->cnt-1)*t->slo - t->lo*t->lo)/(t->cnt-1),t->cnt,t->longcnt);
-				else if(t->cnt > 0)
-					_DEBUG(DBG_STAT,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,	t->hi,0,0,0,t->cnt,t->longcnt);
-				t->cnt=t->longcnt=t->pw=t->crc = 0;
-				t->hi=t->lo=t->shi=t->slo=0;
-				t->tref=0;
+				uint32_t n = t->cnt/2;
+				if(n > 1)
+					_DEBUG(DBG_STAT,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,t->hi/n,t->lo/(n-1),(int)sqrt(n*t->shi - t->hi*t->hi)/n,(int)sqrt((n-1)*t->slo - t->lo*t->lo)/(n-1),n,t->longcnt);
+				else if(n > 0)
+					_DEBUG(DBG_STAT,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,	t->hi,0,0,0,n,t->longcnt);
 			}
 		}
 			
 		for(t=timStack; t->htim; ++t)
 			if(t->timeout)
-				break;
+				break;			
 			
 		if(t->htim == NULL) { 
+			uint32_t refTo,refCnt;
+			tim *first=NULL;
+			
+			for(t=timStack; t->htim; ++t) {
+				if(t->cnt) {
+					if(!first || (t->tref < refTo && t->trefcnt <= refCnt)) {
+						if(t->trefcnt != refCnt || t->tref < refTo-5)
+							memset(&py,0,sizeof(payload));
+						first=t;		
+						refCnt=t->trefcnt;
+						refTo=t->tref;
+						if(t->longcnt)
+							py.byte[t->sect] =4;
+						else if(t->cnt > 4)						// >4 (dva pulta ) za izogib dvojnega pulza pri 
+								py.byte[t->sect] =2;
+							else
+								py.byte[t->sect] =1;
+						}
+				}
+				t->cnt=t->longcnt=0;
+			}
+						
 			if(py.word[0]) {
+				py.hword[2]=first->tref;
+				py.hword[3]=first->trefcnt;
 				if(flushFilter(&py.word[0]) > 8) {
 					if(py.byte[0]==1)	py.byte[0]=2;
 					if(py.byte[1]==1)	py.byte[1]=2;
 					if(py.byte[2]==1)	py.byte[2]=2;
-					py.word[1]=tref;
 					Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
-					tref=tref=0;
 				}
-				py.word[1]=py.word[0];																			//backuo za timeout
+				memcpy(&py_backup,&py,sizeof(payload));											//backuo za timeout
 			} else {
-				py.word[0]=py.word[1];
 				if(flushFilter(NULL) == 1) {																// osamljen pulz je nespremenjen !!!
-					py.word[1]=tref;
-					Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
-					tref=tref=0;
+					Send(_ACK_LEFT_FRONT+idPos,&py_backup,sizeof(payload));
 				}
 			}
 			py.word[0]=0;
