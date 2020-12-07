@@ -328,6 +328,7 @@ FRESULT fTest(int argc, char *argv[]) {
 		if(argv[2]) {
 			if(p) {
 				p->dt=atoi(argv[2]);
+				memcpy(p->arg,m,sizeof(CanTxMsg));
 				free(m);
 			} else
 				_proc_add(testProc,m,"test",atoi(argv[2]));

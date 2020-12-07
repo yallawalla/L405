@@ -97,8 +97,7 @@ void			wsProcInit(void) {
 		
 					for(int i=0; i<(__NWS+8)*24; ++i)
 						*p++=__TL;
-																													// to open update interrupt
-					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_ws,sizeof(_ws)/sizeof(uint32_t));			// to start DMA 
+					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_ws,sizeof(_ws)/sizeof(uint32_t));
 					for (int i = 1; i < 4095; ++i) {
 						int j = i,n = 0;
 						while (j % 2)
