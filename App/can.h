@@ -33,11 +33,13 @@ void			VCP_USB_DEVICE_Init(void),
 extern		const char *			strPos[];
 extern		CAN_HandleTypeDef hcan2;
 extern		CRC_HandleTypeDef hcrc;
+extern		DAC_HandleTypeDef hdac;
 extern 		TIM_HandleTypeDef htim1,
 														htim8,
 														htim3,
 														htim4,
-														htim5;
+														htim5,
+														htim6;
 
 extern		_io								*_CAN,
 														*_VCP,
@@ -51,7 +53,8 @@ extern		uint32_t					nDev,
 														idCrc,
 														debug,
 														testMask,
-														timingTest;
+														timingTest,
+														dacBuf[];
 
 void			*canRx(void *),
 					*canTx(void *);

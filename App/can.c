@@ -480,14 +480,9 @@ void	*canRx(void *v) {
 					break;
 					
 				case _TEST_REQ:
-				{
-					register int i __asm("r3");
-					i=rx.buf.hword[0];
-					while(i--)
-						TEST_GPIO_Port->BSRR = TEST_Pin;
-					TEST_GPIO_Port->BSRR = (TEST_Pin<<16);
-				}
-					
+					dacBuf[1]=rx.buf.hword[3];
+					htim6.Instance->ARR=rx.buf.hword[0];
+					HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t *)dacBuf, 128,DAC_ALIGN_12B_R);
 				break;
 
 				case	_REMOTE_REQ:

@@ -320,17 +320,19 @@ void		*testProc(void *v) {
 //-----------------------------------------------------
 FRESULT fTest(int argc, char *argv[]) {
 	_proc *p=_proc_find(testProc,NULL);
-	if(argv[1]) {
+	if(argv[1] && argv[2] ) {
 		CanTxMsg	*m=malloc(sizeof(CanTxMsg));
 		m->hdr.StdId=_TEST_REQ;
-		m->hdr.DLC=1;
+		m->hdr.DLC=2*sizeof(uint16_t);
 		m->buf.hword[0]=atoi(argv[1]);				
-		if(argv[2]) {
+		m->buf.hword[1]=atoi(argv[2]);				
+		if(argv[3]) {
 			if(p) {
-				p->dt=atoi(argv[2]);
+				p->dt=atoi(argv[3]);
+				memcpy(p->arg,m->buf.bytes,m->hdr.DLC);
 				free(m);
 			} else
-				_proc_add(testProc,m,"test",atoi(argv[2]));
+				_proc_add(testProc,m,"test",atoi(argv[3]));
 		} else {			
 			Send(m->hdr.StdId,&m->buf,m->hdr.DLC);
 			free(m);
