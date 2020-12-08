@@ -355,11 +355,11 @@ FRESULT fAddress(int argc, char *argv[]) {
 	if(argv[1]) {
 		if(0 > atoi(argv[1]) || atoi(argv[1]) > _MAX_DEV)
 			return FR_INVALID_PARAMETER;
-		idPos=atoi(argv[1]);
+		idPos=atoi(argv[1])-1;
 		SaveSettings();
 	}		
 	DecodeCom(0);
-	_print("  device address %d, %s",idPos, strPos[min(4,idPos)]);	
+	_print("  device address %d, %s",idPos+1, strPos[min(4,idPos)]);	
 	return FR_OK;
 }
 //-----------------------------------------------------
@@ -442,10 +442,14 @@ FATFS			fatfs;
 //__________________________________________________Prompt only response ____
 			if(!c) {
 				TCHAR	c[128];
-				f_getcwd(c,sizeof(c));
-				_print("\r\n%X/",idPos);
-				if(!strncmp(c,"1:/",3))
-					_print("USB/");
+				if(f_getcwd(c,sizeof(c))==FR_OK) {
+					if(!strncmp(c,"0:/",3))
+						*(strchr(c,':')-1)=idPos+'U';
+					else
+						*(strchr(c,':')-1)=idPos+'1';
+				} else
+					strcpy(c,"?:/");
+				_print("\r\n%s",c);
 			}
 			else
 //___________________________________________________________________________

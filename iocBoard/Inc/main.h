@@ -63,7 +63,7 @@ void Error_Handler(void);
 #define __TP 130
 #define __TL 36
 #define __TH 94
-#define __LEDS 24
+#define __NWS 24
 #define __RXLEN 128
 #define __TXLEN 128
 #define OTG_ID_Pin GPIO_PIN_13
@@ -76,6 +76,8 @@ void Error_Handler(void);
 #define sense45V_GPIO_Port GPIOC
 #define sense_5V_Pin GPIO_PIN_1
 #define sense_5V_GPIO_Port GPIOC
+#define TREF_Pin GPIO_PIN_4
+#define TREF_GPIO_Port GPIOA
 #define TEST_Pin GPIO_PIN_5
 #define TEST_GPIO_Port GPIOA
 #define LEDS_Pin GPIO_PIN_11

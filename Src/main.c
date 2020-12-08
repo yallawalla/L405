@@ -31,8 +31,6 @@
 #include "console.h"
 #include "leds.h"
 #include "usbh_platform.h"
-//#include "usbd_def.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -171,10 +169,10 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 		f_unlink("L405.hex");
 		f_unlink("L405.bin");
 		idCrc=HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int));
-		if(ff_pack(0) > 20) {
-			ff_pack(EOF);		
-			_GREEN(1000);
-		}
+//		if(ff_pack(0) > 20) {
+//			ff_pack(EOF);		
+//			_GREEN(1000);
+//		}
 	}
 	f_close(&f);
 	_proc_add(canRx,NULL,"canRx",0);

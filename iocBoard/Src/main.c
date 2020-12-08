@@ -29,9 +29,8 @@
 #include "ws.h"
 #include "can.h"
 #include "console.h"
+#include "leds.h"
 #include "usbh_platform.h"
-//#include "usbd_def.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,7 +91,7 @@ static void MX_USART1_UART_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
-
+void	MX_TIM2_Cfg(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -162,20 +161,25 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 		}
 	}
 	f_close(&f);
-	_proc_add(Watchdog,NULL,"watchdog",0); 
+	_proc_add(canRx,NULL,"canRx",0);
+	_proc_add(canTx,NULL,"canTx",0);
 	_proc_add(console,&_VCP,"console",0); 
-	_proc_add(canRx,&_DBG,"canRx",0);
-	_proc_add(canTx,&_DBG,"canTx",0);
+	_proc_add(Watchdog,NULL,"watchdog",100); 
+	_proc_add(ledProc,NULL,"leds",10); 
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
-	wsProcInit();
+	if((idPos) < 4) 
+		MX_TIM2_Cfg();
+	else {
+		wsProcInit();
+		__HAL_TIM_ENABLE_IT(&htim1,TIM_IT_UPDATE);
+	}
 	
-	_stdio(InitUART());
-		printVersion();
-	_stdio(InitITM());
-		printVersion();
+	InitITM();
+	_stdio(&_ITM);
+	printVersion();
 	_stdio(NULL);
-
+	
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -197,8 +201,9 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 			if(otgDeviceId) {
 				MX_DriverVbusFS(false);
 				Parse(__f9);
-			} else
+			} else {
 				Parse(__f11);
+		}
 		}	
 	}
   /* USER CODE END 3 */
@@ -522,7 +527,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED_G_Pin|LED_R_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, TREF_Pin|TEST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(CAN_STB_GPIO_Port, CAN_STB_Pin, GPIO_PIN_RESET);
@@ -545,6 +550,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TREF_Pin */
+  GPIO_InitStruct.Pin = TREF_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(TREF_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : TEST_Pin */
   GPIO_InitStruct.Pin = TEST_Pin;

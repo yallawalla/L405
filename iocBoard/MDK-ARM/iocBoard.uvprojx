@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx,__IOC__</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;        ../Drivers/STM32F4xx_HAL_Driver/Inc;        ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;        ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;        ../Drivers/CMSIS/Include;        ../Middlewares/Third_Party/FatFs/src;        ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc;        ..\..\App;  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;  ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc</IncludePath>
+              <IncludePath>../Inc;         ../Drivers/STM32F4xx_HAL_Driver/Inc;         ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;         ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;         ../Drivers/CMSIS/Include;         ../Middlewares/Third_Party/FatFs/src;         ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc;         ..\..\App;   ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;   ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -642,6 +642,16 @@
               <FileName>info.txt</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\MDK-ARM\info.txt</FilePath>
+            </File>
+            <File>
+              <FileName>leds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\App\leds.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim2cfg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\App\tim2cfg.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -869,7 +869,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>5</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>../Src/user_diskio.c</PathWithFileName>
@@ -1233,7 +1233,7 @@
 
   <Group>
     <GroupName>Middlewares/FatFs</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1532,8 +1532,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\tim2cfg.c</PathWithFileName>
-      <FilenameWithoutPath>tim2cfg.c</FilenameWithoutPath>
+      <PathWithFileName>..\App\leds.c</PathWithFileName>
+      <FilenameWithoutPath>leds.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1544,8 +1544,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\leds.c</PathWithFileName>
-      <FilenameWithoutPath>leds.c</FilenameWithoutPath>
+      <PathWithFileName>..\App\tim2cfg.c</PathWithFileName>
+      <FilenameWithoutPath>tim2cfg.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
