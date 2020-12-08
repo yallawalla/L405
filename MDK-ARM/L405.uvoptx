@@ -160,6 +160,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>py_backup</ItemText>
         </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>disk</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -254,36 +259,8 @@
       <pMultCmdsp></pMultCmdsp>
       <SystemViewers>
         <Entry>
-          <Name>System Viewer\DAC</Name>
-          <WinId>35902</WinId>
-        </Entry>
-        <Entry>
           <Name>System Viewer\GPIOA</Name>
           <WinId>35897</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\TIM1</Name>
-          <WinId>35904</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\TIM2</Name>
-          <WinId>35898</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\TIM3</Name>
-          <WinId>35905</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\TIM4</Name>
-          <WinId>35903</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\TIM5</Name>
-          <WinId>35900</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\TIM7</Name>
-          <WinId>35901</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\TIM8</Name>
@@ -869,7 +846,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>5</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>../Src/user_diskio.c</PathWithFileName>
@@ -1233,7 +1210,7 @@
 
   <Group>
     <GroupName>Middlewares/FatFs</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1425,7 +1402,7 @@
 
   <Group>
     <GroupName>App</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

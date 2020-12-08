@@ -444,7 +444,7 @@ FATFS			fatfs;
 				TCHAR	c[128];
 				if(f_getcwd(c,sizeof(c))==FR_OK) {
 					if(!strncmp(c,"0:/",3))
-						*(strchr(c,':')-1)=idPos+'U';
+						*(strchr(c,':')-1)='U';
 					else
 						*(strchr(c,':')-1)=idPos+'1';
 				} else
@@ -581,14 +581,22 @@ _io 			**io=_DBG;
 
 				case __f9:
 				case __F9:
+					MX_USB_HOST_DeInit();
+					MSC_USB_DEVICE_DeInit();
+					_wait(100);
 					VCP_USB_DEVICE_Init();
 				break;
 				case __f10:
 				case __F10:
+					MX_USB_HOST_DeInit();
+					VCP_USB_DEVICE_DeInit();
+					_wait(100);
 					MSC_USB_DEVICE_Init();
 				break;
 				case __f11:
 				case __F11:
+					MSC_USB_DEVICE_DeInit();
+					VCP_USB_DEVICE_DeInit();
 					MX_USB_HOST_Init();
 				break;
 				

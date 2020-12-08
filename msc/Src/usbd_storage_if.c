@@ -179,7 +179,7 @@ USBD_StorageTypeDef USBD_Storage_Interface_fops_FS =
 int8_t STORAGE_Init_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 2 */
-  return disk_initialize(lun);
+  return disk_initialize(++lun);
   /* USER CODE END 2 */
 }
 
@@ -207,7 +207,7 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
 int8_t STORAGE_IsReady_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 4 */
-  return disk_status(lun);
+  return disk_status(++lun);
   /* USER CODE END 4 */
 }
 
@@ -231,7 +231,7 @@ int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 6 */
-  return disk_read(lun,buf,blk_addr,blk_len);
+  return disk_read(++lun,buf,blk_addr,blk_len);
   /* USER CODE END 6 */
 }
 
@@ -243,7 +243,7 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 7 */
-  return disk_write(lun,buf,blk_addr,blk_len);
+  return disk_write(++lun,buf,blk_addr,blk_len);
   /* USER CODE END 7 */
 }
 
