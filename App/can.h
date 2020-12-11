@@ -56,7 +56,6 @@ extern		uint32_t					nDev,
 void			*canRx(void *),
 					*canTx(void *);
 
-typedef enum { false, true } bool;
 #define max(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a > _b ? _a : _b; })
 #define min(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a < _b ? _a : _b; })
 

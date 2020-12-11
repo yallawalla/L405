@@ -9,6 +9,7 @@
 #include		<stdlib.h>
 #include		<stdarg.h>
 #include		<stdio.h>
+typedef enum { false, true } bool;
 //______________________________________________________________________________________
 typedef struct _buffer
 {

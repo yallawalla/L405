@@ -54,12 +54,12 @@ int 		fputc(int c, FILE *f) {
 				return f_putc(c,(FIL *)f);
 }
 //__________________________________________________________________________________
+void		*console(void *);
+//__________________________________________________________________________________
 _io			*_ITM;
 volatile int32_t  ITM_RxBuffer=ITM_RXBUFFER_EMPTY; 
 //__________________________________________________________________________________
-void		*console(void *);
 void		*itm(void *v) {
-//__________________________________________________________________________________
 int			i=0;
 _io 		*io=*(_io **)v;
 				if(_buffer_pull(io->tx,&i,1))
@@ -73,7 +73,40 @@ _io 		*io=*(_io **)v;
 //______________________________________________________________________________________
 _io			*InitITM(void) {
 				_ITM=_io_init(128,128);
-				_proc_add(console,&_ITM,"console",0);
+				_proc_add(console,&_ITM,"ITM console",0);
 				_proc_add(itm,&_ITM,"itm",2);
 				return _ITM;
 }
+
+
+//__________________________________________________________________________________
+_io			*_VCP;
+__weak	void VCP_Transmit(uint8_t *pbuf, uint16_t len) {}
+__weak	bool VCP_Ready=false;
+//__________________________________________________________________________________
+void		*vcp(void *v) {
+_io 		*io=*(_io **)v;
+uint8_t pbuf[16];
+				if(VCP_Ready && _buffer_count(io->tx))
+					VCP_Transmit(pbuf,_buffer_pull(io->tx,pbuf,16));
+				return v;
+}
+//______________________________________________________________________________________
+void		VCP_Init() {
+				_VCP=_io_init(128,128);
+				_proc_add(vcp,&_VCP,"vcp",0);
+}
+//______________________________________________________________________________________
+void		VCP_DeInit(void *p) {
+				_VCP=_io_close(_VCP);
+				_proc_find(console,&_VCP)->f=NULL;
+				_proc_find(vcp,&_VCP)->f=NULL;
+}
+//______________________________________________________________________________________
+void		VCP_Receive(uint8_t *pbuf, uint16_t len) {
+				_buffer_push(_VCP->rx,pbuf,len);
+}
+
+
+
+

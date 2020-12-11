@@ -503,11 +503,17 @@ void OTG_FS_IRQHandler(void)
 {
   /* USER CODE BEGIN OTG_FS_IRQn 0 */
 	extern void *hpcd_USB_OTG_FS;
+	extern void __OTG_FS_IRQHandler(void);
+	
+	extern void *UsbDevice;
+	extern void	USB_vDevIRQHandler(void *);
+	
 	void   HAL_PCD_IRQHandler(void *);
   /* USER CODE END OTG_FS_IRQn 0 */
   HAL_HCD_IRQHandler(&hhcd_USB_OTG_FS);
   /* USER CODE BEGIN OTG_FS_IRQn 1 */
-	HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
+	//HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
+	USB_vDevIRQHandler(UsbDevice);
   /* USER CODE END OTG_FS_IRQn 1 */
 }
 

@@ -328,15 +328,15 @@ void	*canTx(void *v) {
 				t->timeout=0;
 				_DEBUG(DBG_CRC,"\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);
 				switch(t->crc) {
-					case _VCP_CDC:
-						if(_VCP) {
-							VCP_USB_DEVICE_DeInit();
-							MSC_USB_DEVICE_Init();
-						} else {
-							MSC_USB_DEVICE_DeInit();
-							VCP_USB_DEVICE_Init();
-						}
-					break;
+//					case _VCP_CDC:
+//						if(_VCP) {
+//							VCP_USB_DEVICE_DeInit();
+//							MSC_USB_DEVICE_Init();
+//						} else {
+//							MSC_USB_DEVICE_DeInit();
+//							VCP_USB_DEVICE_Init();
+//						}
+//					break;
 							
 					case _LEFT_FRONT:
 						idPos=0;

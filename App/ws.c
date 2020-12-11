@@ -10,9 +10,7 @@ __ALIGN_END;
 
 struct  {
 	HSV				colour;
-	uint32_t	bit12;
-	uint32_t	bit24;
-	uint32_t	timeout[__NWS];
+	uint32_t	bit12, bit24, timeout[__NWS];
 } ws[] =
 {
 	{{0,255,100},		0,0,{0}},

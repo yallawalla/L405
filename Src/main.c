@@ -159,7 +159,6 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	__otgIdInit;
 	__otgPwrInit;
 	
-	
 	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
 		ff_format("FLASH:");
 		f_chdrive("FLASH:");

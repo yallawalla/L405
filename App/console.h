@@ -65,8 +65,8 @@ enum dbg {
 			_stdio(io);								\
 		} 													\
 	} while(0)	
-
-
 #endif
 
-
+void	HAL_USBD_Setup(void);
+void	UsbDevice_Init(void);
+void	UsbDevice_DeInit(void);

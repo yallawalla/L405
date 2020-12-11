@@ -563,7 +563,7 @@ _io 			**io=_DBG;
 					nDev=0;
 					Send(_ID_IAP_PING,NULL,0);
 					_wait(500);
-					_print("%3d dev. found",nDev);
+					_print("%6d dev. found",nDev);
 					DecodeCom(NULL);
 					_DBG=io;
 					debug=dbg;
@@ -579,24 +579,32 @@ _io 			**io=_DBG;
 				case __f4: Remote(3,__f4); break;
 				case __F4: Remote(3,__F4); break;
 
+//				case __f9:
+//				case __F9:
+//					MX_USB_HOST_DeInit();
+//					MSC_USB_DEVICE_DeInit();
+//					_wait(100);
+//					VCP_USB_DEVICE_Init();
+//				break;
+//				case __f10:
+//				case __F10:
+//					MX_USB_HOST_DeInit();
+//					VCP_USB_DEVICE_DeInit();
+//					_wait(100);
+//					MSC_USB_DEVICE_Init();
+//				break;
+//				case __f11:
+//				case __F11:
+
 				case __f9:
 				case __F9:
 					MX_USB_HOST_DeInit();
-					MSC_USB_DEVICE_DeInit();
-					_wait(100);
-					VCP_USB_DEVICE_Init();
+					HAL_USBD_Setup();
+					UsbDevice_Init();
 				break;
 				case __f10:
 				case __F10:
-					MX_USB_HOST_DeInit();
-					VCP_USB_DEVICE_DeInit();
-					_wait(100);
-					MSC_USB_DEVICE_Init();
-				break;
-				case __f11:
-				case __F11:
-					MSC_USB_DEVICE_DeInit();
-					VCP_USB_DEVICE_DeInit();
+					UsbDevice_Init();
 					MX_USB_HOST_Init();
 				break;
 				
@@ -710,7 +718,7 @@ void JumpToBootloader(void) {
 	void (*SysMemBootJump)(void);
 	volatile uint32_t addr = 0x1FFF0000;
 	
-	VCP_USB_DEVICE_DeInit();
+//	VCP_USB_DEVICE_DeInit();
 	_wait(3000);
 	HAL_RCC_DeInit();
 	SysTick->CTRL = 0;
