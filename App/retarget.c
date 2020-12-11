@@ -86,25 +86,25 @@ __weak	bool VCP_Ready=false;
 //__________________________________________________________________________________
 void		*vcp(void *v) {
 _io 		*io=*(_io **)v;
-uint8_t pbuf[16];
+uint8_t pbuf[64];
 				if(VCP_Ready && _buffer_count(io->tx))
-					VCP_Transmit(pbuf,_buffer_pull(io->tx,pbuf,16));
+					VCP_Transmit(pbuf,_buffer_pull(io->tx,pbuf,64));
 				return v;
 }
 //______________________________________________________________________________________
 void		VCP_Init() {
 				_VCP=_io_init(128,128);
-				_proc_add(vcp,&_VCP,"vcp",0);
+				_proc_add(vcp,&_VCP,"vcp tx",0);
 }
 //______________________________________________________________________________________
 void		VCP_DeInit(void *p) {
 				_VCP=_io_close(_VCP);
-				_proc_find(console,&_VCP)->f=NULL;
 				_proc_find(vcp,&_VCP)->f=NULL;
 }
 //______________________________________________________________________________________
 void		VCP_Receive(uint8_t *pbuf, uint16_t len) {
-				_buffer_push(_VCP->rx,pbuf,len);
+				while(!_buffer_push(_VCP->rx,pbuf,len))
+					_wait(2);
 }
 
 
