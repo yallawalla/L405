@@ -146,46 +146,46 @@
   */
 HAL_StatusTypeDef HAL_IWDG_Init(IWDG_HandleTypeDef *hiwdg)
 {
-//  uint32_t tickstart;
+  uint32_t tickstart;
 
-//  /* Check the IWDG handle allocation */
-//  if (hiwdg == NULL)
-//  {
-//    return HAL_ERROR;
-//  }
+  /* Check the IWDG handle allocation */
+  if (hiwdg == NULL)
+  {
+    return HAL_ERROR;
+  }
 
-//  /* Check the parameters */
-//  assert_param(IS_IWDG_ALL_INSTANCE(hiwdg->Instance));
-//  assert_param(IS_IWDG_PRESCALER(hiwdg->Init.Prescaler));
-//  assert_param(IS_IWDG_RELOAD(hiwdg->Init.Reload));
+  /* Check the parameters */
+  assert_param(IS_IWDG_ALL_INSTANCE(hiwdg->Instance));
+  assert_param(IS_IWDG_PRESCALER(hiwdg->Init.Prescaler));
+  assert_param(IS_IWDG_RELOAD(hiwdg->Init.Reload));
 
-//  /* Enable IWDG. LSI is turned on automatically */
-//  __HAL_IWDG_START(hiwdg);
+  /* Enable IWDG. LSI is turned on automatically */
+  __HAL_IWDG_START(hiwdg);
 
-//  /* Enable write access to IWDG_PR and IWDG_RLR registers by writing
-//  0x5555 in KR */
-//  IWDG_ENABLE_WRITE_ACCESS(hiwdg);
+  /* Enable write access to IWDG_PR and IWDG_RLR registers by writing
+  0x5555 in KR */
+  IWDG_ENABLE_WRITE_ACCESS(hiwdg);
 
-//  /* Write to IWDG registers the Prescaler & Reload values to work with */
-//  hiwdg->Instance->PR = hiwdg->Init.Prescaler;
-//  hiwdg->Instance->RLR = hiwdg->Init.Reload;
+  /* Write to IWDG registers the Prescaler & Reload values to work with */
+  hiwdg->Instance->PR = hiwdg->Init.Prescaler;
+  hiwdg->Instance->RLR = hiwdg->Init.Reload;
 
-//  /* Check pending flag, if previous update not done, return timeout */
-//  tickstart = HAL_GetTick();
+  /* Check pending flag, if previous update not done, return timeout */
+  tickstart = HAL_GetTick();
 
-//  /* Wait for register to be updated */
-//  while (hiwdg->Instance->SR != 0x00u)
-//  {
-//    if ((HAL_GetTick() - tickstart) > HAL_IWDG_DEFAULT_TIMEOUT)
-//    {
-//      return HAL_TIMEOUT;
-//    }
-//  }
+  /* Wait for register to be updated */
+  while (hiwdg->Instance->SR != 0x00u)
+  {
+    if ((HAL_GetTick() - tickstart) > HAL_IWDG_DEFAULT_TIMEOUT)
+    {
+      return HAL_TIMEOUT;
+    }
+  }
 
-//  /* Reload IWDG counter with value defined in the reload register */
-//  __HAL_IWDG_RELOAD_COUNTER(hiwdg);
+  /* Reload IWDG counter with value defined in the reload register */
+  __HAL_IWDG_RELOAD_COUNTER(hiwdg);
 
-//  /* Return function status */
+  /* Return function status */
   return HAL_OK;
 }
 
