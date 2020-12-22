@@ -67,6 +67,7 @@ enum dbg {
 	} while(0)	
 #endif
 
+void	SectorQuery(void);
 void	HAL_USBD_Setup(void);
 void	UsbDevice_Init(void);
 void	UsbDevice_DeInit(void);

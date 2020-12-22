@@ -116,8 +116,6 @@ void	MX_TIM2_Cfg(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-FIL				f;
-FATFS			fatfs;
 uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 
   /* USER CODE END 1 */
@@ -159,21 +157,16 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	__otgIdInit;
 	__otgPwrInit;
 	
-	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
-		ff_format("FLASH:");
-		f_chdrive("FLASH:");
-		SaveSettings();
-		_RED(3000);
-	} else {
+	if(LoadSettings() == FR_OK) {
+		_GREEN(1000);
 		f_unlink("L405.hex");
 		f_unlink("L405.bin");
 		idCrc=HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int));
-//		if(ff_pack(0) > 20) {
-//			ff_pack(EOF);		
-//			_GREEN(1000);
-//		}
-	}
-	f_close(&f);
+		if(ff_pack(0) > 20)
+			ff_pack(EOF);		
+	} else 
+		_RED(3000);
+	
 	_proc_add(canRx,NULL,"canRx",0);
 	_proc_add(canTx,NULL,"canTx",0);
 	_proc_add(console,&_VCP,"console",0); 

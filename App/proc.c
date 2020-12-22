@@ -80,3 +80,25 @@ void HAL_Delay(uint32_t Delay)
 {
 	_wait(Delay);
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	*Watchdog(void) {
+			HAL_IWDG_Refresh(&hiwdg);	
+			return(Watchdog);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	Watchdog_init(int t) {
+			hiwdg.Instance = IWDG;
+			hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
+			hiwdg.Init.Reload = t;
+			HAL_IWDG_Init(&hiwdg);
+}

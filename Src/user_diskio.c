@@ -40,142 +40,10 @@
 #include "io.h"
 #include "proc.h"
 /* Private typedef -----------------------------------------------------------*/
-extern		IWDG_HandleTypeDef hiwdg;
 /* Private define ------------------------------------------------------------*/
-#define 	FATFS_SECTOR	FLASH_SECTOR_6
-#define		FATFS_ADDRESS 0x08040000
-#define		PAGE_SIZE			0x20000
-#define		PAGE_COUNT		6
-#define		SECTOR_SIZE		512
-#define		CLUSTER_SIZE	4*SECTOR_SIZE
-#define		SECTOR_COUNT	(int)(PAGE_SIZE*PAGE_COUNT/(SECTOR_SIZE + sizeof(uint32_t)))
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-HAL_StatusTypeDef	FLASH_Program(uint32_t Address, uint32_t Data) {
-			HAL_StatusTypeDef status;
-			__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPERR  | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR );
-			if(*(uint32_t *)Address !=  Data) {
-				HAL_FLASH_Unlock();
-				do
-					status=HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,Address,Data);
-				while(status == HAL_BUSY);
-				HAL_FLASH_Lock();
-			}	
-			return status;
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-HAL_StatusTypeDef	FLASH_Erase(uint32_t sector, uint32_t n) {
-FLASH_EraseInitTypeDef EraseInitStruct;
-HAL_StatusTypeDef ret;
-uint32_t	SectorError;
-			HAL_FLASH_Unlock();
-			EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-			EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-			EraseInitStruct.Sector = sector;
-			EraseInitStruct.NbSectors = n;
-			ret=HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
-			HAL_FLASH_Lock(); 
-			return ret;
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-void	*Watchdog(void) {
-			HAL_IWDG_Refresh(&hiwdg);	
-			return(Watchdog);
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-void	Watchdog_init(int t) {
-			hiwdg.Instance = IWDG;
-			hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
-			hiwdg.Init.Reload = t;
-			HAL_IWDG_Init(&hiwdg);
-}
-/*******************************************************************************
-* Function Name	: ff_pack
-* Description		: packing flash file system sectors
-* Input					: mode flag, 0-analyze, 1-rewrite
-* Output				: 
-* Return				: percentage of number of sectors reduced
-*******************************************************************************/
-int		ff_pack(int mode) {
-int 	i,f,e,*p,*q,buf[SECTOR_SIZE/4];
-int		c0=0,c1=0;
-
-			Watchdog_init(4000);
-			f=FATFS_SECTOR;																															// f=koda prvega 128k sektorja
-			e=PAGE_SIZE;																																// e=velikost sektorja
-			p=(int *)FATFS_ADDRESS;																											// p=hw adresa sektorja
-			do {
-				do {
-					++c0;
-					Watchdog();																															//jk822iohfw
-					q=&p[SECTOR_SIZE/4+1];																									
-					while(p[SECTOR_SIZE/4] != q[SECTOR_SIZE/4] && q[SECTOR_SIZE/4] != -1)		// iskanje ze prepisanih sektorjev
-						q=&q[SECTOR_SIZE/4+1];
-					if(q[SECTOR_SIZE/4] == -1) {																						// ce ni kopija, se ga prepise na konec fs
-						for(i=0; i<SECTOR_SIZE/4;++i)
-							buf[i]=~p[i];
-						Watchdog();
-						if(mode)
-							disk_write (0,(uint8_t *)buf,p[SECTOR_SIZE/4],1);										// STORAGE_Write bo po prvem brisanju zacel na
-					} else																																	// zacetku !!!
-						++c1;
-					p=&p[SECTOR_SIZE/4+1]; 
-				} while(((int)p)-FATFS_ADDRESS <  e && p[SECTOR_SIZE/4] != -1);						// prepisana cela stran...
-				if(mode) {
-					_print(".");
-					_wait(2);
-					FLASH_Erase(f,1);																												// brisi !
-				}
-				f+=FLASH_SECTOR_1; 
-				e+=PAGE_SIZE;
-			} while(p[SECTOR_SIZE/4] != -1);	
-			if(mode) {
-				_print(". OK");
-				_wait(2);
-				FLASH_Erase(f,1);																													// se zadnja !
-			}
-			Watchdog_init(400);
-			return(100*c1/c0);
-}
-/*******************************************************************************
-* Function Name	: ff_format
-* Description		: formatting flash file system sectors
-* Input					: 
-* Output				: 
-* Return				: 
-*******************************************************************************/
-FRESULT	ff_format(char *drv) {
-	uint8_t	wbuf[SECTOR_SIZE];
-	Watchdog_init(4000);
-	for(int i=FATFS_SECTOR; i<FATFS_SECTOR+FLASH_SECTOR_1*PAGE_COUNT;i+=FLASH_SECTOR_1) {
-		FLASH_Erase(i,1);
-		Watchdog();
-	}
-	return f_mkfs(drv,1,CLUSTER_SIZE,wbuf,SECTOR_SIZE);
-}
 /* Private variables ---------------------------------------------------------*/
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
-
 /* USER CODE END DECL */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -287,6 +155,7 @@ DRESULT USER_write (
 {
   /* USER CODE BEGIN WRITE */
   /* USER CODE HERE */
+	HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
 	int i,*p,*q=NULL;
 		
 	for(p=(int *)FATFS_ADDRESS; p[SECTOR_SIZE/4]!=-1; p=&p[SECTOR_SIZE/4+1])

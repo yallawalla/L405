@@ -11,6 +11,14 @@
 * Output				:
 * Return				:
 *******************************************************************************/
+FATFS			fatfs;
+bool			isMounted=false;
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 int			Escape(void) {
 int		i=fgetc(stdin);
 			if((*stdin->io)->esc == NULL)
@@ -257,6 +265,33 @@ FRESULT Remote(int id, uint32_t ex) {
 * Output				:
 * Return				:
 *******************************************************************************/
+FRESULT fFormat(int argc, char *argv[]) {
+FRESULT	ret=ff_format("FLASH:");
+	if(ret==FR_OK) {
+		f_mount(&fatfs,"FLASH:",1);
+		isMounted=true;
+		if(argv[1])
+			f_setlabel(argv[1]);
+		SaveSettings();
+	}
+	return ret;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT fPack(int argc, char *argv[]) {
+	ff_pack(EOF);
+	return FR_OK;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
 FRESULT fCopy(int argc, char *argv[]) {
 	FRESULT ret=FR_OK;
 	FIL	fs,fd;
@@ -427,7 +462,9 @@ struct cmd {
 	{"type",			fType},
 	{"test",			fTest},
 	{"address",		fAddress},
-	{"iap",				fIap}
+	{"iap",				fIap},
+	{"format",		fFormat},
+	{"pack",			fPack}
 };
 /*******************************************************************************
 * Function Name	:
@@ -438,11 +475,10 @@ struct cmd {
 FRESULT	DecodeCom(char *c) {
 CanRxMsg	rx;
 FRESULT		ret=FR_OK;
-FATFS			fatfs;
 //__________________________________________________Prompt only response ____
 			if(!c) {
 				TCHAR	c[128];
-				if(f_getcwd(c,sizeof(c))==FR_OK) {
+				if(isMounted && f_getcwd(c,sizeof(c))==FR_OK) {
 					if(!strncmp(c,"0:/",3))
 						*(strchr(c,':')-1)='U';
 					else
@@ -472,16 +508,6 @@ FATFS			fatfs;
 					if(ret==FR_OK)
 						ret=f_chdrive("USB:");
 					break;
-//__________________________________________________
-				case 'F':
-					ret=ff_format("FLASH:");
-					if(ret==FR_OK)
-						SaveSettings();
-					break;
-//__________________________________________________
-				case 'P':
-					printf("...%d",ff_pack(EOF));
-				break;
 //__________________________________________________
 				case 'I':
 					if(USBH_Iap())
@@ -604,7 +630,7 @@ _io 			**io=_DBG;
 				break;
 				case __f10:
 				case __F10:
-					UsbDevice_Init();
+					UsbDevice_DeInit();
 					MX_USB_HOST_Init();
 				break;
 				
@@ -660,7 +686,7 @@ _io 	**out=stdout->io;
 ****************************f***************************************************/
 void	printVersion() {
 			DecodeCom(0);
-			_print("  %d.%02d %s <%08X>",
+			_print("V%d.%02d %s <%08X>",
 				SW_version/100,SW_version%100,
 					__DATE__,
 						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));	
@@ -672,24 +698,28 @@ void	printVersion() {
 * Return				:
 ****************************f***************************************************/
 FRESULT	LoadSettings(void) {
-			FIL f;
-			FRESULT err=f_open(&f,"/L405.ini",FA_READ);
-			if(err==FR_OK) {
-				TCHAR	c[128];
-				f_gets(c,sizeof(c),&f);
-				sscanf(c,"%03X\n", &idPos);
-				
-				f_gets(c,sizeof(c),&f);
-				uint32_t state=GPIO_PIN_SET;
-				sscanf(c,"%03X\n", &state);
-				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin,(GPIO_PinState)state);
-				
-				f_gets(c,sizeof(c),&f);
-				sscanf(c,"%08X\n", &testMask);
+	FIL f;
+	FRESULT err;
+	TCHAR	c[128];
+	
+	err=f_chdrive("FLASH:");							if(err != FR_OK)	return err;
+	err=f_mount(&fatfs,"FLASH:",1);				if(err != FR_OK)	return err;
+	isMounted=true;
+	err=f_open(&f,"/L405.ini",FA_READ);		if(err != FR_OK)	return err;
+	f_gets(c,sizeof(c),&f);
+	sscanf(c,"%03X\n", &idPos);
+	
+	f_gets(c,sizeof(c),&f);
+	uint32_t state=GPIO_PIN_SET;
+	sscanf(c,"%03X\n", &state);
+	HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin,(GPIO_PinState)state);
+	
+	f_gets(c,sizeof(c),&f);
+	sscanf(c,"%08X\n", &testMask);
 
-				f_close(&f);
-			}
-			return err;
+	f_close(&f);
+
+	return FR_OK;
 }
 /*******************************************************************************
 * Function Name	: 

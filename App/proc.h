@@ -9,6 +9,7 @@
 #define		_PROC_BUFFER_SIZE 128
 
 typedef		void *func(void *);
+extern		IWDG_HandleTypeDef hiwdg;
  
 typedef	struct {
 func					*f;
