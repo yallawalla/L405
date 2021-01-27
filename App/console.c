@@ -651,6 +651,10 @@ _io 			**io=_DBG;
 					_print("\r\n%6.1f",(float)((timingTest-to) % 0x10000)/84);
 				}
 				break;
+
+				case __End:
+					Send(_ID_TIMING_RESET,NULL,0);
+				break;
 				
 				default:
 					c=cgets(i,EOF);				

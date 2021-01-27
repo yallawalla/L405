@@ -74,7 +74,7 @@
 /* This option switches attribute manipulation functions, f_chmod() and f_utime().
 /  (0:Disable or 1:Enable) Also _FS_READONLY needs to be 0 to enable this option. */
 
-#define _USE_LABEL           0
+#define _USE_LABEL           1
 /* This option switches volume label functions, f_getlabel() and f_setlabel().
 /  (0:Disable or 1:Enable) */
 
@@ -163,7 +163,7 @@
 
 /* USER CODE BEGIN Volumes */
 #define _STR_VOLUME_ID          1	/* 0:Use only 0-9 for drive ID, 1:Use strings for drive ID */
-#define _VOLUME_STRS            "FLASH","USB"
+#define _VOLUME_STRS            "USB","FLASH"
 /* _STR_VOLUME_ID switches string support of volume ID.
 /  When _STR_VOLUME_ID is set to 1, also pre-defined strings can be used as drive
 /  number in the path name. _VOLUME_STRS defines the drive ID strings for each

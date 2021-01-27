@@ -35,8 +35,8 @@ void MX_FATFS_Init(void)
 {
   /*## FatFS: Link the USBH driver ###########################*/
   /*## FatFS: Link the USER driver ###########################*/
-  retUSER = FATFS_LinkDriver(&USER_Driver, USERPath);
   retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
+  retUSER = FATFS_LinkDriver(&USER_Driver, USERPath);
 
   /* USER CODE BEGIN Init */
   /* additional user code for init */     

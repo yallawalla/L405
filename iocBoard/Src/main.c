@@ -72,8 +72,7 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim8;
-#define	serial	huart1
-
+#define	serial		huart1
 #endif
  
 /* USER CODE END PV */
@@ -145,6 +144,9 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	__otgIdInit;
 	__otgPwrInit;
 	
+#ifdef	__IOC__
+	InitUART();
+#endif
 	
 	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
 		ff_format("FLASH:");
@@ -522,12 +524,14 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  HAL_GPIO_WritePin(TREF_GPIO_Port, TREF_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, LED_G_Pin|LED_R_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, TREF_Pin|TEST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, TEST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(CAN_STB_GPIO_Port, CAN_STB_Pin, GPIO_PIN_RESET);

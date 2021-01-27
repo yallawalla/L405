@@ -393,7 +393,7 @@ void	*canTx(void *v) {
 			for(t=timStack; t->htim; ++t) {
 				if(t->cnt) {
 					if(!first || (t->tref < refTo && t->trefcnt <= refCnt)) {
-						if(t->trefcnt != refCnt || t->tref < refTo-5)
+						if(t->trefcnt != refCnt || t->tref < refTo-2)
 							memset(&py,0,sizeof(payload));
 						first=t;		
 						refCnt=t->trefcnt;
@@ -404,7 +404,7 @@ void	*canTx(void *v) {
 								py.byte[t->sect] =2;
 							else
 								py.byte[t->sect] =1;
-						}
+					}
 				}
 				t->cnt=t->longcnt=0;
 			}
@@ -479,6 +479,10 @@ void	*canRx(void *v) {
 					_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
 					break;
 					
+				case _ID_TIMING_RESET:
+					ref_cnt=0;
+					break;
+				
 				case _TEST_REQ:
 				{
 					register int i __asm("r3");
