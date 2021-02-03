@@ -68,10 +68,10 @@ void Error_Handler(void);
 #define __TXLEN 128
 #define OTG_ID_Pin GPIO_PIN_13
 #define OTG_ID_GPIO_Port GPIOC
-#define LED_G_Pin GPIO_PIN_14
-#define LED_G_GPIO_Port GPIOC
-#define LED_R_Pin GPIO_PIN_15
-#define LED_R_GPIO_Port GPIOC
+#define LED_G_Pin GPIO_PIN_1
+#define LED_G_GPIO_Port GPIOD
+#define LED_R_Pin GPIO_PIN_0
+#define LED_R_GPIO_Port GPIOD
 #define sense45V_Pin GPIO_PIN_0
 #define sense45V_GPIO_Port GPIOC
 #define sense_5V_Pin GPIO_PIN_1

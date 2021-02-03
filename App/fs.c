@@ -196,9 +196,9 @@ FILINFO			fno;
 								continue;
 							for (;;) {
 								if((HAL_GetTick() / 100) % 2)
-									_YELLOW(1000);
+									_RED(1000);
 								else
-									_YELLOW(0);
+									_RED(0);
 								fr = f_read(&f0, buffer, sizeof buffer, &br);	
 								if (fr || br == 0) break; 
 								fr = f_write(&f1, buffer, br, &bw);

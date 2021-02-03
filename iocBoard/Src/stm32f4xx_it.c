@@ -61,7 +61,7 @@ extern DMA_HandleTypeDef hdma_adc1;
 extern CAN_HandleTypeDef hcan2;
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
-
+extern TIM_HandleTypeDef htim1;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -189,7 +189,7 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-	HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
+	HAL_TIM_PeriodElapsedCallback(&htim1);
   /* USER CODE END SysTick_IRQn 1 */
 }
 

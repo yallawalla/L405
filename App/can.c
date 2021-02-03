@@ -10,6 +10,8 @@
 *******************************************************************************/
 _io				*_CAN, *canConsole,**_DBG;
 uint32_t	timingTest;
+uint32_t	syncTimeout=1000;
+bool			syncReq=false;
 //______________________________________________________________________________________
 const char *strPos[]={"front left","front right","rear right","rear left","console"};
 uint32_t	idDev,
@@ -58,8 +60,13 @@ uint32_t	filter_count;
 * Return				:
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if(htim == &htim1)
+	if(htim == &htim1) {
 		HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
+		if(HAL_GetTick() > syncTimeout) {
+			syncTimeout += 1000;
+			syncReq=true;
+		}
+	}
 }
 /*******************************************************************************
 * Function Name	: 
@@ -110,7 +117,7 @@ void	Send(int id,  payload *buf, int len) {
 		memcpy(&tx.buf,buf,len);
 	if(HAL_CAN_AddTxMessage(&hcan2, &tx.hdr, (uint8_t *)&tx.buf, &mailbox) != HAL_OK)
 		_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg));
-	_YELLOW(500);
+	_GREEN(100);
 	_DEBUG(DBG_CAN_TX,"\r%5d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
 	for(int i=0; i<tx.hdr.DLC; ++i)
 		_DEBUG(DBG_CAN_TX," %02X",tx.buf.bytes[i]);
@@ -233,6 +240,13 @@ uint32_t	flushFilter(uint32_t *ch) {
 * Return				:
 *******************************************************************************/
 void	*canTx(void *v) {
+	
+	if(syncReq) {
+		Send(_ID_TIMING_SYNC,NULL,0);
+		syncReq=false;
+	}
+	
+
 	if(!_CAN) {
 		_CAN	=	_io_init(100*sizeof(CanTxMsg), 100*sizeof(CanTxMsg));
 
@@ -256,7 +270,8 @@ void	*canTx(void *v) {
 		tim 	*t;
 		for(t=timStack; t->htim; ++t) {
 			uint32_t	tcapt,dt;
-			if(t->htim->Instance && t->tmode == _DMA)
+//			if(t->htim->Instance && t->tmode == _DMA)
+			if(t->htim->Instance && t->htim->hdma[((t->Channel)>>2)+1])
 				t->dma->_push = &t->dma->_buf[(t->dma->size - t->htim->hdma[((t->Channel)>>2)+1]->Instance->NDTR*sizeof(uint32_t))];
 			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) 
 				if((1 << t->ch) & ~testMask) {
@@ -448,7 +463,7 @@ void	*canRx(void *v) {
 		}		
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
-			_BLUE(500);
+			_RED(100);
 			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
 			for(int i=0; i<rx.hdr.DLC; ++i)
 				_DEBUG(DBG_CAN_RX," %02X",rx.buf.bytes[i]);
@@ -458,9 +473,12 @@ void	*canRx(void *v) {
 				
 				case _ID_IAP_PING ... _ID_IAP_PING+_MAX_DEV-1:
 					if(rx.hdr.DLC) {
-						devices[nDev++]=rx.buf.word[1];
-						_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ID_IAP_PING)]);
+						if(nDev)
+							_DEBUG(DBG_CONSOLE,"     ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ID_IAP_PING)]);
+						else
+							_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ID_IAP_PING)]);
 						_DEBUG(DBG_CONSOLE,"%s","\r\n");
+						devices[nDev++]=rx.buf.word[1];
 					} else {			
 						p.word[0]=idCrc;
 						p.word[1]=idDev;
@@ -479,7 +497,7 @@ void	*canRx(void *v) {
 					_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
 					break;
 					
-				case _ID_TIMING_RESET:
+				case _ID_TIMING_SYNC:
 					ref_cnt=0;
 					break;
 				
@@ -538,7 +556,7 @@ uint16_t 		ch=rx.buf.byte[0],
 			
 				case _ACK_LEFT_FRONT ... _ACK_LEFT_FRONT+_MAX_DEV-1:
 					if(rx.hdr.DLC)
-						Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,rx.buf.bytes);		
+						Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,&rx.buf);		
 					else
 						Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);
 					break;	

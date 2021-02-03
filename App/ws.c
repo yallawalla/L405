@@ -24,20 +24,26 @@ struct  {
 
 uint32_t	DecodeTab[4096];
 uint32_t	pTimeout,pCount[__COLS][__NWS];
+uint32_t	tRef,tSlot;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
 * Output				:
 * Return				:
 *******************************************************************************/
-void			Decode(int sect,uint8_t *p) {
+void			Decode(int sect,payload *p) {
 					if(p) {
 						if(!pTimeout)
 							pTimeout=HAL_GetTick()+20;
-						
+//						if(tRef && tSlot) {
+//							---
+//						} else {
+//							tRef=p->hword[2];
+//							tSlot=p->hword[3];
+//						}
 						for(int i=0; i<__NWS/8; ++i)
 							for(int j=0; j<__COLS; ++j)
-								if(p[i] & (1<<j)) {
+								if(p->byte[i] & (1<<j)) {
 									ws[j].bit12 |= 1 << (sect*__NWS/8+i);
 								}
 					}	else {
@@ -127,7 +133,7 @@ void			wsProcInit(void) {
 void			*wsProc(void *p) {
 	
 					if(pTimeout && HAL_GetTick() > pTimeout) {
-						pTimeout=0;
+						pTimeout=tRef=tSlot=0;
 						for(int i=0; i<__COLS; ++i) {
 							ws[i].bit24 |= DecodeTab[ws[i].bit12];
 							for(int j=0; j < __NWS; ++j)

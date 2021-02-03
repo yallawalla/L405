@@ -651,10 +651,6 @@ _io 			**io=_DBG;
 					_print("\r\n%6.1f",(float)((timingTest-to) % 0x10000)/84);
 				}
 				break;
-
-				case __End:
-					Send(_ID_TIMING_RESET,NULL,0);
-				break;
 				
 				default:
 					c=cgets(i,EOF);				
@@ -690,7 +686,7 @@ _io 	**out=stdout->io;
 ****************************f***************************************************/
 void	printVersion() {
 			DecodeCom(0);
-			_print("V%d.%02d %s <%08X>",
+			_print("  V%d.%02d %s <%08X>",
 				SW_version/100,SW_version%100,
 					__DATE__,
 						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));	

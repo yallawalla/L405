@@ -5,19 +5,20 @@
 #include	<math.h>
 #include	"proc.h"
 #include	"main.h"
+#include	"can.h"
 
 #define 	__COLS	6
 
 typedef		struct	{uint8_t r; uint8_t g; uint8_t b; }	RGB;
 typedef		struct	{int16_t h; uint8_t s; uint8_t v; }	HSV;
 
-extern		TIM_HandleTypeDef htim1,htim2;
+extern		TIM_HandleTypeDef htim2;
 extern		uint32_t	DecodeTab[];
 
 void			wsProcInit(void),
 					wsStream(int32_t, int32_t, int32_t),
 					*wsProc(void *),
-					Decode(int,uint8_t *),
+					Decode(int,payload *),
 					RGB2HSV(RGB, HSV *),
 					HSV2RGB(HSV, RGB *);
 
