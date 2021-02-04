@@ -72,6 +72,8 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim8;
+void MX_TIM1_Init(void);
+
 #define	serial		huart1
 #endif
  
@@ -146,6 +148,8 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	
 #ifdef	__IOC__
 	InitUART();
+	MX_TIM1_Init();
+	HAL_TIM_Base_Start(&htim1);
 #endif
 	
 	if(f_mount(&fatfs,"FLASH:",1) || f_chdrive("FLASH:") || LoadSettings()) {
@@ -611,6 +615,43 @@ void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 	pwr.V45/=i;
 	pwr.Vm5/=i;
 }
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+	__HAL_RCC_TIM1_CLK_ENABLE();
+  HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 3, 0);
+  HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 0;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 0xffff;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 /* USER CODE END 4 */
 
 /**
