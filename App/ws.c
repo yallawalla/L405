@@ -35,12 +35,19 @@ void			Decode(int sect,payload *p) {
 					if(p) {
 						if(!pTimeout)
 							pTimeout=HAL_GetTick()+20;
-//						if(tRef && tSlot) {
-//							---
-//						} else {
-//							tRef=p->hword[2];
-//							tSlot=p->hword[3];
-//						}
+						if(tRef && tSlot) {
+							int32_t	dt=p->hword[2] - tRef;
+							if(tSlot != p->hword[3] || dt > 2)
+								return;
+							if(dt < 0)
+								tRef=p->hword[2];
+							if(dt < -2)
+								for(int j=0; j<__COLS; ++j)
+									ws[j].bit12=0;
+						} else {
+							tRef=p->hword[2];
+							tSlot=p->hword[3];
+						}
 						for(int i=0; i<__NWS/8; ++i)
 							for(int j=0; j<__COLS; ++j)
 								if(p->byte[i] & (1<<j)) {

@@ -328,10 +328,9 @@ void	*canTx(void *v) {
 						t->hi=t->lo=t->shi=t->slo=0;
 //----------------------------------------------------------------						
 						t->trefcnt=ref_cnt;																		// referencni count
-						if(tcapt < htim2.Instance->CCR4)											// najprej podelaš preskok
-							t->tref = tcapt + 0x10000 - htim2.Instance->CCR4;		// counterja
-						else
-							t->tref = tcapt - htim2.Instance->CCR4;
+						t->tref = tcapt - htim2.Instance->CCR4;
+						if(tcapt < htim2.Instance->CCR4)											// preskok
+							t->tref += 0x10000;
 						_DEBUG(10,"\r\n%d,%d,%3d,%5d",t->ch, t->sect,t->trefcnt % 1000,t->tref);
 //----------------------------------------------------------------						
 					}
