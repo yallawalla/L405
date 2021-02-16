@@ -34,7 +34,7 @@ int			f_getc (FIL* fil) {						/* Pointer to the file object */
 int 		fgetc(FILE *f) {
 int			c=EOF;
 				if(f==stdin) {
-					if(*stdin->io && (*stdin->io)->get) {
+					if(stdin->io && *stdin->io && (*stdin->io)->get) {
 						c=(*stdin->io)->get((*stdin->io)->rx);
 					} 
 					return c;
@@ -44,7 +44,7 @@ int			c=EOF;
 //__________________________________________________________________________________
 int 		fputc(int c, FILE *f) {
 				if(f==stdout) {
-					if((*stdout->io) && (*stdout->io)->put) {
+					if(stdout->io && (*stdout->io) && (*stdout->io)->put) {
 						while((*stdout->io)->put((*stdout->io)->tx,c) == EOF) {
 							_wait(2);
 						}

@@ -120,7 +120,7 @@ typedef struct {
 	uint32_t					Channel;
 	uint8_t						sect,ch;
 	enum tmode				tmode;				
-	uint32_t					timeout,N,to,tref,trefcnt,crc;
+	uint32_t					timeout,to,tref,trefcnt,crc;
 	uint32_t					cnt,longcnt,pw;
 	uint32_t					hi,lo,shi,slo;
 } tim;

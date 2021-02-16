@@ -97,13 +97,10 @@ payload 		pyld;
 						return(EOF);
 }
 /*******************************************************************************
-* Function Name  : CanHexProg request, server
-* Description    : dekodira in razbije vrstice hex fila na 	pakete 8 bytov in jih
-*								 : pošlje na CAN bootloader
-* Input          : pointer na string, zaporedne vrstice hex fila, <cr> <lf> ali <null> niso nujni
-* Output         : 
-* Return         : 0 ce je checksum error sicer eof(-1). bootloader asinhrono odgovarja z ACK message
-*				 				 : za vsakih 8 bytov !!!
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
 *******************************************************************************/
 FRESULT			iapRemote() {
 						uint32_t n,k;																		// misc
@@ -159,13 +156,10 @@ FRESULT			iapRemote() {
 						return FR_OK;
 }
 /*******************************************************************************
-* Function Name  : CanHexProg request, server
-* Description    : dekodira in razbije vrstice hex fila na 	pakete 8 bytov in jih
-*								 : pošlje na CAN bootloader
-* Input          : pointer na string, zaporedne vrstice hex fila, <cr> <lf> ali <null> niso nujni
-* Output         : 
-* Return         : 0 ce je checksum error sicer eof(-1). bootloader asinhrono odgovarja z ACK message
-*				 				 : za vsakih 8 bytov !!!
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
 *******************************************************************************/
 int32_t			USBH_Iap(void) {	
 FATFS				fs0,fs1;

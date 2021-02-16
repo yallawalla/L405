@@ -26,7 +26,6 @@ FRESULT		iapRemote(void);
 int				ff_pack(int);
 void			Parse(int);
 void			*console(void *);
-void 			JumpToBootloader(void);
 
 typedef 	struct {
 	uint16_t	V45;
@@ -71,3 +70,4 @@ void	SectorQuery(void);
 void	HAL_USBD_Setup(void);
 void	UsbDevice_Init(void);
 void	UsbDevice_DeInit(void);
+	

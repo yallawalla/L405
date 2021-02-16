@@ -76,8 +76,8 @@ void Error_Handler(void);
 #define sense45V_GPIO_Port GPIOC
 #define sense_5V_Pin GPIO_PIN_1
 #define sense_5V_GPIO_Port GPIOC
-#define TREF_Pin GPIO_PIN_12
-#define TREF_GPIO_Port GPIOD
+#define TREF_Pin GPIO_PIN_8
+#define TREF_GPIO_Port GPIOB
 #define TEST_Pin GPIO_PIN_5
 #define TEST_GPIO_Port GPIOA
 #define LEDS_Pin GPIO_PIN_11

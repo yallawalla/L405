@@ -49,6 +49,7 @@ tim timStack[] = {
 	{NULL,&htim4,TIM_CHANNEL_1,0,5,_IT},					//PB6 	1B3
 	{NULL,&htim4,TIM_CHANNEL_3,1,5,_IT},					//PB8 	2B3
 	{NULL,&htim4,TIM_CHANNEL_4,2,5,_IT},					//PB9 	3B3
+
 	{NULL,NULL,0,0,0,_IT}
 };
 
@@ -554,10 +555,12 @@ uint16_t 		ch=rx.buf.byte[0],
 				break;
 			
 				case _ACK_LEFT_FRONT ... _ACK_LEFT_FRONT+_MAX_DEV-1:
-					if(rx.hdr.DLC)
-						Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,&rx.buf);		
-					else
-						Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);
+					if(idPos > 3) {
+						if(rx.hdr.DLC)
+							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,&rx.buf);		
+						else
+							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);
+					}
 					break;	
 					
 				default:
