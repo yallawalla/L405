@@ -24,3 +24,398 @@ ce bi illuminator definirali samo na izhodu iz kont. filtra, enojni pulz p na iz
 - tim2 je trigger za vse druge timerje na ITR1... za tim2 pa itr0!!!
 - ini. TIM2 na konec v main.c
 - zamenjaj vrstni red fatfs inic. v fatfs.c
+
+
+
+
+
+
+
+
+
+5:/ty fault
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+5:/
+5:/
+5:/
+5:/
+5:/dir
+L405.ini        64
+fault           6531
+5:/ty fault
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 2
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+
+[Hard fault handler - all numbers in hex]
+R0 = 0
+R1 = 20006cbc
+R2 = a490a48
+R3 = 20006cbc
+R12 = 0
+LR [R14] = 80cae89  subroutine call return address
+PC [R15] = a490a48  program counter
+PSR = 20000053
+BFAR = e000ed38
+CFSR = 100
+HFSR = 40000000
+DFSR = 0
+AFSR = 0
+SCB_SHCSR = 0
+
+5:/

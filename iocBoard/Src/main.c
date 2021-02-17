@@ -109,7 +109,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 FIL				f;
 FATFS			fatfs;
-uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
+uint32_t	otgDeviceId=true, otgDeviceTimeout=0;
 	
   /* USER CODE END 1 */
 
@@ -139,7 +139,7 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
-  MX_USB_HOST_Init();
+//  MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
 
 	__ledInit;
@@ -209,7 +209,7 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 				Parse(__f9);
 			} else {
 				Parse(__f11);
-		}
+			}
 		}	
 	}
   /* USER CODE END 3 */

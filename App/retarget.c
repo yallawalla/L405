@@ -106,6 +106,53 @@ void		VCP_Receive(uint8_t *pbuf, uint16_t len) {
 				while(!_buffer_push(_VCP->rx,pbuf,len))
 					_wait(2);
 }
+//__________________________________________________________________________________
+// hard fault handler in C,
+// with stack frame location as input parameter
+// called from HardFault_Handler in file eMac.s
+//__________________________________________________________________________________
+void hard_fault_handler_c (unsigned int * hardfault_args)
+{
+  unsigned int stacked_r0;
+  unsigned int stacked_r1;
+  unsigned int stacked_r2;
+  unsigned int stacked_r3;
+  unsigned int stacked_r12;
+  unsigned int stacked_lr;
+  unsigned int stacked_pc;
+  unsigned int stacked_psr;
+	FIL f;
+
+  stacked_r0 = ((unsigned long) hardfault_args[0]);
+  stacked_r1 = ((unsigned long) hardfault_args[1]);
+  stacked_r2 = ((unsigned long) hardfault_args[2]);
+  stacked_r3 = ((unsigned long) hardfault_args[3]);
+ 
+  stacked_r12 = ((unsigned long) hardfault_args[4]);
+  stacked_lr = ((unsigned long) hardfault_args[5]);
+  stacked_pc = ((unsigned long) hardfault_args[6]);
+  stacked_psr = ((unsigned long) hardfault_args[7]);
+ 
+	if(f_open(&f,"fault",FA_OPEN_APPEND | FA_WRITE)==FR_OK) {
+		f_printf(&f,"\n\r\n\r[Hard fault handler - all numbers in hex]\n\r");
+		f_printf(&f,"R0 = %x\n\r", stacked_r0);
+		f_printf(&f,"R1 = %x\n\r", stacked_r1);
+		f_printf(&f,"R2 = %x\n\r", stacked_r2);
+		f_printf(&f,"R3 = %x\n\r", stacked_r3);
+		f_printf(&f,"R12 = %x\n\r", stacked_r12);
+		f_printf(&f,"LR [R14] = %x  subroutine call return address\n\r", stacked_lr);
+		f_printf(&f,"PC [R15] = %x  program counter\n\r", stacked_pc);
+		f_printf(&f,"PSR = %x\n\r", stacked_psr);
+		f_printf(&f,"BFAR = %x\n\r", (*((volatile unsigned long *)(0xE000ED38))));
+		f_printf(&f,"CFSR = %x\n\r", (*((volatile unsigned long *)(0xE000ED28))));
+		f_printf(&f,"HFSR = %x\n\r", (*((volatile unsigned long *)(0xE000ED2C))));
+		f_printf(&f,"DFSR = %x\n\r", (*((volatile unsigned long *)(0xE000ED30))));
+		f_printf(&f,"AFSR = %x\n\r", (*((volatile unsigned long *)(0xE000ED3C))));
+		f_printf(&f,"SCB_SHCSR = %x\n\r", SCB->SHCSR);
+		f_close(&f);
+	}
+	NVIC_SystemReset();
+}
 
 
 

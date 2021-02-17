@@ -61,7 +61,8 @@ __heap_limit
 __Vectors       DCD     __initial_sp               ; Top of Stack
                 DCD     Reset_Handler              ; Reset Handler
                 DCD     NMI_Handler                ; NMI Handler
-                DCD     HardFault_Handler          ; Hard Fault Handler
+;                DCD     HardFault_Handler          ; Hard Fault Handler
+                DCD     HardFault			       ; modif. Hard Fault Handler
                 DCD     MemManage_Handler          ; MPU Fault Handler
                 DCD     BusFault_Handler           ; Bus Fault Handler
                 DCD     UsageFault_Handler         ; Usage Fault Handler
@@ -413,7 +414,18 @@ __user_initial_stackheap
                  ALIGN
 
                  ENDIF
+;*******************************************************************************
+; User Stack and Heap initialization
+;*******************************************************************************
+				IMPORT  	hard_fault_handler_c
+HardFault		PROC
+				TST LR, #4
+				ITE EQ
+				MRSEQ R0, MSP
+				MRSNE R0, PSP
+				B hard_fault_handler_c
+                ENDP
 
-                 END
+                END
 
 ;************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE*****

@@ -553,7 +553,7 @@ FRESULT		ret=FR_OK;
 						q[++n]=strtok(NULL," ,");
 					}
 					for(int i=0; i<sizeof(cmds)/sizeof(struct cmd); ++i)
-						if(!strncmp(q[0],cmds[i].str,strlen(q[0])))
+						if(q[0] && !strncmp(q[0],cmds[i].str,strlen(q[0])))
 							return cmds[i].f(n,q);
 					ret = FR_INVALID_NAME;
 					}

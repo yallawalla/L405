@@ -118,7 +118,7 @@ void	Send(int id,  payload *buf, int len) {
 		memcpy(&tx.buf,buf,len);
 	if(HAL_CAN_AddTxMessage(&hcan2, &tx.hdr, (uint8_t *)&tx.buf, &mailbox) != HAL_OK)
 		_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg));
-	_GREEN(100);
+	_GREEN(20);
 	_DEBUG(DBG_CAN_TX,"\r%5d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
 	for(int i=0; i<tx.hdr.DLC; ++i)
 		_DEBUG(DBG_CAN_TX," %02X",tx.buf.bytes[i]);
@@ -463,7 +463,7 @@ void	*canRx(void *v) {
 		}		
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
-			_RED(100);
+			_RED(20);
 			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
 			for(int i=0; i<rx.hdr.DLC; ++i)
 				_DEBUG(DBG_CAN_RX," %02X",rx.buf.bytes[i]);
