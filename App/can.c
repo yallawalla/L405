@@ -241,7 +241,7 @@ uint32_t	flushFilter(uint32_t *ch) {
 * Return				:
 *******************************************************************************/
 void	*canTx(void *v) {
-	
+
 	if(syncReq) {
 		Send(_ID_TIMING_SYNC,NULL,0);
 		syncReq=false;
@@ -268,7 +268,7 @@ void	*canTx(void *v) {
 		HAL_CAN_Start(&hcan2);
 /*******************************************************************************/
 	} else {
-		tim 	*t;
+		tim 	*t,*first;
 		for(t=timStack; t->htim; ++t) {
 			uint32_t	tcapt,dt;
 //			if(t->htim->Instance && t->tmode == _DMA)
@@ -396,51 +396,48 @@ void	*canTx(void *v) {
 					_DEBUG(DBG_STAT,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,	t->hi,0,0,0,n,t->longcnt);
 			}
 		}
-			
-		for(t=timStack; t->htim; ++t)
+// isci prvega.... prekini, ce je katerikoli timeout se aktiven..		
+		for(t=timStack,first=NULL; t->htim; ++t) {
 			if(t->timeout)
-				break;			
-			
-		if(t->htim == NULL) { 
-			uint32_t refTo,refCnt;
-			tim *first=NULL;
-			
-			for(t=timStack; t->htim; ++t) {
-				if(t->cnt) {
-					if(!first || (t->tref < refTo && t->trefcnt <= refCnt)) {
-						if(t->trefcnt != refCnt || t->tref < refTo-2)
-							memset(&py,0,sizeof(payload));
-						first=t;		
-						refCnt=t->trefcnt;
-						refTo=t->tref;
-						if(t->longcnt)
-							py.byte[t->sect] =4;
-						else if(t->cnt > 4)						// >4 (dva pulta ) za izogib dvojnega pulza pri 
-								py.byte[t->sect] =2;
-							else
-								py.byte[t->sect] =1;
-					}
-				}
-				t->cnt=t->longcnt=0;
+				return canTx;
+			if(t->cnt) {
+				if(first) {
+					if(t->trefcnt < first->trefcnt || (t->trefcnt == first->trefcnt &&  t->tref < first->tref))
+						first = t;
+				} else
+					first=t;
 			}
-						
-			if(py.word[0]) {
-				py.hword[2]=first->tref;
-				py.hword[3]=first->trefcnt;
-				if(flushFilter(&py.word[0]) > 4) {
-					if(py.byte[0]==1)	py.byte[0]=2;
-					if(py.byte[1]==1)	py.byte[1]=2;
-					if(py.byte[2]==1)	py.byte[2]=2;
-					Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
-				}
-				memcpy(&py_backup,&py,sizeof(payload));											//backuo za timeout
-			} else {
-				if(flushFilter(NULL) == 1) {																// osamljen pulz je nespremenjen !!!
-					Send(_ACK_LEFT_FRONT+idPos,&py_backup,sizeof(payload));
-				}
-			}
-			py.word[0]=0;
 		}
+// isci vse v rangu +/-1 od prvega.... brisi payload, ce first ne obstaja, preskok
+		memset(&py,0,sizeof(payload));
+		for(t=timStack; first && t->htim; ++t) {
+			if(t->cnt && t->trefcnt == first->trefcnt && t->tref <= first->tref+1) {
+				if(t->longcnt)
+					py.byte[t->sect] =4;
+				else if(t->cnt > 4)
+					py.byte[t->sect] =2;
+				else
+					py.byte[t->sect] =1;
+			}
+			t->cnt=t->longcnt=0;
+		}
+// flush filter, poslje single pulse po timeoutu ali burst po 15 enakih (!!!) ....					
+		if(py.word[0]) {
+			py.hword[2]=first->tref;
+			py.hword[3]=first->trefcnt;
+			if(flushFilter(&py.word[0]) > 4) {
+				if(py.byte[0]==1)	py.byte[0]=2;
+				if(py.byte[1]==1)	py.byte[1]=2;
+				if(py.byte[2]==1)	py.byte[2]=2;
+				Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
+			}
+			memcpy(&py_backup,&py,sizeof(payload));											// backuo za timeout
+		} else {
+			if(flushFilter(NULL) == 1) {																// osamljen pulz je nespremenjen !!!
+				Send(_ACK_LEFT_FRONT+idPos,&py_backup,sizeof(payload));
+			}
+		}
+		py.word[0]=0;
 	}
 	return canTx;
 }

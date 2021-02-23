@@ -19,7 +19,7 @@ struct  {
 	{{180,255,100},	0,0,{0}},
 	{{240,255,100},	0,0,{0}},
 	{{300,255,100},	0,0,{0}},
-	{{0,0,5},			0,0,{0}}
+	{{0,0,5},				0,0,{0}}
 };
 
 uint32_t	DecodeTab[4096];
@@ -48,11 +48,13 @@ void			Decode(int sect,payload *p) {
 							tRef=p->hword[2];
 							tSlot=p->hword[3];
 						}
+						
 						for(int i=0; i<__NWS/8; ++i)
 							for(int j=0; j<__COLS; ++j)
 								if(p->byte[i] & (1<<j)) {
 									ws[j].bit12 |= 1 << (sect*__NWS/8+i);
 								}
+								
 					}	else {
 						wsStream(sect*__NWS/4,0,__NWS/4-1);
 						for(int i=0; i<__NWS/4; ++i)
