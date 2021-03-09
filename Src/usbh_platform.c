@@ -24,6 +24,7 @@
 
 /* USER CODE BEGIN INCLUDE */
 #include "main.h"
+#include "leds.h"
 /* USER CODE END INCLUDE */
 
 /**
@@ -41,6 +42,8 @@ void MX_DriverVbusFS(uint8_t state)
   {
     /* Drive high Charge pumhp */ 	     
     data = GPIO_PIN_SET;
+		_RED(1000);
+
 #ifdef	__NUCLEO__
 		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_SET);
 #endif
@@ -52,6 +55,7 @@ void MX_DriverVbusFS(uint8_t state)
   {
     /* Drive low Charge pump */
     data = GPIO_PIN_RESET;
+		_GREEN(1000);
 #ifdef	__NUCLEO__
 		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
 #endif
@@ -60,7 +64,7 @@ void MX_DriverVbusFS(uint8_t state)
 #endif
   }
   /* USER CODE END PREPARE_GPIO_DATA_VBUS_FS */
-  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,(GPIO_PinState)data);
+  HAL_GPIO_WritePin(OTG_VBUS_GPIO_Port,OTG_VBUS_Pin,(GPIO_PinState)data);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -11,23 +11,8 @@
 
 -	ce je VCP buffer 2x2048, mora biti heap 0x8000
 - TODO: https://community.st.com/s/question/0D50X00009XkgIYSAZ/unable-to-configure-serial-port-error-for-usb-cdc //Done
+
 - TODO: CAN terminator  bootloaderju ??? 
-
 - TODO: izklop LED pri CAN tx,rx, vnesi funkcionalnost !!!
-
-> 210 04 01 01 00 01 00 01 00
-> 210 02 01 01 00 30 00 01 00
-> 210 01 01 01 00 05 00 01 00
-
-ce bi illuminator definirali samo na izhodu iz kont. filtra, enojni pulz p na izhodu iz timeouta ???
-
-- tim2 je trigger za vse druge timerje na ITR1... za tim2 pa itr0!!!
-- ini. TIM2 na konec v main.c
-- zamenjaj vrstni red fatfs inic. v fatfs.c
-
-plate
-barve
-daljinomer
-beam rider
-
-
+- TODO: RAM drive brez veze ???
+- TODO: po remote konzoli ne grejo escape sekvence ???

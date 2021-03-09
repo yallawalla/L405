@@ -155,6 +155,21 @@
           <WinNumber>1</WinNumber>
           <ItemText>_DBG</ItemText>
         </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>ref_cnt</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>py</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>first</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -251,6 +266,10 @@
         <Entry>
           <Name>System Viewer\GPIOA</Name>
           <WinId>35897</WinId>
+        </Entry>
+        <Entry>
+          <Name>System Viewer\TIM2</Name>
+          <WinId>35905</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\TIM8</Name>
@@ -792,7 +811,7 @@
 
   <Group>
     <GroupName>Application/User</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

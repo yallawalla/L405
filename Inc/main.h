@@ -127,8 +127,6 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #ifdef	__NUCLEO__
 #define	__otgDeviceId	(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10)==GPIO_PIN_SET)
-#define	__otgPwrOn		(HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_6)==GPIO_PIN_SET)
-#define	__otgPwrOff		(HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_6)==GPIO_PIN_RESET)
 #define	__otgPwrInit do {\
 	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
 		__HAL_RCC_GPIOG_CLK_ENABLE();\
@@ -162,8 +160,6 @@ void Error_Handler(void);
 #else 
 	#ifdef	__DISCO__
 #define	__otgDeviceId	(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10)==GPIO_PIN_SET)
-#define	__otgPwrOn		(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0)==GPIO_PIN_SET)
-#define	__otgPwrOff		(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0)==GPIO_PIN_RESET)
 #define	__otgPwrInit do {\
 	  GPIO_InitTypeDef GPIO_InitStruct = {0};\
 		__HAL_RCC_GPIOC_CLK_ENABLE();\
@@ -195,8 +191,6 @@ void Error_Handler(void);
 	} while(0)
  #else
 	#define	__otgDeviceId	(HAL_GPIO_ReadPin(OTG_ID_GPIO_Port, OTG_ID_Pin)==GPIO_PIN_SET)
-	#define	__otgPwrOn		(HAL_GPIO_ReadPin(OTG_VBUS_GPIO_Port, OTG_VBUS_Pin)==GPIO_PIN_SET)
-	#define	__otgPwrOff		(HAL_GPIO_ReadPin(OTG_VBUS_GPIO_Port, OTG_VBUS_Pin)==GPIO_PIN_RESET)
 	#define	__otgPwrInit
 	#define __ledInit
 	#define	__otgIdInit

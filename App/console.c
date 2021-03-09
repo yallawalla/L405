@@ -605,29 +605,13 @@ _io 			**io=_DBG;
 				case __f4: Remote(3,__f4); break;
 				case __F4: Remote(3,__F4); break;
 
-//				case __f9:
-//				case __F9:
-//					MX_USB_HOST_DeInit();
-//					MSC_USB_DEVICE_DeInit();
-//					_wait(100);
-//					VCP_USB_DEVICE_Init();
-//				break;
-//				case __f10:
-//				case __F10:
-//					MX_USB_HOST_DeInit();
-//					VCP_USB_DEVICE_DeInit();
-//					_wait(100);
-//					MSC_USB_DEVICE_Init();
-//				break;
-//				case __f11:
-//				case __F11:
-
 				case __f9:
 				case __F9:
 					MX_USB_HOST_DeInit();
 					HAL_USBD_Setup();
 					UsbDevice_Init();
 				break;
+				
 				case __f10:
 				case __F10:
 					UsbDevice_DeInit();

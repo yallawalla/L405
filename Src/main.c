@@ -202,14 +202,13 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 			otgDeviceId	= __otgDeviceId;
 			otgDeviceTimeout=HAL_GetTick()+100;
 		}
+		
 		if(otgDeviceTimeout && HAL_GetTick() > otgDeviceTimeout) {
 			otgDeviceTimeout=0;
-			if(otgDeviceId) {
-				MX_DriverVbusFS(false);
+			if(otgDeviceId)
 				Parse(__f9);
-			} else {
-				Parse(__f11);
-		}
+			else
+				Parse(__f10);
 		}	
 	}
   /* USER CODE END 3 */

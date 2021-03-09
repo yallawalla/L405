@@ -77,6 +77,7 @@
             // 
             // login
             // 
+            this.login.Interval = 1000;
             this.login.Tick += new System.EventHandler(this.login_Tick);
             // 
             // LR
