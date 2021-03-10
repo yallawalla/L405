@@ -3,11 +3,11 @@
 ***                                                                          ***
 ***                                                                          ***
 ***                      Transient Analysis of circuit1                      ***
-***                           24/05/2020 11:07:10                            ***
+***                           10/03/2021 18:12:52                            ***
 ********************************************************************************
 Limits
 ======
-Maximum Run Time           100u
+Maximum Run Time           500u
 Output Start Time (tstart) 0
 Maximum Time Step          10n
 Number of Points           51
@@ -238,12 +238,12 @@ vce                      0.000
 Operating Point for Devices of Type Resistor
 ============================================
 Instance:                     R1                 R2                 R3
-V                        84.150n           142.800n         2.190E-047
+V                        84.150n           142.800n        -2.190E-047
 Power DC Terms:
 PD                        0.021f             0.036f         4.794E-096
 
 DC Pin Currents:
-Ir                      255.000p           255.000p         2.190E-049
+Ir                      255.000p           255.000p        -2.190E-049
 
 Device Variables:
 tc1                       0.000              0.000              0.000 
@@ -253,10 +253,10 @@ tc2                       0.000              0.000              0.000
 Instance:                     R4               X2.R                 R5
 V                     1.948E-031         1.188E-029        -1.168E-029
 Power DC Terms:
-PD                    3.795E-065         1.129E-060         1.138E-061
+PD                    3.795E-065         7.056E-061         1.138E-061
 
 DC Pin Currents:
-Ir                    1.948E-034         9.504E-032        -9.737E-033
+Ir                    1.948E-034         5.940E-032        -9.737E-033
 
 Device Variables:
 tc1                       0.000              0.000              0.000 
@@ -279,10 +279,10 @@ tc2                       0.000              0.000              0.000
 Instance:                   X3.R                 R9                R10
 V                     1.409E-034        -1.386E-034        -2.310E-036
 Power DC Terms:
-PD                    1.588E-070         1.600E-071         2.667E-073
+PD                    9.925E-071         1.600E-071         2.667E-073
 
 DC Pin Currents:
-Ir                    1.127E-036        -1.155E-037        -1.155E-037
+Ir                    7.044E-037        -1.155E-037        -1.155E-037
 
 Device Variables:
 tc1                       0.000              0.000              0.000 
@@ -303,12 +303,12 @@ tc2                       0.000              0.000              0.000
 
 
 Instance:                    R14                R15                R16
-V                      -712.015m           -49.587m         5.740E-042
+V                      -712.015m           -49.587m        -5.740E-042
 Power DC Terms:
 PD                      905.295u            63.047u         3.294E-085
 
 DC Pin Currents:
-Ir                       -1.271m            -1.271m         5.740E-044
+Ir                       -1.271m            -1.271m        -5.740E-044
 
 Device Variables:
 tc1                       0.000              0.000              0.000 
@@ -318,10 +318,10 @@ tc2                       0.000              0.000              0.000
 Instance:                    R17               X5.R                R18
 V                     3.775E-026         1.296E-024        -1.258E-024
 Power DC Terms:
-PD                    1.188E-055         1.344E-050         1.319E-051
+PD                    1.188E-055         8.398E-051         1.319E-051
 
 DC Pin Currents:
-Ir                    3.146E-030         1.037E-026        -1.049E-027
+Ir                    3.146E-030         6.480E-027        -1.049E-027
 
 Device Variables:
 tc1                       0.000              0.000              0.000 
@@ -574,13 +574,13 @@ ic                        0.000              0.000              0.000
 Operating Point for Devices of Type Opamp
 =========================================
 Instance:                    X2                 X3                 X5
-Using model:           $GENERIC           $GENERIC           $GENERIC
+Using model:             AD8002             AD8002             AD8039
 Condition:
 State                       LIN                LIN                LIN
 
 
 Instance:                    X6
-Using model:           $GENERIC
+Using model:             AD8039
 Condition:
 State                       LIN
 

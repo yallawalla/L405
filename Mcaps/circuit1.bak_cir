@@ -4,7 +4,7 @@ Version=12.00
 Program=Micro-Cap
 Component Version=10.00
 Shape Version=11.00
-Screen=1366,768
+Screen=1280,720
 MCAPVersion=12.2.0.3
 Key ID=Demo
 NLCnt=142
@@ -169,8 +169,8 @@ Current=32,16,16,16
 Name=Photodiode
 Definition=Macro
 Shape=Photodiode2
-Mask=5888
-Used=5
+Mask=4096
+Used=6
 memo=Photodiode macro using the IDark parameter
 Link=http://www.spectrum-soft.com/news/summer2004/photodiode.shtm
 Label Offset=15,20,1,33
@@ -183,8 +183,8 @@ Pin="C",a,0,1,-3,16
 Name=Resistor
 Definition=Resistor
 Shape=Resistor
-Mask=7425
-Used=204
+Mask=7681
+Used=203
 memo=Resistor
 Label Offset=18,6,8,11
 PinCnt=2
@@ -196,7 +196,7 @@ Name=Capacitor
 Definition=Capacitor
 Shape=Capacitor
 Mask=6401
-Used=53
+Used=62
 memo=Capacitor
 Label Offset=16,12,12,12
 PinCnt=2
@@ -207,8 +207,8 @@ Pin="Minus",0,0,-14,-5
 Name=Ground
 Definition=Ground
 Shape=Ground
-Mask=769
-Used=330
+Mask=1793
+Used=363
 memo=Ground
 Label Offset=0,0,0,0
 PinCnt=1
@@ -219,7 +219,7 @@ Name=Voltage Source
 Definition=VSpice
 Shape=SPICE_V
 Mask=4865
-Used=45
+Used=62
 memo=Voltage Source
 Label Offset=19,13,15,13
 PinCnt=2
@@ -230,8 +230,8 @@ Pin="Minus",0,0,-20,-6
 Name=Opamp
 Definition=Opamp
 Shape=Opamp5
-Mask=5121
-Used=13
+Mask=4097
+Used=8
 memo=Opamp
 Label Offset=44,29,-14,39
 PinCnt=5
@@ -245,8 +245,8 @@ Pin="VCC",4,-1,5,14
 Name=Battery
 Definition=Battery
 Shape=Battery
-Mask=6913
-Used=60
+Mask=6145
+Used=68
 memo=Battery
 Label Offset=19,7,10,13
 PinCnt=2
@@ -258,7 +258,7 @@ Name=74AC14
 Definition=Subckt
 Shape=Inv
 Mask=4224
-Used=4
+Used=1
 memo=Hex Inverter
 Label Offset=25,8,13,21
 PinCnt=2
@@ -283,7 +283,6 @@ Name=BAV99W
 Definition=Diode
 Shape=Diode
 Mask=6016
-Used=6
 memo=Dual Switching Diode Vr=75V If=300mA
 Link=http://www.diodes.com/datasheets/ds30045.pdf
 Label Offset=17,10,12,12
@@ -292,7 +291,7 @@ Pin="Anode",6,0,-9,-8
 Pin="Cathode",0,0,-20,-8
 
 [Circuit]
-Window Placement=2,3, -1,-1, -8,-31, 130,130,1131,513
+Window Placement=2,3, -1,-1, -8,-31, 130,130,1049,459
 Default Object=Color=#000080
 Default Object Font=Height=-15,FStyle=0,Color=#000080,Name=Arial
 Default Object Apply Border To Text=No
@@ -304,12 +303,12 @@ PowerFormat=3
 PathDelayFormat=3
 WarningFormat=3
 GridTextFormulaFormat=3
-Window Placement in Transient Analysis=2,3, -1,-1, -8,-31, 0,0,1201,368
-Window Placement in Transient Probe=0,1, -1,-1, -8,-31, 676,0,1352,520
+Window Placement in Transient Analysis=2,3, -1,-1, -8,-31, 0,0,1115,329
+Window Placement in Transient Probe=0,1, -1,-1, -8,-31, 436,4,1069,474
 SpiceType=AMBIGUOUS
 Title_Block_Border=None
 Title_Block=False
-Show Nodes=False
+Show Nodes=True
 Show Voltages=False
 Show Current=False
 Show Power=False
@@ -441,7 +440,7 @@ Style=8192
 
 [Attr]
 ON=-48,-41,VALUE
-V=DC 0 AC 1 0 Pulse 0 0.000005 10u 5n 5n 50u 1m
+V=DC 5u AC 1 0 Pulse 0 1u 10u 5n 5n 20n 1m
 
 [Attr]
 ON=0,0,PACKAGE
@@ -469,7 +468,7 @@ Style=256
 
 [Attr]
 ON=0,0,Saved_Pulse
-V=DC 0 AC 1 0 Pulse 0 0.000005 10u 5n 5n 50u 1m
+V=DC 5u AC 1 0 Pulse 0 1u 10u 5n 5n 20n 1m
 Style=256
 
 [Wire]
@@ -504,16 +503,16 @@ V
 
 [Comp]
 Name=Resistor
-Px=216,176
-Rot=4
+Px=264,176
+Rot=6
 
 [Attr]
-ON=18,-20,PART
+ON=-34,6,PART
 V=R3
 Style=8192
 
 [Attr]
-ON=18,-34,RESISTANCE
+ON=-42,20,RESISTANCE
 V=100
 Style=8192
 
@@ -560,7 +559,7 @@ Style=8192
 
 [Attr]
 ON=44,-57,MODEL
-V=$GENERIC
+V=AD8002
 
 [Attr]
 ON=0,0,PACKAGE
@@ -739,7 +738,7 @@ Style=8192
 
 [Attr]
 ON=44,-57,MODEL
-V=$GENERIC
+V=AD8002
 
 [Attr]
 ON=0,0,PACKAGE
@@ -1020,16 +1019,16 @@ V
 
 [Comp]
 Name=Resistor
-Px=216,408
-Rot=4
+Px=264,408
+Rot=6
 
 [Attr]
-ON=18,-20,PART
+ON=-42,6,PART
 V=R16
 Style=8192
 
 [Attr]
-ON=18,-34,RESISTANCE
+ON=-42,20,RESISTANCE
 V=100
 Style=8192
 
@@ -1076,7 +1075,7 @@ Style=8192
 
 [Attr]
 ON=44,-57,MODEL
-V=$GENERIC
+V=AD8039
 
 [Attr]
 ON=0,0,PACKAGE
@@ -1192,7 +1191,7 @@ Style=8192
 
 [Attr]
 ON=44,-57,MODEL
-V=$GENERIC
+V=AD8039
 
 [Attr]
 ON=0,0,PACKAGE
@@ -1721,7 +1720,7 @@ Style=8192
 
 [Attr]
 ON=-35,-41,VALUE
-V=1.7
+V=2.13
 Style=8192
 
 [Attr]
@@ -2115,7 +2114,7 @@ CurrentSection 3=0
 Splitter.xs=0
 Splitter.ys=0
 TextQuad=4099
-Scale=1.3333333333333333
+Scale=1
 GridUser=10
 ShapeGroups="Main","Euro","Polarity","Main1","Main11","Electrolytic","GroundArrow","DeMorgan"
 CalcRMS=False
@@ -2303,9 +2302,9 @@ PrinterScale=1
 Scale 0=1
 Scale 1=1
 Scale 2=1
-SB 3=183,117
-Scale 3=1.3333333333333333
-Px=1320,262
+SB 3=0,16
+Scale 3=1
+Px=50,203
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
@@ -2369,6 +2368,7 @@ Type=Text
 Print=False
 Enable=True
 Name=Models
+SB 0=0,5
 Font=Height=-15,FStyle=0,Color=#000000,Name=Courier New
 Comment Color=#008000
 WinBackGround Color=#FFFFFF
@@ -2478,6 +2478,8 @@ Text=+ IKF=0.109 IKR=0.09 IRB=5E-06 IS=1.822E-14 ISC=9.982E-12 ISE=2.894E-16
 Text=+ ITF=0.3131 MJC=0.391 MJE=0.3656 MJS=0.333 NC=1.763 NE=1.4 NF=0.9932 NR=0.9931
 Text=+ RB=10 RBM=5 RC=0.7014 RE=0.649 TF=4.908E-10 TR=9E-08 VAF=82 VAR=17.9
 Text=+ VJC=0.5463 VJE=0.7579 VJS=0.75 VTF=2.927 XCJC=0.6193 XTF=9.51)
+Text=.MODEL AD8002 OPA ()
+Text=.MODEL AD8039 OPA ()
 
 [InfoPage]
 InfoPage=True
@@ -2496,13 +2498,13 @@ SimulationLog=True
 
 [Transient]
 WinID=1
-Window Placement=2,3, -1,-1, -8,-31, 0,0,1201,368
+Window Placement=2,3, -1,-1, -8,-31, 0,0,1115,329
 Font=Height=-19,FStyle=0,Color=#0000FF,Name=Arial
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
 Select Box Color=#000080
-Window Placement in Probe=0,1, -1,-1, 0,0, 0,0,676,520
+Window Placement in Probe=0,1, -1,-1, 0,0, 0,0,633,470
 Title
 AutoTitle=Yes
 Grid Color=#808080
@@ -2719,7 +2721,7 @@ ALIGNBOTTOM=No
 
 [APage]
 Analysis=Transient
-Name="Main"
+Name="MAIN"
 
 [Monte Carlo Options]
 Analysis=Transient
@@ -2732,7 +2734,7 @@ Seed=0
 
 [Limits]
 Analysis=Transient
-TMax=100u
+TMax=500u
 TStart=0
 TStep=10n
 NPts=51
@@ -2750,11 +2752,11 @@ Plt=1
 AliasID=1
 XExp=T
 YExp=v(16)
-XRng=0.0001
-YRng=8,-2
+XRng=0.0005
+YRng=4.97683,4.97678
 Options=LINEARX,LINEARY
-Range Grid X=2e-5
-Range Grid Y=2
+Range Grid X=0.0001
+Range Grid Y=1e-5
 Enable=Enable
 Line Color=#0000FF
 Text Color=#0000FF
@@ -2776,11 +2778,11 @@ Plt=2
 AliasID=2
 XExp=T
 YExp=v(29)
-XRng=0.0001
-YRng=7.5
+XRng=0.0005
+YRng=8,-2
 Options=LINEARX,LINEARY
-Range Grid X=2e-5
-Range Grid Y=1.5
+Range Grid X=0.0001
+Range Grid Y=2
 Enable=Enable
 Line Color=#FF0000
 Text Color=#FF0000
@@ -2802,12 +2804,12 @@ Plt=3
 AliasID=3
 XExp=T
 YExp=v(36)
-XRng=0.0001
+XRng=0.0005
 YRng=7.5
 Options=LINEARX,LINEARY
 Range Grid X=2e-5
 Range Grid Y=1.5
-Enable=Enable
+Enable=Hide
 Line Color=#008000
 Text Color=#008000
 Rainbow=False
@@ -2834,7 +2836,7 @@ PlaceText=True
 
 [Pane]
 Analysis=Transient
-CurrentPage 0="Main"
+CurrentPage 0="MAIN"
 
 [Pane]
 Analysis=AC
@@ -2878,6 +2880,38 @@ Col Width Rnd=50
 [WCFiles]
 UseFile=<Library>Standard.tlib
 AVAILABLE_FILE=<Library>Standard.tlib
+
+[Slider]
+Analysis=Transient
+Link="V1(pulse.v2)"
+Min="0"
+Max="10u"
+Default="5u"
+Format=3
+Method=Linear
+Show=True
+Font=Height=-15,FStyle=0,Color=#000000,Name=Arial
+StepSize="10%"
+MRUDockID=59421
+Floating=False
+LocalOffset=True
+Rect=44,-2,135,158
+
+[Slider]
+Analysis=Transient
+Link="V7"
+Min="1"
+Max="4"
+Default="1.7"
+Format=3
+Method=Linear
+Show=True
+Font=Height=-15,FStyle=0,Color=#000000,Name=Arial
+StepSize="1%"
+MRUDockID=59421
+Floating=False
+LocalOffset=True
+Rect=-2,-2,46,158
 
 [OPMethods]
 Analysis=Transient
