@@ -506,7 +506,6 @@ void	*canRx(void *v) {
 						TEST_GPIO_Port->BSRR = TEST_Pin;
 					TEST_GPIO_Port->BSRR = (TEST_Pin<<16);
 				}
-					
 				break;
 
 				case	_REMOTE_REQ:
@@ -518,7 +517,7 @@ void	*canRx(void *v) {
 						canConsole=_io_init(128,128);
 						_proc_add(console,&canConsole,"can console",0);				
 					}
-					break;
+				break;
 
 				case idCAN2COM:
 					if(canConsole)

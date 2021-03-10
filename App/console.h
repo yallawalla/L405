@@ -15,8 +15,9 @@ enum			err_parse	{
 					_PARSE_ERR_MEM
 };
 extern		IWDG_HandleTypeDef hiwdg;
-void			printVersion(void);
 int32_t		USBH_Iap(void);
+void			printVersion(void);
+void			ff_erase(void);
 FRESULT		ff_format(char *);
 FRESULT		LoadSettings(void),
 					SaveSettings(void);

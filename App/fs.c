@@ -298,12 +298,22 @@ int		c0=0,c1=0;
 * Output				: 
 * Return				: 
 *******************************************************************************/
-FRESULT	ff_format(char *drv) {
-	uint8_t	wbuf[SECTOR_SIZE];
+void	ff_erase() {
 	Watchdog_init(4000);
 	for(int i=FATFS_SECTOR; i<FATFS_SECTOR+FLASH_SECTOR_1*PAGE_COUNT;i+=FLASH_SECTOR_1) {
 		FLASH_Erase(i,1);
 		Watchdog();
 	}
+}
+/*******************************************************************************
+* Function Name	: ff_format
+* Description		: formatting flash file system sectors
+* Input					: 
+* Output				: 
+* Return				: 
+*******************************************************************************/
+FRESULT	ff_format(char *drv) {
+	uint8_t	wbuf[SECTOR_SIZE];
+	ff_erase();
 	return f_mkfs(drv,1,CLUSTER_SIZE,wbuf,SECTOR_SIZE);
 }

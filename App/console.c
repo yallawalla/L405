@@ -218,28 +218,43 @@ FRESULT DecodeEq(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-uint32_t	remoteConsole(uint32_t stdid, uint32_t ex) {
+void	remoteLoop() {
 	payload 	buf;
-	uint32_t	m,n=0;
-	while(n<8) {
-		m=Escape();
-		if(m==(uint32_t)EOF || m==ex)
-			break;
+	uint32_t	n=0,c;
+	uint32_t	timeout=0;
+	do {
+		c=fgetc(stdin);
+		if(c==(uint32_t)EOF) {
+			if(n && !timeout) {
+				Send(idCAN2COM,&buf,n);
+				n=0;
+			}
+			_wait(2);
+			continue;
+		}
+		if(c==__Esc)
+			timeout=HAL_GetTick()+5;
 		else
-			buf.byte[n++]=m;
-	}
-	if(n)
-		Send(stdid,&buf,n);
-	return m;
+			timeout=0;
+		buf.byte[n++]=c;
+		if(n == 8) {
+			Send(idCAN2COM,&buf,n);
+			n=0;
+		}
+	} while(!timeout || HAL_GetTick() < timeout);
 }
 //-----------------------------------------------------
-FRESULT Remote(int id, uint32_t ex) {
+FRESULT Remote(int id) {
+				if(*stdin->io == canConsole) {
+					_print("... not allowed");
+					return FR_DISK_ERR;
+				}
 				if(!devices[id]) {
 					Parse(__Esc);
 					if(!devices[id]) {
 						_print("... no devices");
 						DecodeCom(0);
-						return FR_INVALID_PARAMETER;
+						return FR_DISK_ERR;
 					}
 				}
 				_io **io=_DBG;
@@ -248,16 +263,26 @@ FRESULT Remote(int id, uint32_t ex) {
 				debug |= (1<<DBG_CONSOLE);
 				Send(_REMOTE_REQ,(payload *)&devices[id%4],sizeof(int32_t));
 				_print("  remote console open...");
-
 				Send(idCAN2COM,(payload *)"\r",1);
-				while(remoteConsole(idCAN2COM,ex) != ex) 
-					_wait(2);
+				
+				remoteLoop(); 
+
 				Send(_REMOTE_REQ,NULL,0);
 				_DBG=io;
 				debug=dbg;
 				_print("  remote console closed...");
 				DecodeCom(NULL);
 				return FR_OK;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT fErase(int argc, char *argv[]) {
+	ff_erase();
+	return FR_OK;
 }
 /*******************************************************************************
 * Function Name	:
@@ -464,6 +489,7 @@ struct cmd {
 	{"address",		fAddress},
 	{"iap",				fIap},
 	{"format",		fFormat},
+	{"erase",			fErase},
 	{"pack",			fPack}
 };
 /*******************************************************************************
@@ -579,11 +605,10 @@ char	*c;
 					NVIC_SystemReset();	
 //__________________________________________________
 				case __Esc:
-				case __CtrlD:
 				{
 _io 			**io=_DBG;
 					_DBG=stdout->io;
-					uint32_t dbg=debug;
+uint32_t	dbg=debug;
 					debug |= (1<<DBG_CONSOLE);
 					
 					nDev=0;
@@ -596,14 +621,14 @@ _io 			**io=_DBG;
 				}
 				break;				
 				
-				case __f1: Remote(0,__f1); break;
-				case __F1: Remote(0,__F1); break;
-				case __f2: Remote(1,__f2); break;
-				case __F2: Remote(1,__F2); break;
-				case __f3: Remote(2,__f3); break;
-				case __F3: Remote(2,__F3); break;
-				case __f4: Remote(3,__f4); break;
-				case __F4: Remote(3,__F4); break;
+				case __f1:
+				case __F1: Remote(0); break;
+				case __f2:
+				case __F2: Remote(1); break;
+				case __f3:
+				case __F3: Remote(2); break;
+				case __f4:
+				case __F4: Remote(3); break;
 
 				case __f9:
 				case __F9:
