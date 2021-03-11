@@ -642,6 +642,10 @@ uint32_t	dbg=debug;
 					UsbDevice_DeInit();
 					MX_USB_HOST_Init();
 				break;
+
+				case '?':
+					_print("%d\r\n",sizeof(payload));
+				break;
 				
 				case __f12:
 				case __F12:

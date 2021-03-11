@@ -97,7 +97,14 @@ typedef struct {
 	unsigned sect:2;
 } test;
 
+
 typedef union {
+		__packed struct {
+			__packed struct {
+				uint8_t	ch:3, count:4, longpulse:1;
+			} sect[4];
+			uint16_t	tslot,tref;
+		} pulse;
 		uint8_t		byte[8];
 		uint8_t		bytes[8];
 		uint16_t	hword[4];

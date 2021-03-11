@@ -20,9 +20,18 @@ uint32_t	idDev,
 					debug,
 					idPos,
 					testMask;
-payload		py,py_backup;
+payload		py;
 uint32_t	devices[_MAX_DEV];
 uint32_t	ref_cnt;
+
+uint8_t		prio[6][3]={
+{0,0,2},
+{0,1,2},
+{2,2,2},
+{0,0,2},
+{0,1,2},
+{2,2,2}
+};
 
 tim timStack[] = {
 	{NULL,&htim1,TIM_CHANNEL_1,0,0,_DMA},					//PA8		1A1
@@ -343,16 +352,6 @@ void	*canTx(void *v) {
 				t->timeout=0;
 				_DEBUG(DBG_CRC,"\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);
 				switch(t->crc) {
-//					case _VCP_CDC:
-//						if(_VCP) {
-//							VCP_USB_DEVICE_DeInit();
-//							MSC_USB_DEVICE_Init();
-//						} else {
-//							MSC_USB_DEVICE_DeInit();
-//							VCP_USB_DEVICE_Init();
-//						}
-//					break;
-							
 					case _LEFT_FRONT:
 						idPos=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
@@ -381,12 +380,6 @@ void	*canTx(void *v) {
 					break;
 					
 					default: 												// signature
-//						if(t->longcnt)
-//							py.byte[t->sect] |=4;
-//						else if(t->cnt > 4)						// >4 (dva pulta ) za izogib dvojnega pulza pri 
-//								py.byte[t->sect] |=2;
-//							else
-//								py.byte[t->sect] |=1;
 					break;
 				}				
 				uint32_t n = t->cnt/2;
@@ -409,35 +402,25 @@ void	*canTx(void *v) {
 			}
 		}
 // isci vse v rangu +/-1 od prvega.... brisi payload, ce first ne obstaja, preskok
-		memset(&py,0,sizeof(payload));
-		for(t=timStack; first && t->htim; ++t) {
-			if(t->cnt && t->trefcnt == first->trefcnt && t->tref <= first->tref+1) {
-				if(t->longcnt)
-					py.byte[t->sect] =4;
-				else if(t->cnt > 4)
-					py.byte[t->sect] =2;
-				else
-					py.byte[t->sect] =1;
+		if(first) {
+			memset(&py,0,sizeof(payload));
+			py.pulse.tref=first->tref;
+			py.pulse.tslot=first->trefcnt;
+			for(t=timStack; first && t->htim; ++t) {
+				if(t->cnt && t->trefcnt == first->trefcnt && t->tref <= first->tref+1) {
+					if(t->longcnt)
+						py.pulse.sect[t->sect].longpulse=true;
+					if(py.pulse.sect[t->sect].count)
+						py.pulse.sect[t->sect].ch=prio[t->ch][py.pulse.sect[t->sect].ch];
+					else
+						py.pulse.sect[t->sect].ch=prio[t->ch][1];
+
+					py.pulse.sect[t->sect].count=min(py.pulse.sect[t->sect].count+t->cnt,0xf);
+				}
+				t->cnt=t->longcnt=0;
 			}
-			t->cnt=t->longcnt=0;
+			Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
 		}
-// flush filter, poslje single pulse po timeoutu ali burst po 15 enakih (!!!) ....					
-		if(py.word[0]) {
-			py.hword[2]=first->tref;
-			py.hword[3]=first->trefcnt;
-			if(flushFilter(&py.word[0]) > 4) {
-				if(py.byte[0]==1)	py.byte[0]=2;
-				if(py.byte[1]==1)	py.byte[1]=2;
-				if(py.byte[2]==1)	py.byte[2]=2;
-				Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
-			}
-			memcpy(&py_backup,&py,sizeof(payload));											// backuo za timeout
-		} else {
-			if(flushFilter(NULL) == 1) {																// osamljen pulz je nespremenjen !!!
-				Send(_ACK_LEFT_FRONT+idPos,&py_backup,sizeof(payload));
-			}
-		}
-		py.word[0]=0;
 	}
 	return canTx;
 }

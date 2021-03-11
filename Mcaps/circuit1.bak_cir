@@ -227,21 +227,6 @@ Pin="Plus",6,0,-5,-6
 Pin="Minus",0,0,-20,-6
 
 [compdef]
-Name=Opamp
-Definition=Opamp
-Shape=Opamp5
-Mask=4097
-Used=8
-memo=Opamp
-Label Offset=44,29,-14,39
-PinCnt=5
-Pin="Plus input",0,0,-31,-7
-Pin="Minus input",0,6,-33,20
-Pin="VEE",4,7,3,-5
-Pin="Output",9,3,-13,-4
-Pin="VCC",4,-1,5,14
-
-[compdef]
 Name=Battery
 Definition=Battery
 Shape=Battery
@@ -290,8 +275,38 @@ PinCnt=2
 Pin="Anode",6,0,-9,-8
 Pin="Cathode",0,0,-20,-8
 
+[compdef]
+Name=AD8002A_AD
+Definition=Subckt
+Shape=Opamp5
+Mask=5248
+Used=15
+memo=Dual 600MHz, 50mW Current Feedback Amplifier
+Label Offset=51,34,-8,44
+PinCnt=5
+Pin="3",a,0,0,-3,-4
+Pin="2",a,0,6,-3,18
+Pin="7",a,4,-1,6,15
+Pin="4",a,4,7,6,0
+Pin="6",a,9,3,-3,-3
+
+[compdef]
+Name=AD8038
+Definition=Subckt
+Shape=Opamp5
+Mask=5248
+Used=5
+memo=Low Power, 350MHz Voltage Feedback Amplifier
+Label Offset=51,31,-10,41
+PinCnt=5
+Pin="1",a,0,0,-3,-4
+Pin="2",a,0,6,-3,18
+Pin="99",a,4,-1,6,15
+Pin="50",a,4,7,6,0
+Pin="30",a,9,3,-3,-3
+
 [Circuit]
-Window Placement=2,3, -1,-1, -8,-31, 130,130,1049,459
+Window Placement=2,3, -1,-1, -8,-31, 104,104,1203,418
 Default Object=Color=#000080
 Default Object Font=Height=-15,FStyle=0,Color=#000080,Name=Arial
 Default Object Apply Border To Text=No
@@ -304,7 +319,8 @@ PathDelayFormat=3
 WarningFormat=3
 GridTextFormulaFormat=3
 Window Placement in Transient Analysis=2,3, -1,-1, -8,-31, 0,0,1115,329
-Window Placement in Transient Probe=0,1, -1,-1, -8,-31, 436,4,1069,474
+Window Placement in Transient Probe=0,1, -1,-1, -8,-31, 579,-1,1212,469
+Window Placement in AC Probe=0,1, -1,-1, -8,-31, 633,0,1266,481
 SpiceType=AMBIGUOUS
 Title_Block_Border=None
 Title_Block=False
@@ -440,7 +456,7 @@ Style=8192
 
 [Attr]
 ON=-48,-41,VALUE
-V=DC 5u AC 1 0 Pulse 0 1u 10u 5n 5n 20n 1m
+V=DC 5u AC 1 0 Pulse 0 3u 2u 1n 1n 20n 1m
 
 [Attr]
 ON=0,0,PACKAGE
@@ -468,7 +484,7 @@ Style=256
 
 [Attr]
 ON=0,0,Saved_Pulse
-V=DC 5u AC 1 0 Pulse 0 1u 10u 5n 5n 20n 1m
+V=DC 5u AC 1 0 Pulse 0 3u 2u 1n 1n 20n 1m
 Style=256
 
 [Wire]
@@ -546,24 +562,6 @@ Rot=7
 
 [Wire]
 Pxs=136,176,168,176
-
-[Comp]
-Name=Opamp
-Px=344,176
-Rot=4
-
-[Attr]
-ON=44,-43,PART
-V=X2
-Style=8192
-
-[Attr]
-ON=44,-57,MODEL
-V=AD8002
-
-[Attr]
-ON=0,0,PACKAGE
-V
 
 [Comp]
 Name=Battery
@@ -725,24 +723,6 @@ V
 Name=Ground
 Px=512,200
 Rot=7
-
-[Comp]
-Name=Opamp
-Px=616,152
-Rot=4
-
-[Attr]
-ON=44,-43,PART
-V=X3
-Style=8192
-
-[Attr]
-ON=44,-57,MODEL
-V=AD8002
-
-[Attr]
-ON=0,0,PACKAGE
-V
 
 [Wire]
 Pxs=560,152,616,152
@@ -1063,24 +1043,6 @@ Rot=7
 [Wire]
 Pxs=136,408,168,408
 
-[Comp]
-Name=Opamp
-Px=344,408
-Rot=4
-
-[Attr]
-ON=44,-43,PART
-V=X5
-Style=8192
-
-[Attr]
-ON=44,-57,MODEL
-V=AD8039
-
-[Attr]
-ON=0,0,PACKAGE
-V
-
 [Wire]
 Pxs=312,408,344,408
 
@@ -1178,24 +1140,6 @@ V
 Name=Ground
 Px=512,432
 Rot=7
-
-[Comp]
-Name=Opamp
-Px=544,384
-Rot=4
-
-[Attr]
-ON=44,-43,PART
-V=X6
-Style=8192
-
-[Attr]
-ON=44,-57,MODEL
-V=AD8039
-
-[Attr]
-ON=0,0,PACKAGE
-V
 
 [Wire]
 Pxs=512,384,544,384
@@ -1720,7 +1664,7 @@ Style=8192
 
 [Attr]
 ON=-35,-41,VALUE
-V=2.13
+V=2.1
 Style=8192
 
 [Attr]
@@ -1968,6 +1912,94 @@ Pxs=264,176,312,176
 [Wire]
 Pxs=264,408,312,408
 
+[Comp]
+Name=AD8002A_AD
+Px=344,176
+Rot=4
+
+[Attr]
+ON=51,-48,PART
+V=X9
+Style=8192
+
+[Attr]
+ON=51,-62,NAME
+V=AD8002A_AD
+
+[Attr]
+ON=51,-90,PACKAGE
+V=DIP8
+
+[Attr]
+ON=51,-104,GATE
+V=A
+
+[Attr]
+ON=51,-118,COMPNAME
+V=UX9
+
+[Comp]
+Name=AD8002A_AD
+Px=616,152
+Rot=4
+
+[Attr]
+ON=51,-48,PART
+V=X10
+Style=8192
+
+[Attr]
+ON=51,-62,NAME
+V=AD8002A_AD
+
+[Attr]
+ON=51,-90,PACKAGE
+V=DIP8
+
+[Attr]
+ON=51,-104,GATE
+V=A
+
+[Attr]
+ON=51,-118,COMPNAME
+V=UX9
+
+[Comp]
+Name=AD8038
+Px=344,408
+Rot=4
+
+[Attr]
+ON=51,-45,PART
+V=X13
+Style=8192
+
+[Attr]
+ON=51,-59,NAME
+V=AD8038
+
+[Attr]
+ON=51,-87,PACKAGE
+V=SOIC8
+
+[Comp]
+Name=AD8038
+Px=544,384
+Rot=4
+
+[Attr]
+ON=51,-45,PART
+V=X14
+Style=8192
+
+[Attr]
+ON=51,-59,NAME
+V=AD8038
+
+[Attr]
+ON=51,-87,PACKAGE
+V=SOIC8
+
 [Grid Text]
 Text="VS"
 Px=584,624
@@ -2114,7 +2146,7 @@ CurrentSection 3=0
 Splitter.xs=0
 Splitter.ys=0
 TextQuad=4099
-Scale=1
+Scale=0.66666666666666663
 GridUser=10
 ShapeGroups="Main","Euro","Polarity","Main1","Main11","Electrolytic","GroundArrow","DeMorgan"
 CalcRMS=False
@@ -2302,9 +2334,9 @@ PrinterScale=1
 Scale 0=1
 Scale 1=1
 Scale 2=1
-SB 3=0,16
-Scale 3=1
-Px=50,203
+SB 3=0,64
+Scale 3=0.66666666666666663
+Px=131,151
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
@@ -2368,7 +2400,6 @@ Type=Text
 Print=False
 Enable=True
 Name=Models
-SB 0=0,5
 Font=Height=-15,FStyle=0,Color=#000000,Name=Courier New
 Comment Color=#008000
 WinBackGround Color=#FFFFFF
@@ -2504,7 +2535,7 @@ WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
 Select Box Color=#000080
-Window Placement in Probe=0,1, -1,-1, 0,0, 0,0,633,470
+Window Placement in Probe=0,1, -1,-1, 0,0, 0,1,633,470
 Title
 AutoTitle=Yes
 Grid Color=#808080
@@ -2524,8 +2555,8 @@ LabelMinor=Off
 DataPoints=False
 Token=False
 Ruler=False
-XAxisGrids=True
-YAxisGrids=True
+XAxisGrids=False
+YAxisGrids=False
 MinorLogGrids=True
 BaseLine=False
 AlignZ=True
@@ -2542,7 +2573,7 @@ Tracker Cursor BranchInfo=False
 Horizontal Cursor=False
 Same Y Scales=Yes
 Enable X Scaling=True
-Enable Y Scaling=True
+Enable Y Scaling=False
 Keep X Scales The Same=True
 Number of Grids X=5
 Number of Grids Y=5
@@ -2721,7 +2752,220 @@ ALIGNBOTTOM=No
 
 [APage]
 Analysis=Transient
-Name="MAIN"
+Name="Main"
+
+[AC]
+WinID=2
+Font=Height=-19,FStyle=0,Color=#0000FF,Name=Arial
+WinBackGround Color=#FFFFFF
+Select Color=#FF0000
+Anchor Color=#000000
+Select Box Color=#000080
+Window Placement in Probe=0,1, -1,-1, 0,0, 0,0,633,481
+Title
+AutoTitle=Yes
+Grid Color=#808080
+Grid Weight=1
+Grid Pattern=Dot6
+Tracker Foreground=Height=-15,FStyle=0,Color=#000000,Name=Arial
+Tracker Background=#FFFF00
+Baseline color=#0000FF
+BaseLine Weight=1
+CurveFit color=#FF0000
+CurveFit Weight=2
+CurveFit Pattern=Dash
+Static Grids=False
+PlusMark=False
+MinorLog25=Off
+LabelMinor=Off
+DataPoints=False
+Token=False
+Ruler=False
+XAxisGrids=True
+YAxisGrids=True
+MinorLogGrids=True
+BaseLine=False
+AlignZ=True
+Align Cursors=True
+TagFormatX=3
+TagFormatY=3
+FormulaFormat=2
+EndMode=SCALE
+Graph Background=#FFFFFF
+Tracker Intercept=False
+Tracker Mouse=True
+Tracker Cursor=True
+Tracker Cursor BranchInfo=False
+Horizontal Cursor=False
+Same Y Scales=Yes
+Enable X Scaling=True
+Enable Y Scaling=True
+Keep X Scales The Same=True
+Number of Grids X=5
+Number of Grids Y=5
+Cursor Select Color Primary=#C0C0C0
+Cursor Select Color Secondary=#FF0000
+Data Point Labels Color Fore=Height=-15,FStyle=0,Color=#000000,Name=Arial
+Data Point Labels Color Back=#FFFF00
+OperPoint=True
+AutoScaleRanges=True
+FFT_NPts="8192"
+FFT_IncludeDCHarmonic=False
+FFT_AutoScale_Harmonics="10"
+PrinterAutoTile=No
+PrinterBlackBorder=No
+AnimateWait=None
+AnimateWaitTime=500
+AnimatePressAfter=0
+Save_For_Future=No
+Reduce_Display=1
+Reduce_Save=1
+Reduce_ThrowDataOut=0
+Num Out Header Left
+Num Out Header Center="$MC\n$user\n$company\n$Analysis of $name\n$date $time"
+Num Out Header Right
+Num Out Delimiter=32
+Num Out Write=True
+Num Out Write Main Header=True
+Num Out Write Limits=True
+Num Out Write Branch Header=True
+Num Out Write Models=False
+Num Out Write Zero Models=True
+Num Out Write Undefined Models=True
+Num Out Write Operating Point=True
+Num Out Write Measurement Values=True
+Num Out Write Tolerance Detail=True
+Num Out Write Noise=True
+Num Out Write Values=True
+Num Out Write Waveform Header=True
+Num Out Allow Dup Y Expr=False
+Num Out Low="FMIN"
+Num Out High="FMAX"
+Num Out Font=Height=-15,FStyle=0,Color=#000000,Name=Courier New
+Num Out Format=3
+Num Out HideNonSelected=False
+Num Out UseActualDataPoints=False
+AutoSaveWave=False
+Wave Format=16E
+State Variables Format=5E
+Print Individual Pages=False
+
+[Tools]
+Pos=Top
+SELECT=Yes
+PAN=Yes
+GRAPHIC=Yes
+LINE=No
+ELLIPSE=No
+RECT=No
+DIAM=No
+ARC=No
+PIE=No
+TRIANGLE=No
+STAR=No
+LEFTBRK=No
+RIGHTBRK=No
+BOTHBRK=No
+META=No
+PARALLELOGRAM=No
+POLYCLOS=No
+POLYOPEN=No
+SCALE=Yes
+CURSOR=Yes
+MEASUREH=Yes
+MEASUREV=Yes
+TAG=Yes
+PTAG=Yes
+TEXT=Yes
+PROPERTY=Yes
+START=Yes
+STOP=Yes
+PAUSE=Yes
+RESUME=No
+DATAPTS=Yes
+TOKENS=Yes
+RULER=Yes
+PLUS=Yes
+XAXIS=Yes
+YAXIS=Yes
+MINORLOG=Yes
+LOG25=Yes
+BASELINE=Yes
+HORIZCUR=Yes
+GOTOX=Yes
+GOTOY=Yes
+GOTOPERF=Yes
+GOTOBRNC=Yes
+CLEAR_ACCUMULATED=Yes
+PDELETE_ALL_PLOTS=Yes
+NEXT=Yes
+NEXTIN=Yes
+PEAK=Yes
+VALLEY=Yes
+HIGH=Yes
+LOW=Yes
+INFLECTN=Yes
+GHIGH=Yes
+GLOW=Yes
+BOTTOM=Yes
+TOP=Yes
+WAVEFORMBUFFER=Yes
+AOUTPUT=Yes
+PKEY=Yes
+ENXSCALE=Yes
+ENYSCALE=Yes
+ZOOMIN=Yes
+ZOOMOUT=Yes
+AUTOSCALE=Yes
+RESTORESCALE=No
+COLOR=Yes
+FONT=Yes
+STYLE=Yes
+SELNEXT=No
+NORMALIZE=No
+NORMALIZE_MIN=No
+NORMALIZE_MAX=No
+ADD_TAG_LEFT=No
+ADD_TAG_RIGHT=No
+ADD_HORZ_TAG=No
+ADD_VERT_TAG=No
+ALIGN_CURSORS=No
+ALIGN_CURSORSZ=No
+CURSORTOCLIPBOARD=No
+TRACKER_CURSOR=No
+TRACKER_CURSOR_BRANCHINFO=No
+TRACKER_INTERCEPT=No
+TRACKER_MOUSE=No
+TOFRONT=Yes
+TOBACK=Yes
+SPLITCIRTEXTH=No
+SPLITCIRTEXTV=No
+SPACE_SPLITTERS_EVENLY=No
+NORMALCIR=No
+LABEL_WAVEFORM=No
+LABEL_DATA_POINTS=No
+WFB_ADD_TO_LIMITS=No
+ENVELOPE=No
+SAMEYSCALES=No
+KEEPXSCALESTHESAME=No
+CURVEFIT=No
+ADD_MARKER=No
+SHOWWATCH=No
+BP=No
+TOGGLEMODE=No
+REMOVEALLTEXT=No
+AUTOSCALEX=No
+LABELALLMINOR=No
+ALIGNLEFT=No
+ALIGNCENTER=No
+ALIGNRIGHT=No
+ALIGNTOP=No
+ALIGNMIDDLES=No
+ALIGNBOTTOM=No
+
+[APage]
+Analysis=AC
+Name="Main"
 
 [Monte Carlo Options]
 Analysis=Transient
@@ -2732,11 +2976,20 @@ Distribution=Normal
 Number of Runs=10
 Seed=0
 
+[Monte Carlo Options]
+Analysis=AC
+Status=Off
+Zero Tolerance=False
+Eliminate Outliers=False
+Distribution=Normal
+Number of Runs=10
+Seed=0
+
 [Limits]
 Analysis=Transient
-TMax=500u
+TMax=200u
 TStart=0
-TStep=10n
+TStep=100n
 NPts=51
 Temp=27
 RetraceRuns=1
@@ -2752,11 +3005,11 @@ Plt=1
 AliasID=1
 XExp=T
 YExp=v(16)
-XRng=0.0005
-YRng=4.97683,4.97678
+XRng=0.0002
+YRng=8,-2
 Options=LINEARX,LINEARY
-Range Grid X=0.0001
-Range Grid Y=1e-5
+Range Grid X=4e-5
+Range Grid Y=2
 Enable=Enable
 Line Color=#0000FF
 Text Color=#0000FF
@@ -2778,10 +3031,10 @@ Plt=2
 AliasID=2
 XExp=T
 YExp=v(29)
-XRng=0.0005
+XRng=0.0002
 YRng=8,-2
 Options=LINEARX,LINEARY
-Range Grid X=0.0001
+Range Grid X=4e-5
 Range Grid Y=2
 Enable=Enable
 Line Color=#FF0000
@@ -2803,13 +3056,98 @@ Analysis=Transient
 Plt=3
 AliasID=3
 XExp=T
-YExp=v(36)
-XRng=0.0005
-YRng=7.5
+YExp=v(35)
+XRng=0.0002
+YRng=4.97655,4.97655
 Options=LINEARX,LINEARY
-Range Grid X=2e-5
-Range Grid Y=1.5
-Enable=Hide
+Range Grid X=4e-5
+Range Grid Y=6e-8
+Enable=Enable
+Line Color=#008000
+Text Color=#008000
+Rainbow=False
+VFmtX=3
+VFmtY=3
+ScaleFactorX="None"
+ScaleFactorY="None"
+ScaleUnitsX="Auto"
+ScaleUnitsY="Auto"
+SFmtX=2
+SFmtY=2
+NOFmtX=3E
+NOFmtY=3E
+
+[Limits]
+Analysis=AC
+FRange=1E8,1k
+NPts=1001
+Temp=27
+MaxChng=5
+NInput=None
+NOutput=2
+Sweep type=Log
+StateVar=Zero
+RunOption=Normal
+Temperature Type=Linear
+Accumulate Plots=False
+IgnoreExprErrors=False
+FirstValueDisplay=Mag
+SecondValueDisplay=PhaseDeg
+DisplayValuesInProbe=DC
+
+[WaveForm]
+Analysis=AC
+Plt=1
+AliasID=1
+XExp=F
+YExp=dB(v(VC))
+XRng=Auto
+YRng=Auto
+Options=LINEARY
+Enable=Enable
+Line Color=#0000FF
+Text Color=#0000FF
+Rainbow=False
+VFmtX=3
+VFmtY=3
+ScaleFactorX="None"
+ScaleFactorY="None"
+ScaleUnitsX="Auto"
+ScaleUnitsY="Auto"
+SFmtX=2
+SFmtY=2
+NOFmtX=3E
+NOFmtY=3E
+
+[WaveForm]
+Analysis=AC
+Plt=2
+AliasID=2
+XExp=F
+YExp=ph(v(VC))
+XRng=Auto
+YRng=Auto
+Options=LINEARY
+Enable=Enable
+Line Color=#FF0000
+Text Color=#FF0000
+Rainbow=False
+VFmtX=3
+VFmtY=3
+ScaleFactorX="None"
+ScaleFactorY="None"
+ScaleUnitsX="Auto"
+ScaleUnitsY="Auto"
+SFmtX=2
+SFmtY=2
+NOFmtX=3E
+NOFmtY=3E
+
+[WaveForm]
+Analysis=AC
+AliasID=-1
+Options=LINEARY
+Enable=Enable
 Line Color=#008000
 Text Color=#008000
 Rainbow=False
@@ -2868,6 +3206,11 @@ Analysis=Transient
 Format=3
 ExprPercentWidth=80
 
+[Watch]
+Analysis=AC
+Format=3
+ExprPercentWidth=80
+
 [WCTolerance]
 Var Width=100
 Nominal Width=72
@@ -2895,7 +3238,7 @@ StepSize="10%"
 MRUDockID=59421
 Floating=False
 LocalOffset=True
-Rect=44,-2,135,158
+Rect=-2,-2,89,158
 
 [Slider]
 Analysis=Transient
@@ -2911,7 +3254,7 @@ StepSize="1%"
 MRUDockID=59421
 Floating=False
 LocalOffset=True
-Rect=-2,-2,46,158
+Rect=-2,156,44,316
 
 [OPMethods]
 Analysis=Transient
