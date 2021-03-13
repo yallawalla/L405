@@ -22,7 +22,7 @@ uint32_t	idDev,
 					testMask;
 payload		py;
 uint32_t	devices[_MAX_DEV];
-uint32_t	ref_cnt;
+uint32_t	refCnt,flushTout;
 
 uint8_t		prio[6][3]={
 {0,0,2},
@@ -63,6 +63,16 @@ tim timStack[] = {
 };
 
 uint32_t	filter_count;
+
+FIL				xxx;
+void			open() {
+	f_open(&xxx,"xxx.txt",FA_CREATE_ALWAYS | FA_WRITE);
+}
+void			close() {
+	f_sync(&xxx);
+	f_close(&xxx);
+}
+
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -89,7 +99,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	tim				*p=NULL;
 	
 	if(htim->Instance==TIM2 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_4)
-		++ref_cnt;
+		++refCnt;
 	
 	if(htim->Instance==TIM3)	p=&timStack[12];
 	if(htim->Instance==TIM4)	p=&timStack[15];
@@ -220,43 +230,13 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef* hcan) {
 * Output				:
 * Return				:
 *******************************************************************************/
-uint32_t	flushFilter(uint32_t *ch) {
-	#define N_FLUSH 4
-	static uint32_t old = 0, cnt = 0, cnteq = 0, tout = 0;
-	uint32_t ret = 0;
-	if (ch) {
-		tout = HAL_GetTick() + 30;
-		++cnt;
-		if (*ch == old || cnt==1)
-			++cnteq;
-		else
-			cnteq = 0;
-		old = *ch;
-		if (cnteq && !(cnteq % N_FLUSH))
-			ret=cnteq;
-	}
-	else if (tout && HAL_GetTick() > tout) {
-		tout=0;
-		if (cnt == cnteq)
-			ret = cnteq;
-		cnt = cnteq = 0;
-	}
-	return ret;
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 void	*canTx(void *v) {
-
+// slot sync message.... 
 	if(syncReq) {
 		Send(_ID_TIMING_SYNC,NULL,0);
 		syncReq=false;
 	}
-	
-
+// first entry...
 	if(!_CAN) {
 		_CAN	=	_io_init(100*sizeof(CanTxMsg), 100*sizeof(CanTxMsg));
 
@@ -275,16 +255,16 @@ void	*canTx(void *v) {
 		HAL_CAN_ActivateNotification(&hcan2,CAN_IT_RX_FIFO0_MSG_PENDING);
 		HAL_CAN_ActivateNotification(&hcan2,CAN_IT_TX_MAILBOX_EMPTY);
 		HAL_CAN_Start(&hcan2);
-/*******************************************************************************/
+// periodic polling req....
 	} else {
 		tim 	*t,*first;
 		for(t=timStack; t->htim; ++t) {
 			uint32_t	tcapt,dt;
-//			if(t->htim->Instance && t->tmode == _DMA)
 			if(t->htim->Instance && t->htim->hdma[((t->Channel)>>2)+1])
 				t->dma->_push = &t->dma->_buf[(t->dma->size - t->htim->hdma[((t->Channel)>>2)+1]->Instance->NDTR*sizeof(uint32_t))];
 			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) 
 				if((1 << t->ch) & ~testMask) {
+//					f_printf(&xxx,"%6d\r",tcapt);
 					if(t->timeout) {
 						if(tcapt < t->to)
 							dt = (0x10000 + tcapt - t->to)/uS;
@@ -337,7 +317,7 @@ void	*canTx(void *v) {
 						t->cnt=t->longcnt=t->pw=t->crc = 0;
 						t->hi=t->lo=t->shi=t->slo=0;
 //----------------------------------------------------------------						
-						t->trefcnt=ref_cnt;																		// referencni count
+						t->trefcnt=refCnt;																		// referencni count
 						t->tref = tcapt - htim2.Instance->CCR4;
 						if(tcapt < htim2.Instance->CCR4)											// preskok
 							t->tref += 0x10000;
@@ -346,6 +326,9 @@ void	*canTx(void *v) {
 					}
 					++t->cnt;
 					t->timeout=HAL_GetTick()+MAX__INT;
+					if(!flushTout) {
+						flushTout=HAL_GetTick()+FLUSH__INT;
+					}
 				}
 
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
@@ -354,29 +337,34 @@ void	*canTx(void *v) {
 				switch(t->crc) {
 					case _LEFT_FRONT:
 						idPos=0;
+						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _RIGHT_FRONT:
 						idPos=1;
+						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _RIGHT_REAR:
 						idPos=2;
+						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _LEFT_REAR:
 						idPos=3;
+						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 			
 					case _REPEAT:
+						t->cnt=t->longcnt=0;
 					break;
 					
 					default: 												// signature
@@ -391,6 +379,9 @@ void	*canTx(void *v) {
 		}
 // isci prvega.... prekini, ce je katerikoli timeout se aktiven..		
 		for(t=timStack,first=NULL; t->htim; ++t) {
+			if(flushTout && HAL_GetTick() > flushTout) {
+				t->timeout=0;
+			}
 			if(t->timeout)
 				return canTx;
 			if(t->cnt) {
@@ -405,22 +396,43 @@ void	*canTx(void *v) {
 		if(first) {
 			memset(&py,0,sizeof(payload));
 			py.pulse.tref=first->tref;
-			py.pulse.tslot=first->trefcnt;
+			py.pulse.slot=first->trefcnt;
 			for(t=timStack; first && t->htim; ++t) {
+// na kanalu je nek count in je blzu first...
 				if(t->cnt && t->trefcnt == first->trefcnt && t->tref <= first->tref+1) {
-					if(t->longcnt)
-						py.pulse.sect[t->sect].longpulse=true;
-					if(py.pulse.sect[t->sect].count)
-						py.pulse.sect[t->sect].ch=prio[t->ch][py.pulse.sect[t->sect].ch];
-					else
-						py.pulse.sect[t->sect].ch=prio[t->ch][1];
+					if(t->longcnt) {
+						if(t->longcnt > 15) {
+							py.pulse.sect[t->sect].longpulse=true;
+							py.pulse.sect[t->sect].count=min(t->longcnt,0xf);
+						}
+					} else if (t->cnt > 15) {
+						py.pulse.sect[t->sect].count=min(t->cnt,0xf);
+					} else if (t->cnt && t->cnt <= 2) {
+						py.pulse.sect[t->sect].count=1;
+					}
+// le je v payloadu že count, se preveri prioriteta, sicer se nastavi najnižja				
+//					if(py.pulse.sect[t->sect].count)
+//						py.pulse.sect[t->sect].ch=prio[t->ch][py.pulse.sect[t->sect].ch];
+//					else
+//						py.pulse.sect[t->sect].ch=prio[t->ch][1];
 
-					py.pulse.sect[t->sect].count=min(py.pulse.sect[t->sect].count+t->cnt,0xf);
+//					py.pulse.sect[t->sect].count=min(py.pulse.sect[t->sect].count+t->cnt,0xf);
+////////////////////////////
+					{
+						uint32_t n = t->cnt/2;
+						if(n > 1)
+							_DEBUG(21,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,t->hi/n,t->lo/(n-1),(int)sqrt(n*t->shi - t->hi*t->hi)/n,(int)sqrt((n-1)*t->slo - t->lo*t->lo)/(n-1),n,t->longcnt);
+						else if(n > 0)
+							_DEBUG(21,"\r\n%d,%d:%5d,%5d,%5d,%5d --- %d,%d",t->ch,t->sect,	t->hi,0,0,0,n,t->longcnt);
+					}
+					_DEBUG(20,"\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);
+////////////////////////////
 				}
 				t->cnt=t->longcnt=0;
 			}
 			Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
 		}
+		flushTout=0;
 	}
 	return canTx;
 }
@@ -478,7 +490,7 @@ void	*canRx(void *v) {
 					break;
 					
 				case _ID_TIMING_SYNC:
-					ref_cnt=0;
+					refCnt=0;
 					break;
 				
 				case _TEST_REQ:

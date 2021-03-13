@@ -8,8 +8,8 @@
 #define		MIN_BURST			50					
 #define		CRC_THRHOLD		300				
 #define		MAX_BURST			100
-#define		MAX__INT			10					
-#define		MAX_FLUSH			90
+#define		MAX__INT			20					
+#define		FLUSH__INT		180
 
 #define 	N_CH0					8
 #define 	N_CH1					8
@@ -103,7 +103,7 @@ typedef union {
 			__packed struct {
 				uint8_t	ch:3, count:4, longpulse:1;
 			} sect[4];
-			uint16_t	tslot,tref;
+			uint16_t	slot,tref;
 		} pulse;
 		uint8_t		byte[8];
 		uint8_t		bytes[8];

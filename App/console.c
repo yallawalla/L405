@@ -562,6 +562,18 @@ FRESULT		ret=FR_OK;
 					} while(*c);
 					break;
 //__________________________________________________
+void			open(void),close(void);
+				case 'o':
+					open();
+					_print("\r\nopen...");
+					DecodeCom(NULL);
+					break;
+				case 'c':
+					close();
+					_print("\r\nclosed...");
+					DecodeCom(NULL);
+					break;
+//__________________________________________________
 				case '?':
 					return DecodeInq(++c);
 				case '+':
@@ -643,10 +655,6 @@ uint32_t	dbg=debug;
 					MX_USB_HOST_Init();
 				break;
 
-				case '?':
-					_print("%d\r\n",sizeof(payload));
-				break;
-				
 				case __f12:
 				case __F12:
 					iapRemote();

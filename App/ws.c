@@ -24,7 +24,7 @@ struct  {
 
 uint32_t	DecodeTab[4096];
 uint32_t	pTimeout,pCount[__COLS][__NWS];
-uint32_t	tRef,tSlot;
+uint32_t	tref[__NWS/6],slot[__NWS/6];
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -35,26 +35,20 @@ void			Decode(int sect,payload *p) {
 					if(p) {
 						if(!pTimeout)
 							pTimeout=HAL_GetTick()+20;
-						if(tRef && tSlot) {
-							int32_t	dt=p->pulse.tref - tRef;
-							if(tSlot != p->pulse.tslot || dt > 2)
-								return;
-							if(dt < 0)
-								tRef=p->pulse.tref;
-							if(dt < -2)
-								for(int j=0; j<__COLS; ++j)
-									ws[j].bit12=0;
-						} else {
-							tRef=p->pulse.tref;
-							tSlot=p->pulse.tslot;
+						if(!tref[sect] && !slot[sect]) { 
+							tref[sect]=p->pulse.tref;
+							slot[sect]=p->pulse.slot;
 						}
-						
-						for(int i=0; i<__NWS/8; ++i)
-							for(int j=0; j<__COLS; ++j)
-								if(p->byte[i] & (1<<j)) {
-									ws[j].bit12 |= 1 << (sect*__NWS/8+i);
-								}
-								
+							
+						for(int i=0; i<__NWS/4/2; ++i)
+							if(p->pulse.sect[i].count) {
+								if(p->pulse.sect[i].longpulse)
+									ws[2].bit12 |= 1<<(sect*__NWS/4/2+i);
+								else if(p->pulse.sect[i].count > 8)
+									ws[1].bit12 |= 1<<(sect*__NWS/4/2+i);
+								else if(p->pulse.sect[i].count <= 2)
+									ws[0].bit12 |= 1<<(sect*__NWS/4/2+i);
+							}
 					}	else {
 						wsStream(sect*__NWS/4,0,__NWS/4-1);
 						for(int i=0; i<__NWS/4; ++i)
@@ -140,9 +134,29 @@ void			wsProcInit(void) {
 * Return				:
 *******************************************************************************/
 void			*wsProc(void *p) {
-	
+// procesiranje po timeoutu	
+// iskanje prvega, cas in slot v t oz. s
 					if(pTimeout && HAL_GetTick() > pTimeout) {
-						pTimeout=tRef=tSlot=0;
+uint16_t 		t=0,s=0;
+						for(int i=0; i<__NWS/6; ++i) 
+							if(slot[i] || tref[i]) {
+								if((t || s) && (slot[i] > s || tref[i] > t))
+									continue;
+								s=slot[i];
+								t=tref[i];
+							}
+// briši bit12 za kvadrant, ki ni blizu prvemu
+						for(int i=0; i<__NWS/6; ++i) {
+							if((slot[i] || tref[i]) && (slot[i] != s || tref[i] > t+2)) {
+								for(int j=0; j<__COLS; ++j)
+									ws[j].bit12 &= ~(7 << (i*__NWS/4/2));
+							}
+						}
+// briši timeout, slot in referenco
+						pTimeout=0;
+						for(int i=0; i<__NWS/6; ++i)
+							slot[i]=tref[i]=0;
+// dekodiranje bit12>>bit24						
 						for(int i=0; i<__COLS; ++i) {
 							ws[i].bit24 |= DecodeTab[ws[i].bit12];
 							for(int j=0; j < __NWS; ++j)
@@ -152,7 +166,7 @@ void			*wsProc(void *p) {
 							ws[i].bit12=0;
 						}
 					}
-						
+// proženje aktivnih v bit24 na 20ms				
 					for(int i=0; i < __NWS; ++i) {
 						int j;
 						for(j=0; j < __COLS; ++j) {
@@ -166,7 +180,7 @@ void			*wsProc(void *p) {
 							for(j=0; j < __COLS; ++j)
 								pCount[j][i]=0;
 					}
-	
+// brisanje aktivnih po timeoutu	
 					for(int i=0; i<__COLS; ++i) 
 						for(int j=0; j<__NWS; ++j)
 							if(ws[i].timeout[j] && HAL_GetTick() > ws[i].timeout[j]) {
