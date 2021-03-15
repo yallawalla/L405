@@ -7,7 +7,7 @@
 #define 	uS						84
 #define		MIN_BURST			50					
 #define		CRC_THRHOLD		300				
-#define		MAX_BURST			100
+#define		MAX_BURST			120
 #define		MAX__INT			20					
 #define		FLUSH__INT		180
 

@@ -562,18 +562,6 @@ FRESULT		ret=FR_OK;
 					} while(*c);
 					break;
 //__________________________________________________
-void			open(void),close(void);
-				case 'o':
-					open();
-					_print("\r\nopen...");
-					DecodeCom(NULL);
-					break;
-				case 'c':
-					close();
-					_print("\r\nclosed...");
-					DecodeCom(NULL);
-					break;
-//__________________________________________________
 				case '?':
 					return DecodeInq(++c);
 				case '+':

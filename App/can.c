@@ -63,16 +63,6 @@ tim timStack[] = {
 };
 
 uint32_t	filter_count;
-
-FIL				xxx;
-void			open() {
-	f_open(&xxx,"xxx.txt",FA_CREATE_ALWAYS | FA_WRITE);
-}
-void			close() {
-	f_sync(&xxx);
-	f_close(&xxx);
-}
-
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -264,7 +254,6 @@ void	*canTx(void *v) {
 				t->dma->_push = &t->dma->_buf[(t->dma->size - t->htim->hdma[((t->Channel)>>2)+1]->Instance->NDTR*sizeof(uint32_t))];
 			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) 
 				if((1 << t->ch) & ~testMask) {
-//					f_printf(&xxx,"%6d\r",tcapt);
 					if(t->timeout) {
 						if(tcapt < t->to)
 							dt = (0x10000 + tcapt - t->to)/uS;
@@ -295,34 +284,57 @@ void	*canTx(void *v) {
 						}
 						
 						if(t->cnt % 2) {													// __---
-							t->pw +=dt;
-							
 							t->hi +=dt;
 							t->shi+=dt*dt;
-							
-							if(t->pw > MIN_BURST) {
-								++t->longcnt;
-							}
+							t->pw +=dt;
 						} else {																	// --___
-								if(dt < MAX_BURST) {
-									if(t->pw > MIN_BURST)
-										--t->longcnt;
-								} else
-									t->pw=0;
 							t->lo += dt;
 							t->slo+=dt*dt;
+							if(dt > MAX_BURST && t->pw > MIN_BURST) {
+								++t->longcnt;
+								t->pw=0;
+							}
 						}
+						
+//	----------___________________--------------
+//  ----------_-_-_-_-_-------_-_-_-_-_--------
+//  ----------_--------_----------_-------------
+						
+						
+//						if(t->cnt % 2) {													// __---
+//							t->pw +=dt;
+//							
+//							t->hi +=dt;
+//							t->shi+=dt*dt;
+//							
+//							if(t->pw > MIN_BURST) {
+//								++t->longcnt;
+//							}
+//						} else {																	// --___
+//								if(dt < MAX_BURST) {
+//									if(t->pw > MIN_BURST)
+//										--t->longcnt;
+//								} else
+//									t->pw=0;
+//							t->lo += dt;
+//							t->slo+=dt*dt;
+//						}
 					}	else {
+//----------------------------------------------------------------			
+int32_t			n=(tcapt - htim2.Instance->CCR4) % 0x10000;
+						t->trefcnt=refCnt;																		// referencni count
+						if(t->ch==0 || t->ch==3)															// prioriteta kanalov
+							n-=10;
+						if(t->ch==2 || t->ch==5)
+							n-=20;
+						if(n < 0)
+							t->trefcnt = --t->trefcnt % 0x10000;
+						t->tref = n % 0x10000;
+						_DEBUG(10,"\r\n%d,%d,%3d,%5d",t->ch, t->sect,t->trefcnt % 1000,t->tref);
+//----------------------------------------------------------------						
 						t->to=tcapt;
 						t->cnt=t->longcnt=t->pw=t->crc = 0;
 						t->hi=t->lo=t->shi=t->slo=0;
-//----------------------------------------------------------------						
-						t->trefcnt=refCnt;																		// referencni count
-						t->tref = tcapt - htim2.Instance->CCR4;
-						if(tcapt < htim2.Instance->CCR4)											// preskok
-							t->tref += 0x10000;
-						_DEBUG(10,"\r\n%d,%d,%3d,%5d",t->ch, t->sect,t->trefcnt % 1000,t->tref);
-//----------------------------------------------------------------						
 					}
 					++t->cnt;
 					t->timeout=HAL_GetTick()+MAX__INT;
@@ -398,7 +410,7 @@ void	*canTx(void *v) {
 			py.pulse.tref=first->tref;
 			py.pulse.slot=first->trefcnt;
 			for(t=timStack; first && t->htim; ++t) {
-// na kanalu je nek count in je blzu first...
+// na kanalu je nek count in je blizu first...
 				if(t->cnt && t->trefcnt == first->trefcnt && t->tref <= first->tref+1) {
 					if(t->longcnt) {
 						if(t->longcnt > 15) {
@@ -430,7 +442,8 @@ void	*canTx(void *v) {
 				}
 				t->cnt=t->longcnt=0;
 			}
-			Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
+			if(py.pulse.sect[0].count || py.pulse.sect[1].count || py.pulse.sect[2].count)
+				Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
 		}
 		flushTout=0;
 	}
@@ -551,7 +564,8 @@ uint16_t 		ch=rx.buf.byte[0],
 							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,&rx.buf);		
 						else
 							Decode(rx.hdr.StdId-_ACK_LEFT_FRONT,NULL);
-					}
+					} else
+						flushTout = HAL_GetTick();
 					break;	
 					
 				default:

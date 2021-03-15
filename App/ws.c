@@ -46,7 +46,7 @@ void			Decode(int sect,payload *p) {
 									ws[2].bit12 |= 1<<(sect*__NWS/4/2+i);
 								else if(p->pulse.sect[i].count > 8)
 									ws[1].bit12 |= 1<<(sect*__NWS/4/2+i);
-								else if(p->pulse.sect[i].count <= 2)
+								else if(p->pulse.sect[i].count && p->pulse.sect[i].count <= 2)
 									ws[0].bit12 |= 1<<(sect*__NWS/4/2+i);
 							}
 					}	else {
@@ -61,12 +61,12 @@ void			Decode(int sect,payload *p) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void			wsStream(int32_t sect, int32_t colour, int32_t n) {
+void			wsStream(int32_t npos, int32_t colour, int32_t n) {
 RGB				rgb={0,0,0};
-uint32_t	*p = &_ws[(sect+8+4)*24];
+uint32_t	*p = &_ws[(npos+8+4)*24];
 					if(colour >= 0)
 						HSV2RGB(ws[colour].colour, &rgb);
-					
+// krog					
 					for(int i=0; i<n; ++i) {
 						for(int k=0; k<8; ++k)
 							(rgb.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
@@ -75,7 +75,7 @@ uint32_t	*p = &_ws[(sect+8+4)*24];
 						for(int k=0; k<8; ++k)
 							(rgb.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 					}
-							
+// indikatorji			
 					if(n==1) {
 						int i=colour;
 						if(i<0)
@@ -91,7 +91,7 @@ uint32_t	*p = &_ws[(sect+8+4)*24];
 					
 					
 					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_ws,sizeof(_ws)/sizeof(uint32_t));
-					_DEBUG(DBG_LED,"\r%3d: * %02X %02X %02X %02X %02X %2d\r\n",HAL_GetTick() % 1000, sect, rgb.r,rgb.g,rgb.b,n,colour);
+					_DEBUG(DBG_LED,"\r%3d: * %02X %02X %02X %02X %02X %2d\r\n",HAL_GetTick() % 1000, npos, rgb.r,rgb.g,rgb.b,n,colour);
 }
 /*******************************************************************************
 * Function Name	: 
