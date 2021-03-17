@@ -63,6 +63,8 @@ namespace WindowsFormsApplication2
                         com.Close();
                     com.PortName = portname;
                     com.Open();
+                    com.DiscardOutBuffer();
+                    com.DiscardInBuffer();
 
                 }
                 login.Interval = 1000;
@@ -78,7 +80,7 @@ namespace WindowsFormsApplication2
             try
             {
                 rxString += com.ReadExisting();
-                this.Invoke(new EventHandler(ParsingRxData));
+                this.BeginInvoke(new EventHandler(ParsingRxData));
             }
             catch { }
         }
@@ -200,11 +202,13 @@ namespace WindowsFormsApplication2
             Properties.l405.Default.width = this.Width;
             Properties.l405.Default.height = this.Height;
             Properties.l405.Default.Save();
-
+            if (com.IsOpen)
+                com.Close();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e) 
         {
+            com.Close();
             if (System.Windows.Forms.Application.MessageLoop)
                 System.Windows.Forms.Application.Exit();
             else

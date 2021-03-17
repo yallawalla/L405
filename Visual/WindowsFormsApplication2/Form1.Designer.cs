@@ -72,7 +72,8 @@
             // 
             // com
             // 
-            this.com.BaudRate = 921600;
+            this.com.BaudRate = 115200;
+            this.com.DtrEnable = true;
             this.com.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.com_DataReceived);
             // 
             // login

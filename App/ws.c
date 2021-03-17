@@ -158,17 +158,15 @@ uint16_t 		t=0,s=0;
 							slot[i]=tref[i]=0;
 // dekodiranje bit12>>bit24						
 						for(int i=0; i<__COLS; ++i) {
-							ws[i].bit24 |= DecodeTab[ws[i].bit12];
 							for(int j=0; j < __NWS; ++j)
-								if(ws[i].timeout[j] == 0 && ws[i].bit24 & (1 << j)) {
-									ws[i].timeout[j]=HAL_GetTick()+2000;
-								}
+								if(DecodeTab[ws[i].bit12] & (1 << j))
+									ws[i].timeout[j]=HAL_GetTick()+500;
+							ws[i].bit24 |= DecodeTab[ws[i].bit12];
 							ws[i].bit12=0;
 						}
 					}
 // proženje aktivnih v bit24 na 20ms				
-					for(int i=0; i < __NWS; ++i) {
-						int j;
+					for(int i=0,j; i < __NWS; ++i) {
 						for(j=0; j < __COLS; ++j) {
 							if((ws[j].bit24 & (1 << i)) && pCount[j][i] < 5) {
 								if(!pCount[j][i]++)

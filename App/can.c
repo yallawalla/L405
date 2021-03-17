@@ -422,13 +422,6 @@ int32_t			n=(tcapt - htim2.Instance->CCR4) % 0x10000;
 					} else if (t->cnt && t->cnt <= 2) {
 						py.pulse.sect[t->sect].count=1;
 					}
-// le je v payloadu e count, se preveri prioriteta, sicer se nastavi najnija				
-//					if(py.pulse.sect[t->sect].count)
-//						py.pulse.sect[t->sect].ch=prio[t->ch][py.pulse.sect[t->sect].ch];
-//					else
-//						py.pulse.sect[t->sect].ch=prio[t->ch][1];
-
-//					py.pulse.sect[t->sect].count=min(py.pulse.sect[t->sect].count+t->cnt,0xf);
 ////////////////////////////
 					{
 						uint32_t n = t->cnt/2;

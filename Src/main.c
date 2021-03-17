@@ -40,8 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-void	*console(void *);
-_io		*InitITM(void);
+_io		*InitITM(void),InitVCP(void);
 adc		pwr;
 
 /* USER CODE END PD */
@@ -169,7 +168,6 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	
 	_proc_add(canRx,NULL,"canRx",0);
 	_proc_add(canTx,NULL,"canTx",0);
-	_proc_add(console,&_VCP,"console",0); 
 	_proc_add(Watchdog,NULL,"watchdog",100); 
 	_proc_add(ledProc,NULL,"leds",10); 
 	
@@ -181,11 +179,11 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 		__HAL_TIM_ENABLE_IT(&htim1,TIM_IT_UPDATE);
 	}
 	
+	InitVCP();
 	InitITM();
 	_stdio(&_ITM);
 	printVersion();
 	_stdio(NULL);
-	
   /* USER CODE END 2 */
 
   /* Infinite loop */
