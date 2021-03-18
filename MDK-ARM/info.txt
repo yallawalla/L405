@@ -16,7 +16,3 @@
 - TODO: izklop LED pri CAN tx,rx, vnesi funkcionalnost !!!
 - TODO: RAM drive brez veze ???
 - TODO: po remote konzoli ne grejo escape sekvence ???
-
-< 200 00 00 11 00 CC 00 69 D6
-< 200 00 11 00 00 CC 00 69 D6
-< 200 11 00 00 00 CC 00 69 D6

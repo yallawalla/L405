@@ -295,30 +295,6 @@ void	*canTx(void *v) {
 								t->pw=0;
 							}
 						}
-						
-//	----------___________________--------------
-//  ----------_-_-_-_-_-------_-_-_-_-_--------
-//  ----------_--------_----------_-------------
-						
-						
-//						if(t->cnt % 2) {													// __---
-//							t->pw +=dt;
-//							
-//							t->hi +=dt;
-//							t->shi+=dt*dt;
-//							
-//							if(t->pw > MIN_BURST) {
-//								++t->longcnt;
-//							}
-//						} else {																	// --___
-//								if(dt < MAX_BURST) {
-//									if(t->pw > MIN_BURST)
-//										--t->longcnt;
-//								} else
-//									t->pw=0;
-//							t->lo += dt;
-//							t->slo+=dt*dt;
-//						}
 					}	else {
 //----------------------------------------------------------------			
 int32_t			n=(tcapt - htim2.Instance->CCR4) % 0x10000;
@@ -414,13 +390,18 @@ int32_t			n=(tcapt - htim2.Instance->CCR4) % 0x10000;
 				if(t->cnt && t->trefcnt == first->trefcnt && t->tref <= first->tref+1) {
 					if(t->longcnt) {
 						if(t->longcnt > 15) {
+							py.pulse.sect[t->sect].ch=2;
 							py.pulse.sect[t->sect].longpulse=true;
 							py.pulse.sect[t->sect].count=min(t->longcnt,0xf);
 						}
 					} else if (t->cnt > 15) {
+						py.pulse.sect[t->sect].ch=1;
+						py.pulse.sect[t->sect].longpulse=false;
 						py.pulse.sect[t->sect].count=min(t->cnt,0xf);
 					} else if (t->cnt && t->cnt <= 2) {
-						py.pulse.sect[t->sect].count=1;
+						py.pulse.sect[t->sect].ch=0;
+						py.pulse.sect[t->sect].longpulse=false;
+						py.pulse.sect[t->sect].count=min(t->cnt,0xf);
 					}
 ////////////////////////////
 					{

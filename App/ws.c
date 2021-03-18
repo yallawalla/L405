@@ -24,7 +24,7 @@ struct  {
 
 uint32_t	DecodeTab[4096];
 uint32_t	pTimeout,pCount[__COLS][__NWS];
-uint32_t	tref[__NWS/6],slot[__NWS/6];
+uint32_t	tref[__NWS/6],slot[__NWS/6],chLev;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -41,14 +41,11 @@ void			Decode(int sect,payload *p) {
 						}
 							
 						for(int i=0; i<__NWS/4/2; ++i)
-							if(p->pulse.sect[i].count) {
-								if(p->pulse.sect[i].longpulse)
-									ws[2].bit12 |= 1<<(sect*__NWS/4/2+i);
-								else if(p->pulse.sect[i].count > 8)
-									ws[1].bit12 |= 1<<(sect*__NWS/4/2+i);
-								else if(p->pulse.sect[i].count && p->pulse.sect[i].count <= 2)
-									ws[0].bit12 |= 1<<(sect*__NWS/4/2+i);
+							if(p->pulse.sect[i].count && p->pulse.sect[i].ch >= chLev) {
+								ws[p->pulse.sect[i].ch].bit12 |= 1<<(sect*__NWS/4/2+i);
+								chLev=p->pulse.sect[i].ch;
 							}
+						
 					}	else {
 						wsStream(sect*__NWS/4,0,__NWS/4-1);
 						for(int i=0; i<__NWS/4; ++i)
@@ -187,6 +184,12 @@ uint16_t 		t=0,s=0;
 								ws[i].bit24 &= ~(1<<j);
 								pCount[i][j]=0;
 							}
+							
+					for(int i=0; i<__COLS; ++i)
+							if(ws[i].bit24)
+								return wsProc;
+					chLev=0;
+
 					return wsProc;
 }
 /*******************************************************************************
