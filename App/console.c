@@ -197,6 +197,14 @@ FRESULT DecodeInq(char *c) {
 				case 'v':
 					printVersion();
 				break;
+				
+				case 't':
+					while(fgetc(stdin) == EOF) {
+						uint32_t t=HAL_GetTick()/1000;
+						_print("\r%02d:%02d:%02d",t/3600,(t/60)%60,t%60);
+						_wait(200);
+						}
+				break;
 
 				default:
 					return FR_INVALID_NAME;
