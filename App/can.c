@@ -9,7 +9,7 @@
 * Return				:
 *******************************************************************************/
 _io				*_CAN, *canConsole,**_DBG;
-uint32_t	timingTest;
+uint32_t	timingTest,timslot;
 uint32_t	syncTimeout=1000;
 bool			syncReq=false;
 //______________________________________________________________________________________
@@ -70,6 +70,8 @@ uint32_t	filter_count;
 * Return				:
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if(htim == &htim3)
+		++timslot;
 	if(htim == &htim1) {
 		HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
 		if(HAL_GetTick() > syncTimeout) {
@@ -223,7 +225,7 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef* hcan) {
 void	*canTx(void *v) {
 // slot sync message.... 
 	if(syncReq) {
-		Send(_ID_TIMING_SYNC,NULL,0);
+		Send(_ID_SYNC_REQ,NULL,0);
 		syncReq=false;
 	}
 // first entry...
@@ -476,8 +478,17 @@ void	*canRx(void *v) {
 					_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
 					break;
 					
-				case _ID_TIMING_SYNC:
+				case _ID_SYNC_REQ:
 					refCnt=0;
+					p.hword[0]=idPos;
+					p.hword[1]=timslot;
+					p.hword[2]=htim2.Instance->CCR4;
+					Send(_ID_SYNC_ACK,&p,sizeof(payload));
+					__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
+					break;
+				
+				case _ID_SYNC_ACK:
+					_DEBUG(DBG_SYNC,"\r\nid %d,%5hu,%5hu",rx.buf.hword[0],rx.buf.hword[1],rx.buf.hword[2]);
 					break;
 				
 				case _TEST_REQ:

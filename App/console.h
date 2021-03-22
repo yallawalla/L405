@@ -54,7 +54,8 @@ enum dbg {
 	DBG_USEC,
 	DBG_CONSOLE,
 	DBG_STAT,
-	DBG_VOLT
+	DBG_VOLT,
+	DBG_SYNC
 };
 
 #define _DEBUG(n,f, ...) 				\

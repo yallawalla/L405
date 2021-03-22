@@ -75,7 +75,8 @@ typedef enum {
 	_ID_IAP_REQ,
 	_ID_TIMING_REQ,
 	_ID_TIMING_ACK,
-	_ID_TIMING_SYNC,
+	_ID_SYNC_REQ,
+	_ID_SYNC_ACK,
 
 	_ID_IAP_GO				=0xA0,
 	_ID_IAP_ERASE,
