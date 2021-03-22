@@ -9,7 +9,7 @@
 * Return				:
 *******************************************************************************/
 _io				*_CAN, *canConsole,**_DBG;
-uint32_t	timingTest,timslot;
+uint32_t	timslot;
 uint32_t	syncTimeout=1000;
 bool			syncReq=false;
 //______________________________________________________________________________________
@@ -167,12 +167,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
 	CanRxMsg msg;
 	uint32_t	mailbox;
 	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&msg.hdr,(uint8_t *)&msg.buf);
-	if(msg.hdr.StdId==_ID_TIMING_REQ) {
-		msg.hdr.StdId=_ID_TIMING_ACK;
+	if(msg.hdr.StdId==_ID_SYNC_REQ) {
+		msg.hdr.StdId=_ID_SYNC_ACK;
+		msg.hdr.DLC=3*sizeof(short);
+		msg.buf.hword[0]=idPos;
+		msg.buf.hword[1]=timslot;
+		msg.buf.hword[2]=htim1.Instance->CNT;
 		HAL_CAN_AddTxMessage(&hcan2, (CAN_TxHeaderTypeDef *)&msg.hdr, (uint8_t *)&msg.buf, &mailbox);
-	}
-	else if(msg.hdr.StdId==_ID_TIMING_ACK) {
-		timingTest=TIM1->CNT;
+		__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
+		refCnt=0;
 	}
 	else
 		_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
@@ -478,15 +481,6 @@ void	*canRx(void *v) {
 					_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
 					break;
 					
-				case _ID_SYNC_REQ:
-					refCnt=0;
-					p.hword[0]=idPos;
-					p.hword[1]=timslot;
-					p.hword[2]=htim2.Instance->CCR4;
-					Send(_ID_SYNC_ACK,&p,sizeof(payload));
-					__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
-					break;
-				
 				case _ID_SYNC_ACK:
 					_DEBUG(DBG_SYNC,"\r\nid %d,%5hu,%5hu",rx.buf.hword[0],rx.buf.hword[1],rx.buf.hword[2]);
 					break;

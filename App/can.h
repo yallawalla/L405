@@ -50,8 +50,7 @@ extern		uint32_t					nDev,
 														idPos,
 														idCrc,
 														debug,
-														testMask,
-														timingTest;
+														testMask;
 
 void			*canRx(void *),
 					*canTx(void *);
@@ -73,8 +72,6 @@ typedef enum {
    idCOM2CAN,
 	 idCAN2COM,
 	_ID_IAP_REQ,
-	_ID_TIMING_REQ,
-	_ID_TIMING_ACK,
 	_ID_SYNC_REQ,
 	_ID_SYNC_ACK,
 
