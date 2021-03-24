@@ -13,6 +13,8 @@
 *******************************************************************************/
 FATFS			fatfs;
 bool			isMounted=false;
+void shlin(void);
+
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -649,6 +651,11 @@ uint32_t	dbg=debug;
 				case __F10:
 					UsbDevice_DeInit();
 					MX_USB_HOST_Init();
+				break;
+				
+				case __f5:
+				case __F5:
+					shlin();
 				break;
 
 				case __f12:

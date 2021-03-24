@@ -132,6 +132,7 @@ typedef struct {
 
 void				Send(int, payload *,int);
 int					AckWait(int);
+uint16_t		eval(uint16_t);
 
 #define			_SIGN_PAGE			FLASH_Sector_1
 #define			_FLASH_TOP			0x08008000

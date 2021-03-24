@@ -9,9 +9,7 @@
 * Return				:
 *******************************************************************************/
 _io				*_CAN, *canConsole,**_DBG;
-uint32_t	timslot;
-uint32_t	syncTimeout=1000;
-bool			syncReq=false;
+uint32_t	tim1ovf,tim3ovf;
 //______________________________________________________________________________________
 const char *strPos[]={"front left","front right","rear right","rear left","console"};
 uint32_t	idDev,
@@ -71,12 +69,15 @@ uint32_t	filter_count;
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &htim3)
-		++timslot;
+		++tim3ovf;
 	if(htim == &htim1) {
 		HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
-		if(HAL_GetTick() > syncTimeout) {
-			syncTimeout += 1000;
-			syncReq=true;
+		if(++tim1ovf % 128 == 0) {
+//			payload p;
+//			p.word[1]=tim3ovf;
+//			p.hword[1]=htim1.Instance->CNT;
+//			Send(_ID_SYNC_REQ,&p,sizeof(payload));
+			Send(_ID_SYNC_REQ,NULL,0);
 		}
 	}
 }
@@ -163,23 +164,32 @@ CAN_FilterTypeDef  sFilterConfig;
 * Output				:
 * Return				:
 *******************************************************************************/
+//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
+//	CanRxMsg msg;
+//	uint32_t	mailbox;
+//	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&msg.hdr,(uint8_t *)&msg.buf);
+//	if(msg.hdr.StdId==_ID_SYNC_REQ) {
+//		msg.hdr.StdId=_ID_SYNC_ACK;
+//		msg.buf.hword[0]	=idPos;
+//		msg.buf.word[1]		-=tim3ovf;
+//		msg.buf.hword[1]=	htim2.Instance->CCR4 + (msg.buf.hword[1] - htim1.Instance->CNT);
+//		HAL_CAN_AddTxMessage(&hcan2, (CAN_TxHeaderTypeDef *)&msg.hdr, (uint8_t *)&msg.buf, &mailbox);
+//		__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
+//		refCnt=0;
+//	}
+//	else
+//		_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
+//}
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
 	CanRxMsg msg;
-	uint32_t	mailbox;
 	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&msg.hdr,(uint8_t *)&msg.buf);
 	if(msg.hdr.StdId==_ID_SYNC_REQ) {
-		msg.hdr.StdId=_ID_SYNC_ACK;
-		msg.hdr.DLC=3*sizeof(short);
-		msg.buf.hword[0]=idPos;
-		msg.buf.hword[1]=timslot;
-		msg.buf.hword[2]=htim1.Instance->CNT;
-		HAL_CAN_AddTxMessage(&hcan2, (CAN_TxHeaderTypeDef *)&msg.hdr, (uint8_t *)&msg.buf, &mailbox);
-		__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
-		refCnt=0;
+		msg.buf.word[0]=tim3ovf;
+		msg.buf.hword[2]=	htim1.Instance->CNT;
 	}
-	else
-		_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
+	_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
 }
+
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -226,11 +236,6 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef* hcan) {
 * Return				:
 *******************************************************************************/
 void	*canTx(void *v) {
-// slot sync message.... 
-	if(syncReq) {
-		Send(_ID_SYNC_REQ,NULL,0);
-		syncReq=false;
-	}
 // first entry...
 	if(!_CAN) {
 		_CAN	=	_io_init(100*sizeof(CanTxMsg), 100*sizeof(CanTxMsg));
@@ -480,9 +485,18 @@ void	*canRx(void *v) {
 					++nDev;
 					_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
 					break;
-					
+
+				case _ID_SYNC_REQ:
+					p.hword[0]	=idPos;
+					p.word[1]		=rx.buf.word[0];
+					p.hword[1]=	htim2.Instance->CCR4 - eval(rx.buf.hword[2]);
+					Send(_ID_SYNC_ACK,&p,sizeof(payload));
+					__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
+					refCnt=0;
+				break;
+						
 				case _ID_SYNC_ACK:
-					_DEBUG(DBG_SYNC,"\r\nid %d,%5hu,%5hu",rx.buf.hword[0],rx.buf.hword[1],rx.buf.hword[2]);
+					_DEBUG(DBG_SYNC,"\r\nid %d,%8u,%5hu",rx.buf.hword[0],rx.buf.word[1],rx.buf.hword[1]);
 					break;
 				
 				case _TEST_REQ:

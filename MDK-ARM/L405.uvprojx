@@ -746,6 +746,11 @@
               <FileType>1</FileType>
               <FilePath>..\App\tim2cfg.c</FilePath>
             </File>
+            <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\misc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1455,6 +1460,11 @@
               <FileType>1</FileType>
               <FilePath>..\App\tim2cfg.c</FilePath>
             </File>
+            <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\misc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2163,6 +2173,11 @@
               <FileName>tim2cfg.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\tim2cfg.c</FilePath>
+            </File>
+            <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\misc.c</FilePath>
             </File>
           </Files>
         </Group>
