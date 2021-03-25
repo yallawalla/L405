@@ -487,16 +487,17 @@ void	*canRx(void *v) {
 					break;
 
 				case _ID_SYNC_REQ:
-					p.hword[0]	=idPos;
-					p.word[1]		=rx.buf.word[0];
-					p.hword[1]=	htim2.Instance->CCR4 - eval(rx.buf.hword[2]);
+					p.hword[0]= 	idPos;
+					p.hword[1]=		htim2.Instance->CCR4 - eval(rx.buf.hword[2]);
+					p.hword[2]= 	htim2.Instance->CCR4;
+					p.hword[3]= 	rx.buf.hword[2];
 					Send(_ID_SYNC_ACK,&p,sizeof(payload));
 					__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
 					refCnt=0;
 				break;
 						
 				case _ID_SYNC_ACK:
-					_DEBUG(DBG_SYNC,"\r\nid %d,%8u,%5hu",rx.buf.hword[0],rx.buf.word[1],rx.buf.hword[1]);
+					_DEBUG(DBG_SYNC,"\r\n%d,%5hu,%5hu,%5hu",rx.buf.hword[0],rx.buf.hword[1],rx.buf.hword[2],rx.buf.hword[3]);
 					break;
 				
 				case _TEST_REQ:
