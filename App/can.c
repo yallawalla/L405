@@ -185,7 +185,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
 	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&msg.hdr,(uint8_t *)&msg.buf);
 	if(msg.hdr.StdId==_ID_SYNC_REQ) {
 		msg.buf.word[0]=tim3ovf;
-		msg.buf.hword[2]=	htim1.Instance->CNT;
+		msg.buf.hword[2]=	htim2.Instance->CCR4;
+		msg.buf.hword[3]=	htim1.Instance->CNT;
 	}
 	_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
 }
@@ -488,9 +489,9 @@ void	*canRx(void *v) {
 
 				case _ID_SYNC_REQ:
 					p.hword[0]= 	idPos;
-					p.hword[1]=		htim2.Instance->CCR4 - eval(rx.buf.hword[2]);
-					p.hword[2]= 	htim2.Instance->CCR4;
-					p.hword[3]= 	rx.buf.hword[2];
+					p.hword[1]=		rx.buf.hword[2] - eval(rx.buf.hword[3]);
+					p.hword[2]= 	rx.buf.hword[2];
+					p.hword[3]= 	rx.buf.hword[3];
 					Send(_ID_SYNC_ACK,&p,sizeof(payload));
 					__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
 					refCnt=0;

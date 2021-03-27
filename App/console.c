@@ -388,6 +388,26 @@ void		*testProc(void *v) {
 	return testProc;
 }
 //-----------------------------------------------------
+FRESULT fLog(int argc, char *argv[]) {
+	FRESULT ret=FR_OK;
+	FIL	fs;
+	ret=f_open(&fs,"log",FA_READ);
+	if(ret==FR_OK) {
+		char		c[64];
+		short		k0,k1,k2,k3;
+		while(!f_eof(&fs)) {
+			f_gets(c,sizeof(c),&fs);
+			sscanf(c,"%hu,%hu,%hu,%hu",&k0,&k1,&k2,&k3);
+			if(k0==atoi(argv[1])) {
+				_print("\r\n%d,%5hu,%5hu,%5hu",k0,k2 - eval(k3),k2,k3);
+				_wait(10);
+			}
+		}
+		f_close(&fs);
+	}
+	return ret;
+}
+//-----------------------------------------------------
 FRESULT fTest(int argc, char *argv[]) {
 	_proc *p=_proc_find(testProc,NULL);
 	if(argv[1]) {
@@ -496,6 +516,7 @@ struct cmd {
 	{"cdir",			chDir},
 	{"type",			fType},
 	{"test",			fTest},
+	{"log",				fLog},	
 	{"address",		fAddress},
 	{"iap",				fIap},
 	{"format",		fFormat},
@@ -657,7 +678,7 @@ uint32_t	dbg=debug;
 				case __F5:
 					shlin();
 				break;
-
+				
 				case __f12:
 				case __F12:
 					iapRemote();

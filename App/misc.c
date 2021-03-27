@@ -1,15 +1,14 @@
-#include	"stm32f4xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include <stdlib.h>
 #include <stdio.h>
 
 #define		N 100
 static	double		linreg(double, double);
-static	uint16_t	kalman(uint16_t x);
 
 int32_t 	count, offset, upperq;
 ;
 struct {
-	int32_t	x,y;
+	double 	x,y;
 } p[N];
 
 double		sumX=0, sumX2=0, sumY=0, sumXY=0, a, b;
@@ -19,12 +18,17 @@ double		sumX=0, sumX2=0, sumY=0, sumXY=0, a, b;
 * Output				:
 * Return				:
 *******************************************************************************/
-uint16_t	evall(uint16_t y) {
-	return kalman(y);
-}
-
-
 uint16_t	eval(uint16_t y) {
+	if (count > 3*N) {
+			double aa=a+b*count, bb=b;
+			sumX = sumX2 = sumY = sumXY = offset = upperq = count = 0;
+			while(count < N) {
+				int32_t l=aa + bb * (count-N);
+				if(l<0)
+					l &= 0xffff;
+				l=eval(l & 0xffff);
+			}
+	}
 	if(count) {
 		if(upperq && y < 0x4000)
 			offset += 0x10000;
@@ -35,11 +39,6 @@ uint16_t	eval(uint16_t y) {
 			upperq=1;
 	else
 			upperq=0;
-	
-//	if(count==N)
-//		offset=a - (int32_t)(a+b*count )% 0x10000;
-
-//	return (int32_t)linreg(count & N, offset) % 0x10000;
 	return (int32_t)linreg(count, y+offset) % 0x10000;
 }
 /*******************************************************************************
@@ -78,35 +77,4 @@ double	linreg(double x, double y) {
 }
 void shlin() {
 	printf("n=%d,a=%f,b=%f,off=%d\r\n",count,a,b,offset);
-}
-
-uint16_t	kalman(uint16_t x)  {
-	uint32_t ky = 100, kdy = 10000;
-	static uint32_t y,dy;
-	if (count > 0) {
-		if (upperq > 0 && x < 0x4000)
-			y -= 0x10000;
-		else if (upperq == 0 && x > 0xc000)
-			y += 0x10000; 
-	}
-	if (x > 0x8000)
-		upperq = 1;
-	else
-		upperq = 0;
-
-	switch (count) {
-			case 0:
-					y = x;
-					break;
-			case 1:
-					dy = x - y;
-					break;
-			default:
-					dy += (x - y);
-					y += (x - y) / ky + dy / kdy;
-					//     y = y % 0x10000;
-					break;
-	}
-	++count;
-	return y % 0x10000;
 }
