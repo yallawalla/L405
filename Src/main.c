@@ -172,18 +172,14 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	_proc_add(ledProc,NULL,"leds",10); 
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
-	if((idPos) < 4) 
-		MX_TIM2_Cfg();
-	else {
-		wsProcInit();
-		__HAL_TIM_ENABLE_IT(&htim1,TIM_IT_UPDATE);
-	}
 	
 	InitVCP();
 	InitITM();
 	_stdio(&_ITM);
 	printVersion();
 	_stdio(NULL);
+
+	wsProcInit();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -194,6 +190,9 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
+		if(HAL_GetTick() > 1000)
+			__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
+
 		_proc_loop();
 		
 		if(otgDeviceId !=  __otgDeviceId) {

@@ -9,7 +9,6 @@
 * Return				:
 *******************************************************************************/
 _io				*_CAN, *canConsole,**_DBG;
-uint32_t	tim1ovf,tim3ovf;
 //______________________________________________________________________________________
 const char *strPos[]={"front left","front right","rear right","rear left","console"};
 uint32_t	idDev,
@@ -61,6 +60,7 @@ tim timStack[] = {
 };
 
 uint32_t	filter_count;
+uint32_t	testReq,testRef=64;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -68,18 +68,16 @@ uint32_t	filter_count;
 * Return				:
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if(htim == &htim3)
-		++tim3ovf;
-	if(htim == &htim1) {
-		HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
-		if(++tim1ovf % 128 == 0) {
-//			payload p;
-//			p.word[1]=tim3ovf;
-//			p.hword[1]=htim1.Instance->CNT;
-//			Send(_ID_SYNC_REQ,&p,sizeof(payload));
+	if(htim == &htim3) {
+		HAL_GPIO_WritePin(GPIOA, TREF_Pin, GPIO_PIN_SET);	// ????
+		if(++refCnt % 128 == 0 && idPos > 3)
 			Send(_ID_SYNC_REQ,NULL,0);
+		if((refCnt % 128 == testRef) && testReq && idPos > 3) {
+			testReq=0;
+			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
+			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 	
 		}
-	}
+	}		
 }
 /*******************************************************************************
 * Function Name	: 
@@ -90,9 +88,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	uint32_t	i;
 	tim				*p=NULL;
-	
-	if(htim->Instance==TIM2 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_4)
-		++refCnt;
 	
 	if(htim->Instance==TIM3)	p=&timStack[12];
 	if(htim->Instance==TIM4)	p=&timStack[15];
@@ -164,33 +159,14 @@ CAN_FilterTypeDef  sFilterConfig;
 * Output				:
 * Return				:
 *******************************************************************************/
-//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
-//	CanRxMsg msg;
-//	uint32_t	mailbox;
-//	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&msg.hdr,(uint8_t *)&msg.buf);
-//	if(msg.hdr.StdId==_ID_SYNC_REQ) {
-//		msg.hdr.StdId=_ID_SYNC_ACK;
-//		msg.buf.hword[0]	=idPos;
-//		msg.buf.word[1]		-=tim3ovf;
-//		msg.buf.hword[1]=	htim2.Instance->CCR4 + (msg.buf.hword[1] - htim1.Instance->CNT);
-//		HAL_CAN_AddTxMessage(&hcan2, (CAN_TxHeaderTypeDef *)&msg.hdr, (uint8_t *)&msg.buf, &mailbox);
-//		__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
-//		refCnt=0;
-//	}
-//	else
-//		_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
-//}
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
 	CanRxMsg msg;
 	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&msg.hdr,(uint8_t *)&msg.buf);
 	if(msg.hdr.StdId==_ID_SYNC_REQ) {
-		msg.buf.word[0]=tim3ovf;
-		msg.buf.hword[2]=	htim2.Instance->CCR4;
 		msg.buf.hword[3]=	htim1.Instance->CNT;
 	}
 	_buffer_push(_CAN->rx,&msg,sizeof(CanRxMsg));
 }
-
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -308,7 +284,7 @@ void	*canTx(void *v) {
 						}
 					}	else {
 //----------------------------------------------------------------			
-int32_t			n=(tcapt - htim2.Instance->CCR4) % 0x10000;
+int32_t			n=tcapt;
 						t->trefcnt=refCnt;																		// referencni count
 						if(t->ch==0 || t->ch==3)															// prioriteta kanalov
 							n-=10;
@@ -427,8 +403,10 @@ int32_t			n=(tcapt - htim2.Instance->CCR4) % 0x10000;
 				}
 				t->cnt=t->longcnt=0;
 			}
-			if(py.pulse.sect[0].count || py.pulse.sect[1].count || py.pulse.sect[2].count)
+			if(py.pulse.sect[0].count || py.pulse.sect[1].count || py.pulse.sect[2].count) {
+				eval(&py.pulse.slot,&py.pulse.tref);
 				Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
+			}
 		}
 		flushTout=0;
 	}
@@ -488,17 +466,12 @@ void	*canRx(void *v) {
 					break;
 
 				case _ID_SYNC_REQ:
-					p.hword[0]= 	idPos;
-					p.hword[1]=		rx.buf.hword[2] - eval(rx.buf.hword[3]);
-					p.hword[2]= 	rx.buf.hword[2];
-					p.hword[3]= 	rx.buf.hword[3];
-					Send(_ID_SYNC_ACK,&p,sizeof(payload));
-					__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
+					sync(rx.buf.hword[3]);
 					refCnt=0;
 				break;
 						
 				case _ID_SYNC_ACK:
-					_DEBUG(DBG_SYNC,"\r\n%d,%5hu,%5hu,%5hu",rx.buf.hword[0],rx.buf.hword[1],rx.buf.hword[2],rx.buf.hword[3]);
+					_DEBUG(DBG_SYNC,"%.*s",rx.hdr.DLC,rx.buf.bytes);
 					break;
 				
 				case _TEST_REQ:

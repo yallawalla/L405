@@ -50,7 +50,11 @@ extern		uint32_t					nDev,
 														idPos,
 														idCrc,
 														debug,
-														testMask;
+														testMask,
+														refCnt,
+														testReq,
+														testRef;
+
 
 void			*canRx(void *),
 					*canTx(void *);
@@ -132,7 +136,8 @@ typedef struct {
 
 void				Send(int, payload *,int);
 int					AckWait(int);
-uint16_t		eval(uint16_t);
+uint16_t		sync(uint16_t);
+void				eval(uint16_t *, uint16_t *); 
 
 #define			_SIGN_PAGE			FLASH_Sector_1
 #define			_FLASH_TOP			0x08008000

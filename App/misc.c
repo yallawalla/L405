@@ -1,4 +1,5 @@
 #include "stm32f4xx_hal.h"
+#include "console.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -6,7 +7,7 @@
 static	double		linreg(double, double);
 
 int32_t 	count, offset, upperq;
-;
+uint16_t	syncval;
 struct {
 	double 	x,y;
 } p[N];
@@ -18,7 +19,18 @@ double		sumX=0, sumX2=0, sumY=0, sumXY=0, a, b;
 * Output				:
 * Return				:
 *******************************************************************************/
-uint16_t	eval(uint16_t y) {
+void	eval(uint16_t *n,uint16_t *y) {
+	if(*y > syncval)
+		++*n;
+	*y = *y-syncval;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+uint16_t	sync(uint16_t y) {
 	if (count > 3*N) {
 			double aa=a+b*count, bb=b;
 			sumX = sumX2 = sumY = sumXY = offset = upperq = count = 0;
@@ -26,7 +38,7 @@ uint16_t	eval(uint16_t y) {
 				int32_t l=aa + bb * (count-N);
 				if(l<0)
 					l &= 0xffff;
-				l=eval(l & 0xffff);
+				l=sync(l & 0xffff);
 			}
 	}
 	if(count) {
@@ -39,7 +51,8 @@ uint16_t	eval(uint16_t y) {
 			upperq=1;
 	else
 			upperq=0;
-	return (int32_t)linreg(count, y+offset) % 0x10000;
+	syncval=(int32_t)linreg(count, y+offset) % 0x10000;
+	return syncval;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -74,7 +87,4 @@ double	linreg(double x, double y) {
 	a = (sumY - b*sumX)/j;
 	
 	return a+b*x;
-}
-void shlin() {
-	printf("n=%d,a=%f,b=%f,off=%d\r\n",count,a,b,offset);
 }

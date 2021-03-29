@@ -13,7 +13,7 @@
 *******************************************************************************/
 FATFS			fatfs;
 bool			isMounted=false;
-void shlin(void);
+int32_t		xxxtest=0x8000;
 
 /*******************************************************************************
 * Function Name	: 
@@ -399,7 +399,7 @@ FRESULT fLog(int argc, char *argv[]) {
 			f_gets(c,sizeof(c),&fs);
 			sscanf(c,"%hu,%hu,%hu,%hu",&k0,&k1,&k2,&k3);
 			if(k0==atoi(argv[1])) {
-				_print("\r\n%d,%5hu,%5hu,%5hu",k0,k2 - eval(k3),k2,k3);
+				_print("\r\n%d,%5hu,%5hu,%5hu",k0,k2 - sync(k3),k2,k3);
 				_wait(10);
 			}
 		}
@@ -674,14 +674,20 @@ uint32_t	dbg=debug;
 					MX_USB_HOST_Init();
 				break;
 				
-				case __f5:
-				case __F5:
-					shlin();
-				break;
-				
 				case __f12:
 				case __F12:
 					iapRemote();
+				break;
+
+
+				case __Up:
+					testRef = min(++testRef,128);
+					testReq=1;
+				break;
+
+				case __Down:
+					testRef = max(--testRef,1);
+					testReq=1;
 				break;
 
 				default:
