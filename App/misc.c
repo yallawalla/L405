@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #define		N 100
-static	double		linreg(double, double);
+static		double		linreg(double, double);
 
 int32_t 	count, offset, upperq;
 uint16_t	syncval;
@@ -19,10 +19,8 @@ double		sumX=0, sumX2=0, sumY=0, sumXY=0, a, b;
 * Output				:
 * Return				:
 *******************************************************************************/
-void	eval(uint16_t *n,uint16_t *y) {
-	if(*y > syncval)
-		++*n;
-	*y = *y-syncval;
+int32_t	eval(int32_t slots) {
+	return syncval+slots*b/128.0;
 }
 /*******************************************************************************
 * Function Name	: 

@@ -284,7 +284,7 @@ void	*canTx(void *v) {
 						}
 					}	else {
 //----------------------------------------------------------------			
-int32_t			n=tcapt;
+int32_t			n=eval(refCnt)-tcapt;
 						t->trefcnt=refCnt;																		// referencni count
 						if(t->ch==0 || t->ch==3)															// prioriteta kanalov
 							n-=10;
@@ -404,7 +404,6 @@ int32_t			n=tcapt;
 				t->cnt=t->longcnt=0;
 			}
 			if(py.pulse.sect[0].count || py.pulse.sect[1].count || py.pulse.sect[2].count) {
-				eval(&py.pulse.slot,&py.pulse.tref);
 				Send(_ACK_LEFT_FRONT+idPos,&py,sizeof(payload));
 			}
 		}
