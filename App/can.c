@@ -69,7 +69,6 @@ uint32_t	testReq,testRef=64;
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &htim3) {
-		HAL_GPIO_WritePin(GPIOA, TREF_Pin, GPIO_PIN_SET);	// ????
 		if(++refCnt % 128 == 0 && idPos > 3)
 			Send(_ID_SYNC_REQ,NULL,0);
 		if((refCnt % 128 == testRef) && testReq && idPos > 3) {
@@ -236,16 +235,13 @@ void	*canTx(void *v) {
 	} else {
 		tim 	*t,*first;
 		for(t=timStack; t->htim; ++t) {
-			uint32_t	tcapt,dt;
+			int32_t	tcapt,dt;
 			if(t->htim->Instance && t->htim->hdma[((t->Channel)>>2)+1])
 				t->dma->_push = &t->dma->_buf[(t->dma->size - t->htim->hdma[((t->Channel)>>2)+1]->Instance->NDTR*sizeof(uint32_t))];
 			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) 
 				if((1 << t->ch) & ~testMask) {
 					if(t->timeout) {
-						if(tcapt < t->to)
-							dt = (0x10000 + tcapt - t->to)/uS;
-						else
-							dt = (tcapt - t->to)/uS;
+						dt = ((tcapt - t->to) & 0xffff)/uS;
 						t->to=tcapt;
 					
 						if(dt>MIN_BURST) {
@@ -282,20 +278,18 @@ void	*canTx(void *v) {
 								t->pw=0;
 							}
 						}
+//----------------------------------------------------------------			
 					}	else {
 //----------------------------------------------------------------			
-int32_t			n=eval(refCnt)-tcapt;
-						t->trefcnt=refCnt;																		// referencni count
-						if(t->ch==0 || t->ch==3)															// prioriteta kanalov
-							n-=10;
+						t->to=tcapt;																					// referenca za dt
+						if(tcapt > 0x8000 && t->htim->Instance->CNT < 0x8000)
+							tcapt -= 0x10000;
+						if(t->ch==0 || t->ch==3)															// tref iz prioritete kanalov
+							tcapt-=10;
 						if(t->ch==2 || t->ch==5)
-							n-=20;
-						if(n < 0)
-							t->trefcnt = --t->trefcnt % 0x10000;
-						t->tref = n % 0x10000;
-						_DEBUG(10,"\r\n%d,%d,%3d,%5d",t->ch, t->sect,t->trefcnt % 1000,t->tref);
+							tcapt-=20;
+						t->tref=eval(tcapt + (refCnt<<16));										// izracun glede na sinhronizacijo
 //----------------------------------------------------------------						
-						t->to=tcapt;
 						t->cnt=t->longcnt=t->pw=t->crc = 0;
 						t->hi=t->lo=t->shi=t->slo=0;
 					}
@@ -359,22 +353,16 @@ int32_t			n=eval(refCnt)-tcapt;
 			}
 			if(t->timeout)
 				return canTx;
-			if(t->cnt) {
-				if(first) {
-					if(t->trefcnt < first->trefcnt || (t->trefcnt == first->trefcnt &&  t->tref < first->tref))
-						first = t;
-				} else
-					first=t;
-			}
+			if(t->cnt && (!first || t->tref < first->tref))
+				first=t;
 		}
 // isci vse v rangu +/-1 od prvega.... brisi payload, ce first ne obstaja, preskok
 		if(first) {
 			memset(&py,0,sizeof(payload));
 			py.pulse.tref=first->tref;
-			py.pulse.slot=first->trefcnt;
 			for(t=timStack; first && t->htim; ++t) {
 // na kanalu je nek count in je blizu first...
-				if(t->cnt && t->trefcnt == first->trefcnt && t->tref <= first->tref+1) {
+				if(t->cnt && t->tref <= first->tref+1) {
 					if(t->longcnt) {
 						if(t->longcnt > 15) {
 							py.pulse.sect[t->sect].ch=2;

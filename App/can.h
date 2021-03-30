@@ -105,7 +105,7 @@ typedef union {
 			__packed struct {
 				uint8_t	ch:3, count:4, longpulse:1;
 			} sect[4];
-			uint16_t	slot,tref;
+			uint32_t tref;
 		} pulse;
 		uint8_t		byte[8];
 		uint8_t		bytes[8];
@@ -129,7 +129,7 @@ typedef struct {
 	uint32_t					Channel;
 	uint8_t						sect,ch;
 	enum tmode				tmode;				
-	uint32_t					timeout,to,tref,trefcnt,crc;
+	uint32_t					timeout,to,tref,crc;
 	uint32_t					cnt,longcnt,pw;
 	uint32_t					hi,lo,shi,slo;
 } tim;
@@ -137,7 +137,6 @@ typedef struct {
 void				Send(int, payload *,int);
 int					AckWait(int);
 uint16_t		sync(uint16_t);
-//void				eval(uint16_t *, uint16_t *); 
 int32_t			eval(int32_t);
 
 #define			_SIGN_PAGE			FLASH_Sector_1

@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                                ../Drivers/STM32F4xx_HAL_Driver/Inc;                                ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                ../Drivers/CMSIS/Include;                                ..\App;                                ../Middlewares/Third_Party/FatFs/src;                                ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;                                ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;                                ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc</IncludePath>
+              <IncludePath>../Inc;                                 ../Drivers/STM32F4xx_HAL_Driver/Inc;                                 ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                 ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                 ../Drivers/CMSIS/Include;                                 ..\App;                                 ../Middlewares/Third_Party/FatFs/src;                                 ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;                                 ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;                                 ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
