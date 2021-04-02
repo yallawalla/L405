@@ -37,7 +37,8 @@ extern 		TIM_HandleTypeDef htim1,
 														htim8,
 														htim3,
 														htim4,
-														htim5;
+														htim5,
+														htim9;
 
 extern		_io								*_CAN,
 														*_VCP,
@@ -49,9 +50,7 @@ extern		uint32_t					nDev,
 														idDev,
 														idPos,
 														idCrc,
-														debug,
 														testMask,
-														refCnt,
 														testReq,
 														testRef;
 
@@ -65,6 +64,7 @@ void			*canRx(void *),
 extern	uint32_t	devices[];
 
 #define	_MAX_DEV		8
+#define	_MAX_HEAD		4
 
 typedef enum {    
 	_ACK_LEFT_FRONT		=0x200,

@@ -8,18 +8,17 @@
 * Output				: 
 * Return				:
 *******************************************************************************/
-_io				*_CAN, *canConsole,**_DBG;
+_io				*_CAN, *canConsole;
 //______________________________________________________________________________________
 const char *strPos[]={"front left","front right","rear right","rear left","console"};
 uint32_t	idDev,
 					nDev,
 					idCrc,
-					debug,
 					idPos,
 					testMask;
 payload		py;
 uint32_t	devices[_MAX_DEV];
-uint32_t	refCnt,flushTout;
+uint32_t	flushTout;
 
 uint8_t		prio[6][3]={
 {0,0,2},
@@ -61,6 +60,7 @@ tim timStack[] = {
 
 uint32_t	filter_count;
 uint32_t	testReq,testRef=64;
+uint32_t	syncTimeout=3000;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -69,11 +69,13 @@ uint32_t	testReq,testRef=64;
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &htim3) {
-		if(++refCnt % 128 == 0 && idPos > 3)
+		if(__HAL_TIM_GET_COUNTER(&htim9) == 0 && idPos > _MAX_HEAD-1 && !iapInproc)
 			Send(_ID_SYNC_REQ,NULL,0);
-		if((refCnt % 128 == testRef) && testReq && idPos > 3) {
+		if((__HAL_TIM_GET_COUNTER(&htim9) == testRef) && testReq && idPos > 3) {
 			testReq=0;
 			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
+//			uint32_t to=htim3.Instance->CNT+84*20;
+//			while(htim3.Instance->CNT < to);
 			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 	
 		}
 	}		
@@ -85,25 +87,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 * Return				:
 *******************************************************************************/
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-	uint32_t	i;
-	tim				*p=NULL;
+	uint32_t	i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_1);
+	uint32_t	j=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_3);
+	uint32_t	k=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_4);
 	
+	tim				*p=NULL;
 	if(htim->Instance==TIM3)	p=&timStack[12];
 	if(htim->Instance==TIM4)	p=&timStack[15];
 
 	if(p)
 		switch(htim->Channel) {
 			case HAL_TIM_ACTIVE_CHANNEL_1:
-				i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_1);
 				_buffer_push(p[0].dma, &i, sizeof(uint32_t));
 			break;
 			case HAL_TIM_ACTIVE_CHANNEL_3:
-				i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_3);
-				_buffer_push(p[1].dma, &i, sizeof(uint32_t));
+				_buffer_push(p[1].dma, &j, sizeof(uint32_t));
 			break;
 			case HAL_TIM_ACTIVE_CHANNEL_4:
-				i=HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_4);
-				_buffer_push(p[2].dma, &i, sizeof(uint32_t));
+				_buffer_push(p[2].dma, &k, sizeof(uint32_t));
 			break;
 			default:
 				break;
@@ -123,8 +124,11 @@ void	Send(int id,  payload *buf, int len) {
 	if(buf && len)
 		memcpy(&tx.buf,buf,len);
 	if(HAL_CAN_AddTxMessage(&hcan2, &tx.hdr, (uint8_t *)&tx.buf, &mailbox) != HAL_OK)
-		_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg));
-	_GREEN(20);
+		if(_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg))!=sizeof(CanTxMsg)) {
+			_SETERR(ERR_CAN_TX);
+			return;
+		}
+	_CLRERR(ERR_CAN_TX);
 	_DEBUG(DBG_CAN_TX,"\r%5d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
 	for(int i=0; i<tx.hdr.DLC; ++i)
 		_DEBUG(DBG_CAN_TX," %02X",tx.buf.bytes[i]);
@@ -284,11 +288,11 @@ void	*canTx(void *v) {
 						t->to=tcapt;																					// referenca za dt
 						if(tcapt > 0x8000 && t->htim->Instance->CNT < 0x8000)
 							tcapt -= 0x10000;
+						t->tref=eval(tcapt + (__HAL_TIM_GET_COUNTER(&htim9)<<16));										// izracun glede na sinhronizacijo
 						if(t->ch==0 || t->ch==3)															// tref iz prioritete kanalov
-							tcapt-=10;
-						if(t->ch==2 || t->ch==5)
-							tcapt-=20;
-						t->tref=eval(tcapt + (refCnt<<16));										// izracun glede na sinhronizacijo
+							t->tref+=16;
+						if(t->ch==1 || t->ch==4)
+							t->tref+=32;
 //----------------------------------------------------------------						
 						t->cnt=t->longcnt=t->pw=t->crc = 0;
 						t->hi=t->lo=t->shi=t->slo=0;
@@ -416,9 +420,12 @@ void	*canRx(void *v) {
 			if(n)
 				Send(idCOM2CAN,&p,n);
 		}		
+		if(HAL_GetTick() > syncTimeout && idPos < _MAX_HEAD)
+			_SETERR(ERR_SYNC);
+		else
+			_CLRERR(ERR_SYNC);
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
-			_RED(20);
 			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
 			for(int i=0; i<rx.hdr.DLC; ++i)
 				_DEBUG(DBG_CAN_RX," %02X",rx.buf.bytes[i]);
@@ -429,9 +436,9 @@ void	*canRx(void *v) {
 				case _ID_IAP_PING ... _ID_IAP_PING+_MAX_DEV-1:
 					if(rx.hdr.DLC) {
 						if(nDev)
-							_DEBUG(DBG_CONSOLE,"     ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ID_IAP_PING)]);
+							_DEBUG(DBG_CONSOLE,"     ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)]);
 						else
-							_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(4,rx.hdr.StdId-_ID_IAP_PING)]);
+							_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)]);
 						_DEBUG(DBG_CONSOLE,"%s","\r\n");
 						devices[nDev++]=rx.buf.word[1];
 					} else {			
@@ -454,7 +461,11 @@ void	*canRx(void *v) {
 
 				case _ID_SYNC_REQ:
 					sync(rx.buf.hword[3]);
-					refCnt=0;
+					syncTimeout=HAL_GetTick()+200;
+					__HAL_TIM_SET_COUNTER(&htim9,0);
+					if(abs(_V45 - 45.0f > 3.0f)) _SETERR(ERR_V45); else _CLRERR(ERR_V45);
+					if(abs(_VM5 - 5.0f  > 0.5f)) _SETERR(ERR_VM5); else _CLRERR(ERR_VM5);
+					
 				break;
 						
 				case _ID_SYNC_ACK:

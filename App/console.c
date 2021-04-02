@@ -12,9 +12,9 @@
 * Return				:
 *******************************************************************************/
 FATFS			fatfs;
-bool			isMounted=false;
-int32_t		xxxtest=0x8000;
-
+bool			isMounted=false,iapInproc=false;
+uint32_t	debug,error,errmask;
+_io				**_DBG;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -124,6 +124,16 @@ FRESULT DecodePlus(char *c) {
 					testMask |= (1<<strtoul(++c,&c,10));
 				SaveSettings();
 				break;
+
+				case 'e':
+				case 'E':
+				c=strchr(c,' ');
+				if(!c)
+					errmask=0;
+				while(c && *c)
+					errmask &= ~(1<<strtoul(++c,&c,10));
+				SaveSettings();
+				break;
 				
 				case 'r':
 				case 'R':
@@ -165,6 +175,16 @@ FRESULT DecodeMinus(char *c) {
 					testMask &= ~(1<<strtoul(++c,&c,10));
 				SaveSettings();
 				break;
+
+				case 'e':
+				case 'E':
+				c=strchr(c,' ');
+				if(!c)
+					errmask=(uint32_t)EOF;
+				while(c && *c)
+					errmask |= (1<<strtoul(++c,&c,10));
+				SaveSettings();
+				break;
 				
 				case 'r':
 				case 'R':
@@ -188,10 +208,7 @@ FRESULT DecodeInq(char *c) {
 				switch(*trim(&c)) {
 				case 'a':
 					while(fgetc(stdin) == EOF) {
-						_print("\r%.1fV,%.1fV,%.1f'C",
-							(float)(pwr.V45*3.3/4095.0*(1.2+47)/1.2),
-							(float)(3.3 - (4095-pwr.Vm5)*((1.2+6.8)/1.2*3.3/4095.0)),
-							(float)((pwr.T*3.3/4095.0 - 0.76)/2.5e-3+25.0));
+						_print("\r%.1fV,%.1fV,%.1f'C",_V45,_VM5,_TEMP);
 						_wait(200);
 						}
 				break;
@@ -374,7 +391,10 @@ FRESULT fType(int argc, char *argv[]) {
 * Return				:
 *******************************************************************************/
 FRESULT fIap(int argc, char *argv[]) {
-	return iapRemote();
+	iapInproc=true;
+	FRESULT ret=iapRemote();
+	iapInproc=false;
+	return ret;
 }
 /*******************************************************************************
 * Function Name	:
@@ -449,7 +469,7 @@ FRESULT fAddress(int argc, char *argv[]) {
 		SaveSettings();
 	}		
 	DecodeCom(0);
-	_print("  device address %d, %s",idPos+1, strPos[min(4,idPos)]);	
+	_print("  device address %d, %s",idPos+1, strPos[min(_MAX_HEAD,idPos)]);	
 	return FR_OK;
 }
 //-----------------------------------------------------
@@ -676,9 +696,8 @@ uint32_t	dbg=debug;
 				
 				case __f12:
 				case __F12:
-					iapRemote();
+					DecodeCom("iap");
 				break;
-
 
 				case __Up:
 					testRef = min(++testRef,128);
@@ -754,6 +773,8 @@ FRESULT	LoadSettings(void) {
 	
 	f_gets(c,sizeof(c),&f);
 	sscanf(c,"%08X\n", &testMask);
+	f_gets(c,sizeof(c),&f);
+	sscanf(c,"%08X\n", &errmask);
 
 	f_close(&f);
 
@@ -772,6 +793,7 @@ FRESULT	SaveSettings(void) {
 				f_printf(&f,"%-10d;dev. address\n", idPos);
 				f_printf(&f,"%-10d;term. pin\n",HAL_GPIO_ReadPin(CAN_TERM_GPIO_Port, CAN_TERM_Pin));
 				f_printf(&f,"%08X  ;mask\n", testMask);
+				f_printf(&f,"%08X  ;error mask\n", errmask);
 				f_close(&f);
 			}
 			return err;

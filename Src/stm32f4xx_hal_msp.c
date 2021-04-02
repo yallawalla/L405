@@ -460,7 +460,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     HAL_NVIC_SetPriority(TIM3_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(TIM3_IRQn);
   /* USER CODE BEGIN TIM3_MspInit 1 */
-
+		__HAL_TIM_ENABLE_IT(htim_base,TIM_IT_UPDATE);
   /* USER CODE END TIM3_MspInit 1 */
   }
   else if(htim_base->Instance==TIM4)
@@ -708,7 +708,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     /* Peripheral clock enable */
     __HAL_RCC_TIM9_CLK_ENABLE();
   /* USER CODE BEGIN TIM9_MspInit 1 */
-
+		HAL_TIM_Base_Start(htim_base);
   /* USER CODE END TIM9_MspInit 1 */
   }
 

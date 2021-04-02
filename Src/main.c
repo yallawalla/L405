@@ -193,9 +193,6 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
-		if(HAL_GetTick() > 1000)
-			__HAL_TIM_ENABLE_IT(&htim3,TIM_IT_UPDATE);
-
 		_proc_loop();
 		
 		if(otgDeviceId !=  __otgDeviceId) {
@@ -833,7 +830,7 @@ static void MX_TIM9_Init(void)
   htim9.Instance = TIM9;
   htim9.Init.Prescaler = 0;
   htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim9.Init.Period = 65535;
+  htim9.Init.Period = 127;
   htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim9) != HAL_OK)
