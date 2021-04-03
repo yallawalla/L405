@@ -68,10 +68,13 @@ uint32_t	syncTimeout=3000;
 * Return				:
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if(htim == &htim3) {
-		if(__HAL_TIM_GET_COUNTER(&htim9) == 0 && idPos > _MAX_HEAD-1 && !iapInproc)
+	if(htim == &htim3  && idPos > _MAX_HEAD-1) {
+		if(HAL_GetTick() % 1000 == 0)
+			_GREEN(20);
+		if(__HAL_TIM_GET_COUNTER(&htim9) == 0 && !iapInproc) {
 			Send(_ID_SYNC_REQ,NULL,0);
-		if((__HAL_TIM_GET_COUNTER(&htim9) == testRef) && testReq && idPos > 3) {
+		}
+		if((__HAL_TIM_GET_COUNTER(&htim9) == testRef) && testReq) {
 			testReq=0;
 			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
 //			uint32_t to=htim3.Instance->CNT+84*20;
@@ -245,7 +248,7 @@ void	*canTx(void *v) {
 			while(_buffer_pull(t->dma,&tcapt,sizeof(uint32_t))) 
 				if((1 << t->ch) & ~testMask) {
 					if(t->timeout) {
-						dt = ((tcapt - t->to) & 0xffff)/uS;
+						dt = (((tcapt - t->to) & 0xffff) + uS/2)/uS;
 						t->to=tcapt;
 					
 						if(dt>MIN_BURST) {

@@ -1,7 +1,8 @@
 #include	"stm32f4xx_hal.h"
-#include	"console.h"
 #include	<stdlib.h>
 #include	<stdio.h>
+#include	"console.h"
+#include	"leds.h"
 
 #define		N 100
 static		float			linreg(float, float);
@@ -28,7 +29,7 @@ int32_t	eval(int32_t t) {
 float	linreg(float x, float y) {
 	uint32_t	i = count++ % N;
 	uint32_t	j = count;
-
+	
 	if (count > N) {
 		j = N;
 		sX -= p[i].x;
@@ -60,11 +61,14 @@ float	linreg(float x, float y) {
 * Return				:
 *******************************************************************************/
 uint16_t	sync(uint16_t y) {
+	if(count % 10 == 0)
+		_GREEN(20);
 	if (count > 3*N) {
 			float a0=a+b*count, b0=b;
 			sX = sX2 = sY = sXY = offset = upperq = count = 0;
 			while(count < N)
 				sync((int32_t)(a0 + b0 * (count-N)) & 0xffff);
+			_GREEN(200);
 	}
 	if(count) {
 		if(upperq && y < 0x4000)
