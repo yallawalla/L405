@@ -13,7 +13,7 @@
 *******************************************************************************/
 FATFS			fatfs;
 bool			isMounted=false,iapInproc=false;
-uint32_t	debug,error,errmask;
+uint32_t	debug,error,errmask,pinV;
 _io				**_DBG;
 /*******************************************************************************
 * Function Name	: 
@@ -206,7 +206,7 @@ FRESULT DecodeMinus(char *c) {
 *******************************************************************************/
 FRESULT DecodeInq(char *c) {
 				switch(*trim(&c)) {
-				case 'a':
+				case 'u':
 					while(fgetc(stdin) == EOF) {
 						_print("\r%.1fV,%.1fV,%.1f'C",_V45,_VM5,_TEMP);
 						_wait(200);
@@ -237,7 +237,18 @@ FRESULT DecodeInq(char *c) {
 * Return				:
 *******************************************************************************/
 FRESULT DecodeEq(char *c) {
-	return FR_OK;
+				switch(*trim(&c)) {
+					case 'u':
+					case 'U':
+					for(c=strchr(c,' '); c && *c;)
+						pinV = strtoul(++c,&c,10);
+					SaveSettings();
+					break;
+
+					default:
+						return FR_INVALID_NAME;
+				}
+				return FR_OK;
 }
 /*******************************************************************************
 * Function Name	:
@@ -775,6 +786,8 @@ FRESULT	LoadSettings(void) {
 	sscanf(c,"%08X\n", &testMask);
 	f_gets(c,sizeof(c),&f);
 	sscanf(c,"%08X\n", &errmask);
+	f_gets(c,sizeof(c),&f);
+	sscanf(c,"%08X\n", &pinV);
 
 	f_close(&f);
 
@@ -794,6 +807,7 @@ FRESULT	SaveSettings(void) {
 				f_printf(&f,"%-10d;term. pin\n",HAL_GPIO_ReadPin(CAN_TERM_GPIO_Port, CAN_TERM_Pin));
 				f_printf(&f,"%08X  ;mask\n", testMask);
 				f_printf(&f,"%08X  ;error mask\n", errmask);
+				f_printf(&f,"%8d  ;pin voltage\n", pinV);
 				f_close(&f);
 			}
 			return err;

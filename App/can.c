@@ -69,11 +69,11 @@ uint32_t	syncTimeout=3000;
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &htim3  && idPos > _MAX_HEAD-1) {
-		if(HAL_GetTick() % 1000 == 0)
-			_GREEN(20);
-		if(__HAL_TIM_GET_COUNTER(&htim9) == 0 && !iapInproc) {
+		if(__HAL_TIM_GET_COUNTER(&htim9) % 128  == 0 && !iapInproc)
 			Send(_ID_SYNC_REQ,NULL,0);
-		}
+		if(__HAL_TIM_GET_COUNTER(&htim9) % 1280 == 0)
+			_GREEN(20);
+
 		if((__HAL_TIM_GET_COUNTER(&htim9) == testRef) && testReq) {
 			testReq=0;
 			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
@@ -302,9 +302,9 @@ void	*canTx(void *v) {
 					}
 					++t->cnt;
 					t->timeout=HAL_GetTick()+MAX__INT;
-					if(!flushTout) {
+					if(!flushTout)
 						flushTout=HAL_GetTick()+FLUSH__INT;
-					}
+					_RED(40);
 				}
 
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
@@ -466,7 +466,7 @@ void	*canRx(void *v) {
 					sync(rx.buf.hword[3]);
 					syncTimeout=HAL_GetTick()+200;
 					__HAL_TIM_SET_COUNTER(&htim9,0);
-					if(abs(_V45 - 45.0f > 3.0f)) _SETERR(ERR_V45); else _CLRERR(ERR_V45);
+					if(abs(_V45 - pinV > 3.0f)) _SETERR(ERR_V45); else _CLRERR(ERR_V45);
 					if(abs(_VM5 - 5.0f  > 0.5f)) _SETERR(ERR_VM5); else _CLRERR(ERR_VM5);
 					
 				break;
