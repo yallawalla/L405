@@ -92,7 +92,7 @@ void	SectorQuery(void);
 void	HAL_USBD_Setup(void);
 void	UsbDevice_Init(void);
 void	UsbDevice_DeInit(void);
-	
+bool	flashLock(bool);
 #define _V45	((float)(pwr.V45*3.3/4095.0*(1.2+47)/1.2))
 #define _VM5	((float)(3.3 - (4095-pwr.Vm5)*((1.2+6.8)/1.2*3.3/4095.0)))
 #define _TEMP	((float)((pwr.T*3.3/4095.0 - 0.76)/2.5e-3+25.0))

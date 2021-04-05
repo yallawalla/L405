@@ -122,7 +122,6 @@ FRESULT DecodePlus(char *c) {
 					testMask=(uint32_t)EOF;
 				while(c && *c)
 					testMask |= (1<<strtoul(++c,&c,10));
-				SaveSettings();
 				break;
 
 				case 'e':
@@ -132,14 +131,12 @@ FRESULT DecodePlus(char *c) {
 					errmask=0;
 				while(c && *c)
 					errmask &= ~(1<<strtoul(++c,&c,10));
-				SaveSettings();
 				break;
 				
 				case 'r':
 				case 'R':
 				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_RESET);
 				_GREEN(200);
-				SaveSettings();
 				break;
 
 				default:
@@ -173,7 +170,6 @@ FRESULT DecodeMinus(char *c) {
 					testMask=0;
 				while(c && *c)
 					testMask &= ~(1<<strtoul(++c,&c,10));
-				SaveSettings();
 				break;
 
 				case 'e':
@@ -183,14 +179,12 @@ FRESULT DecodeMinus(char *c) {
 					errmask=(uint32_t)EOF;
 				while(c && *c)
 					errmask |= (1<<strtoul(++c,&c,10));
-				SaveSettings();
 				break;
 				
 				case 'r':
 				case 'R':
 				HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin, GPIO_PIN_SET);
 				_RED(200);
-				SaveSettings();
 				break;
 
 				default:
@@ -242,7 +236,6 @@ FRESULT DecodeEq(char *c) {
 					case 'U':
 					for(c=strchr(c,' '); c && *c;)
 						pinV = strtoul(++c,&c,10);
-					SaveSettings();
 					break;
 
 					default:
@@ -291,7 +284,7 @@ FRESULT Remote(int id) {
 					Parse(__Esc);
 					if(!devices[id]) {
 						_print("... no devices");
-						DecodeCom(0);
+						DecodeCom(NULL);
 						return FR_DISK_ERR;
 					}
 				}
@@ -477,9 +470,8 @@ FRESULT fAddress(int argc, char *argv[]) {
 		if(0 > atoi(argv[1]) || atoi(argv[1]) > _MAX_DEV)
 			return FR_INVALID_PARAMETER;
 		idPos=atoi(argv[1])-1;
-		SaveSettings();
 	}		
-	DecodeCom(0);
+	DecodeCom(NULL);
 	_print("  device address %d, %s",idPos+1, strPos[min(_MAX_HEAD,idPos)]);	
 	return FR_OK;
 }
@@ -676,7 +668,8 @@ uint32_t	dbg=debug;
 					nDev=0;
 					Send(_ID_IAP_PING,NULL,0);
 					_wait(500);
-					_print("%6d dev. found",nDev);
+					_print("     ser %08X, hash <%08X>, %s",idDev,idCrc, strPos[min(_MAX_HEAD,idPos)]);
+					_print(", %d dev. found",nDev);
 					DecodeCom(NULL);
 					_DBG=io;
 					debug=dbg;
@@ -710,6 +703,13 @@ uint32_t	dbg=debug;
 					DecodeCom("iap");
 				break;
 
+				case __f11:
+				case __F11:
+					SaveSettings();
+				_print("...saved");
+				DecodeCom(NULL);
+				break;
+
 				case __Up:
 					testRef = min(++testRef,128);
 					testReq=1;
@@ -718,6 +718,21 @@ uint32_t	dbg=debug;
 				case __Down:
 					testRef = max(--testRef,1);
 					testReq=1;
+				break;
+				
+				case __PageUp:
+					if(flashLock(true))
+						_print("locked");
+					else
+						_print("error");
+					DecodeCom(NULL);
+				break;
+				case __PageDown:
+					if(flashLock(false))
+						_print("unlocked");
+					else
+						_print("error");
+					DecodeCom(NULL);
 				break;
 
 				default:
@@ -753,7 +768,7 @@ _io 	**out=stdout->io;
 * Return				:
 ****************************f***************************************************/
 void	printVersion() {
-			DecodeCom(0);
+			DecodeCom(NULL);
 			_print("  V%d.%02d %s <%08X>",
 				SW_version/100,SW_version%100,
 					__DATE__,
@@ -775,19 +790,24 @@ FRESULT	LoadSettings(void) {
 	isMounted=true;
 	err=f_open(&f,"/L405.ini",FA_READ);		if(err != FR_OK)	return err;
 	f_gets(c,sizeof(c),&f);
-	sscanf(c,"%03X\n", &idPos);
+	sscanf(c,"%03X", &idPos);
 	
 	f_gets(c,sizeof(c),&f);
 	uint32_t state=GPIO_PIN_SET;
-	sscanf(c,"%03X\n", &state);
+	sscanf(c,"%03X", &state);
 	HAL_GPIO_WritePin(CAN_TERM_GPIO_Port, CAN_TERM_Pin,(GPIO_PinState)state);
 	
 	f_gets(c,sizeof(c),&f);
-	sscanf(c,"%08X\n", &testMask);
+	sscanf(c,"%08X", &testMask);
 	f_gets(c,sizeof(c),&f);
-	sscanf(c,"%08X\n", &errmask);
+	sscanf(c,"%08X", &errmask);
 	f_gets(c,sizeof(c),&f);
-	sscanf(c,"%08X\n", &pinV);
+	sscanf(c,"%08X", &pinV);
+
+	for(int i=0; i<6; ++i) {
+		f_gets(c,sizeof(c),&f);
+		sscanf(c,"%hu,%hhu,%hhu", &ws[i].colour.h, &ws[i].colour.s, &ws[i].colour.v);
+	}
 
 	f_close(&f);
 
@@ -803,11 +823,13 @@ FRESULT	SaveSettings(void) {
 			FIL f;
 			FRESULT err=f_open(&f,"/L405.ini",FA_WRITE | FA_CREATE_ALWAYS);
 			if(err==FR_OK) {
-				f_printf(&f,"%-10d;dev. address\n", idPos);
-				f_printf(&f,"%-10d;term. pin\n",HAL_GPIO_ReadPin(CAN_TERM_GPIO_Port, CAN_TERM_Pin));
-				f_printf(&f,"%08X  ;mask\n", testMask);
-				f_printf(&f,"%08X  ;error mask\n", errmask);
-				f_printf(&f,"%8d  ;pin voltage\n", pinV);
+				f_printf(&f,"%-12d;dev. address\n", idPos);
+				f_printf(&f,"%-12d;term. pin\n",HAL_GPIO_ReadPin(CAN_TERM_GPIO_Port, CAN_TERM_Pin));
+				f_printf(&f,"%08X    ;mask\n", testMask);
+				f_printf(&f,"%08X    ;error mask\n", errmask);
+				f_printf(&f,"%8d    ;pin voltage\n", pinV);
+				for(int i=0; i<6; ++i)
+					f_printf(&f,"%3d,%3d,%3d ;colour %d\n", ws[i].colour.h, ws[i].colour.s, ws[i].colour.v,i);
 				f_close(&f);
 			}
 			return err;

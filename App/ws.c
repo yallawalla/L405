@@ -4,14 +4,11 @@
 #define		SW_version			100
 
 __ALIGN_BEGIN 
-uint32_t	_ws[(__NWS+8+8)*24]; 
+uint32_t	wsdma[(__NWS+8+8)*24]; 
 __ALIGN_END;
 
 
-struct  {
-	HSV				colour;
-	uint32_t	bit12, bit24, timeout[__NWS];
-} ws[] =
+_ws ws[] =
 {
 	{{0,255,100},		0,0,{0}},
 	{{60,255,100},	0,0,{0}},
@@ -58,7 +55,7 @@ void			Decode(int sect,payload *p) {
 *******************************************************************************/
 void			wsStream(int32_t npos, int32_t colour, int32_t n) {
 RGB				rgb={0,0,0};
-uint32_t	*p = &_ws[(npos+8+4)*24];
+uint32_t	*p = &wsdma[(npos+8+4)*24];
 					if(colour >= 0)
 						HSV2RGB(ws[colour].colour, &rgb);
 // krog					
@@ -75,7 +72,7 @@ uint32_t	*p = &_ws[(npos+8+4)*24];
 						int i=colour;
 						if(i<0)
 							i=-i-1;
-						p = &_ws[(8+i-2)*24];
+						p = &wsdma[(8+i-2)*24];
 						for(int k=0; k<8; ++k)
 							(rgb.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 						for(int k=0; k<8; ++k)
@@ -85,7 +82,7 @@ uint32_t	*p = &_ws[(npos+8+4)*24];
 					}
 					
 					
-					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_ws,sizeof(_ws)/sizeof(uint32_t));
+					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,wsdma,sizeof(wsdma)/sizeof(uint32_t));
 					_DEBUG(DBG_LED,"\r%3d: * %02X %02X %02X %02X %02X %2d\r\n",HAL_GetTick() % 1000, npos, rgb.r,rgb.g,rgb.b,n,colour);
 }
 /*******************************************************************************
@@ -95,11 +92,11 @@ uint32_t	*p = &_ws[(npos+8+4)*24];
 * Return				:
 *******************************************************************************/
 void			wsProcInit(void) {
-					uint32_t *p = &_ws[4*24];
+					uint32_t *p = &wsdma[4*24];
 		
 					for(int i=0; i<(__NWS+8)*24; ++i)
 						*p++=__TL;
-					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,_ws,sizeof(_ws)/sizeof(uint32_t));
+					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,wsdma,sizeof(wsdma)/sizeof(uint32_t));
 					for (int i = 1; i < 4095; ++i) {
 						int j = i,n = 0;
 						while (j % 2)
@@ -231,8 +228,8 @@ void	RGB2HSV(RGB RGB, HSV *HSV){
  else
  HSV->h = 240 + (RGB.r - RGB.g)*60/delta;		// between magenta & cyan
  
- if(HSV->h < 0 )
- HSV->h += 360;
+// if(HSV->h < 0 )
+// HSV->h += 360;
 }
 /*******************************************************************************
  * Function HSV2RGB

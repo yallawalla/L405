@@ -84,3 +84,39 @@ uint16_t	sync(uint16_t y) {
 	syncval=(int32_t)linreg(count, y+offset);
 	return syncval;
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+bool flashLock(bool state)
+{
+	bool ret=true;
+  FLASH_OBProgramInitTypeDef OptionsBytesStruct = {0};
+	HAL_FLASH_Unlock();
+	HAL_FLASH_OB_Unlock();
+  HAL_FLASHEx_OBGetConfig(&OptionsBytesStruct);
+
+  if(state == true)
+  {
+    if(OptionsBytesStruct.RDPLevel == OB_RDP_LEVEL_0)
+    {
+      OptionsBytesStruct.OptionType = OPTIONBYTE_RDP;
+      OptionsBytesStruct.RDPLevel   = OB_RDP_LEVEL_1;
+      if(HAL_FLASHEx_OBProgram(&OptionsBytesStruct) != HAL_OK)
+				ret=false;
+		}
+  } else {
+    if(OptionsBytesStruct.RDPLevel == OB_RDP_LEVEL_1)
+    {
+      OptionsBytesStruct.OptionType = OPTIONBYTE_RDP;
+      OptionsBytesStruct.RDPLevel   = OB_RDP_LEVEL_0;
+			if(HAL_FLASHEx_OBProgram(&OptionsBytesStruct) != HAL_OK)
+				ret=false;
+		}
+  }
+	HAL_FLASH_OB_Lock();
+	HAL_FLASH_Lock();
+	return ret;
+}

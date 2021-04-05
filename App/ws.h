@@ -10,7 +10,7 @@
 #define 	__COLS	6
 
 typedef		struct	{uint8_t r; uint8_t g; uint8_t b; }	RGB;
-typedef		struct	{int16_t h; uint8_t s; uint8_t v; }	HSV;
+typedef		struct	{uint16_t h; uint8_t s; uint8_t v; }	HSV;
 
 extern		TIM_HandleTypeDef htim2;
 extern		uint32_t	DecodeTab[];
@@ -35,4 +35,10 @@ static __inline	uint32_t ror(uint32_t base, uint32_t i, uint32_t n) {
 		i = ((i % 2) << (base-1)) + i / 2;
 	return i;
 }
+
+typedef struct {
+	HSV				colour;
+	uint32_t	bit12, bit24, timeout[__NWS];
+} _ws;
+extern _ws ws[];
 #endif
