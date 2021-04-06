@@ -167,11 +167,12 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 		if(ff_pack(0) > 20)
 			ff_pack(EOF);		
 	} else 
-		_RED(3000);
+		_RED(1000);
 	
 	_proc_add(canRx,NULL,"canRx",0);
 	_proc_add(canTx,NULL,"canTx",0);
 	_proc_add(Watchdog,NULL,"watchdog",100); 
+	_proc_add(selftest,NULL,"selftest",100); 
 	_proc_add(ledProc,NULL,"leds",10); 
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));

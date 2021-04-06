@@ -30,32 +30,32 @@ uint8_t		prio[6][3]={
 };
 
 tim timStack[] = {
-	{NULL,&htim1,TIM_CHANNEL_1,0,0,_DMA},					//PA8		1A1
-	{NULL,&htim1,TIM_CHANNEL_2,1,0,_DMA},					//PA9		2A1
-	{NULL,&htim1,TIM_CHANNEL_3,2,0,_DMA},					//PA10	3A1
+	{NULL,&htim1,TIM_CHANNEL_1,0,0,_DMA,_1A1_GPIO_Port,_1A1_Pin},					//PA8		1A1
+	{NULL,&htim1,TIM_CHANNEL_2,1,0,_DMA,_2A1_GPIO_Port,_2A1_Pin},					//PA9		2A1
+	{NULL,&htim1,TIM_CHANNEL_3,2,0,_DMA,_3A1_GPIO_Port,_3A1_Pin},					//PA10	3A1
 	
-	{NULL,&htim3,TIM_CHANNEL_2,0,1,_DMA},					//PA7		1A2
-	{NULL,&htim4,TIM_CHANNEL_2,0,4,_DMA},					//PB7		1B2
+	{NULL,&htim3,TIM_CHANNEL_2,0,1,_DMA,_1A2_GPIO_Port,_1A2_Pin},					//PA7		1A2
+	{NULL,&htim4,TIM_CHANNEL_2,0,4,_DMA,_1B2_GPIO_Port,_1B2_Pin},					//PB7		1B2
 	
-	{NULL,&htim5,TIM_CHANNEL_1,1,1,_DMA},					//PA0 	2A2
-	{NULL,&htim5,TIM_CHANNEL_2,1,4,_DMA},					//PA1 	2B2
+	{NULL,&htim5,TIM_CHANNEL_1,1,1,_DMA,_2A2_GPIO_Port,_2A2_Pin},					//PA0 	2A2
+	{NULL,&htim5,TIM_CHANNEL_2,1,4,_DMA,_2B2_GPIO_Port,_2B2_Pin},					//PA1 	2B2
 	
-	{NULL,&htim5,TIM_CHANNEL_3,2,1,_DMA},					//PA2 	3A2
-	{NULL,&htim5,TIM_CHANNEL_4,2,4,_DMA},					//PA3		3B2
+	{NULL,&htim5,TIM_CHANNEL_3,2,1,_DMA,_3A2_GPIO_Port,_3A2_Pin},					//PA2 	3A2
+	{NULL,&htim5,TIM_CHANNEL_4,2,4,_DMA,_3B2_GPIO_Port,_3B2_Pin},					//PA3		3B2
 	
-	{NULL,&htim8,TIM_CHANNEL_2,0,3,_DMA},					//PC7		1B1
-	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA},					//PC8		2B1
-	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA},					//PC9		3B1
+	{NULL,&htim8,TIM_CHANNEL_2,0,3,_DMA,_1B1_GPIO_Port,_1B1_Pin},					//PC7		1B1
+	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA,_2B1_GPIO_Port,_2B1_Pin},					//PC8		2B1
+	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA,_3B1_GPIO_Port,_3B1_Pin},					//PC9		3B1
 
-	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT},					//PA6		1A3
-	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT},					//PB0		2A3
-	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT},					//PB1 	3A3
+	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT,_1A3_GPIO_Port,_1A3_Pin},					//PA6		1A3
+	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT,_2A3_GPIO_Port,_2A3_Pin},					//PB0		2A3
+	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT,_3A3_GPIO_Port,_3A3_Pin},					//PB1 	3A3
 	
-	{NULL,&htim4,TIM_CHANNEL_1,0,5,_IT},					//PB6 	1B3
-	{NULL,&htim4,TIM_CHANNEL_3,1,5,_IT},					//PB8 	2B3
-	{NULL,&htim4,TIM_CHANNEL_4,2,5,_IT},					//PB9 	3B3
+	{NULL,&htim4,TIM_CHANNEL_1,0,5,_IT,_1B3_GPIO_Port,_1B3_Pin},					//PB6 	1B3
+	{NULL,&htim4,TIM_CHANNEL_3,1,5,_IT,_2B3_GPIO_Port,_2B3_Pin},					//PB8 	2B3
+	{NULL,&htim4,TIM_CHANNEL_4,2,5,_IT,_3B3_GPIO_Port,_3B3_Pin},					//PB9 	3B3
 
-	{NULL,NULL,0,0,0,_IT}
+	{0}
 };
 
 uint32_t	filter_count;
@@ -131,7 +131,7 @@ void	Send(int id,  payload *buf, int len) {
 			_SETERR(ERR_CAN_TX);
 			return;
 		}
-	_CLRERR(ERR_CAN_TX);
+//	_CLRERR(ERR_CAN_TX);
 	_DEBUG(DBG_CAN_TX,"\r%5d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
 	for(int i=0; i<tx.hdr.DLC; ++i)
 		_DEBUG(DBG_CAN_TX," %02X",tx.buf.bytes[i]);
@@ -422,11 +422,11 @@ void	*canRx(void *v) {
 			int n=_buffer_pull(canConsole->tx,p.bytes,8);
 			if(n)
 				Send(idCOM2CAN,&p,n);
-		}		
+		}
 		if(HAL_GetTick() > syncTimeout && idPos < _MAX_HEAD)
 			_SETERR(ERR_SYNC);
-		else
-			_CLRERR(ERR_SYNC);
+//		else
+//			_CLRERR(ERR_SYNC);
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
 			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
@@ -439,14 +439,14 @@ void	*canRx(void *v) {
 				case _ID_IAP_PING ... _ID_IAP_PING+_MAX_DEV-1:
 					if(rx.hdr.DLC) {
 						if(nDev)
-							_DEBUG(DBG_CONSOLE,"     ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)]);
+							_DEBUG(DBG_CONSOLE,"     ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",rx.buf.hword[2],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)],rx.buf.hword[3]);
 						else
-							_DEBUG(DBG_CONSOLE,"  ser %08X, hash <%08X>, %s",rx.buf.word[1],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)]);
-						_DEBUG(DBG_CONSOLE,"%s","\r\n");
+							_DEBUG(DBG_CONSOLE,"  ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",rx.buf.hword[2],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)],rx.buf.hword[3]);
 						devices[nDev++]=rx.buf.word[1];
 					} else {			
 						p.word[0]=idCrc;
-						p.word[1]=idDev;
+						p.hword[2]=idDev & 0xffff;
+						p.hword[3]=error & 0xffff;
 						Send(_ID_IAP_PING+idPos,&p,sizeof(payload));
 					}
 				break;
@@ -466,15 +466,16 @@ void	*canRx(void *v) {
 					sync(rx.buf.hword[3]);
 					syncTimeout=HAL_GetTick()+200;
 					__HAL_TIM_SET_COUNTER(&htim9,0);
-					if(abs(_V45 - pinV > 3.0f)) _SETERR(ERR_V45); else _CLRERR(ERR_V45);
-					if(abs(_VM5 - 5.0f  > 0.5f)) _SETERR(ERR_VM5); else _CLRERR(ERR_VM5);
-					
 				break;
 						
 				case _ID_SYNC_ACK:
 					_DEBUG(DBG_SYNC,"%.*s",rx.hdr.DLC,rx.buf.bytes);
 					break;
-				
+
+				case _ID_RESET:
+					NVIC_SystemReset();	
+				break;
+
 				case _TEST_REQ:
 				{
 					register int i __asm("r3");
@@ -490,7 +491,7 @@ void	*canRx(void *v) {
 						_proc_find(console,&canConsole)->f=NULL;
 						canConsole=_io_close(canConsole);
 					}
-					else if(rx.buf.word[0]==idDev && !canConsole) {
+					else if(rx.buf.hword[0]==(idDev & 0xffff) && !canConsole) {
 						canConsole=_io_init(128,128);
 						_proc_add(console,&canConsole,"can console",0);				
 					}

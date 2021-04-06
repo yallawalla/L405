@@ -62,7 +62,8 @@ enum err {
 	ERR_CAN_TX=0,
 	ERR_V45,
 	ERR_VM5,
-	ERR_SYNC
+	ERR_SYNC,
+	ERR_PIN=8
 };
 
 #define _DEBUG(n,f, ...) 				\
@@ -78,12 +79,10 @@ enum err {
 #define _SETERR(n) 											\
 	do {																	\
 		error |= ((1<<(n)) & ~errmask);			\
-		if(error & (1<<(n)))	_RED(100);		\
 	} while(0)
 
 #define _CLRERR(n) 											\
 	do {																	\
-		if(error & (1<<(n)))	_GREEN(200);	\
 		error &= (~(1<<(n)));								\
 	} while(0)
 	
@@ -93,6 +92,8 @@ void	HAL_USBD_Setup(void);
 void	UsbDevice_Init(void);
 void	UsbDevice_DeInit(void);
 bool	flashLock(bool);
+void	*selftest(void);
+	
 #define _V45	((float)(pwr.V45*3.3/4095.0*(1.2+47)/1.2))
 #define _VM5	((float)(3.3 - (4095-pwr.Vm5)*((1.2+6.8)/1.2*3.3/4095.0)))
 #define _TEMP	((float)((pwr.T*3.3/4095.0 - 0.76)/2.5e-3+25.0))

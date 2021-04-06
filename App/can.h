@@ -29,39 +29,25 @@ void			VCP_USB_DEVICE_Init(void),
 					MX_USB_HOST_Init(void),
 					MX_USB_HOST_DeInit(void),
 					canFilterCfg(int, int, int, int);
-					
-extern		const char *			strPos[];
-extern		CAN_HandleTypeDef hcan2;
-extern		CRC_HandleTypeDef hcrc;
-extern 		TIM_HandleTypeDef htim1,
-														htim8,
-														htim3,
-														htim4,
-														htim5,
-														htim9;
 
-extern		_io								*_CAN,
-														*_VCP,
-														*_ITM,
-														*canConsole;
-
-
-extern		uint32_t					nDev,
-														idDev,
-														idPos,
-														idCrc,
-														testMask,
-														testReq,
-														testRef;
-
+typedef struct {
+	_buffer						*dma;
+	TIM_HandleTypeDef *htim;
+	uint32_t					Channel;
+	uint8_t						sect,ch;
+	enum {_DMA,_IT}		tmode;		
+	GPIO_TypeDef*			gpio;
+	uint16_t					pin;	
+	uint32_t					timeout,to,tref,crc;
+	uint32_t					cnt,longcnt,pw;
+	uint32_t					hi,lo,shi,slo;
+} tim;
 
 void			*canRx(void *),
 					*canTx(void *);
 
 #define max(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a > _b ? _a : _b; })
 #define min(a,b) ({ __typeof__ (a) _a = (a);  __typeof__ (b) _b = (b);  _a < _b ? _a : _b; })
-
-extern	uint32_t	devices[];
 
 #define	_MAX_DEV		8
 #define	_MAX_HEAD		4
@@ -78,6 +64,7 @@ typedef enum {
 	_ID_IAP_REQ,
 	_ID_SYNC_REQ,
 	_ID_SYNC_ACK,
+	_ID_RESET,
 
 	_ID_IAP_GO				=0xA0,
 	_ID_IAP_ERASE,
@@ -88,11 +75,6 @@ typedef enum {
 	_ID_IAP_STRING,
 	_ID_IAP_PING,
 } _StdId;
-
-	enum tmode{    
-	_DMA,
-	_IT
-};
 
 typedef struct {
 	unsigned mask:6;
@@ -123,17 +105,6 @@ typedef struct {
 	payload buf;
 } CanTxMsg;
 
-typedef struct {
-	_buffer						*dma;
-	TIM_HandleTypeDef *htim;
-	uint32_t					Channel;
-	uint8_t						sect,ch;
-	enum tmode				tmode;				
-	uint32_t					timeout,to,tref,crc;
-	uint32_t					cnt,longcnt,pw;
-	uint32_t					hi,lo,shi,slo;
-} tim;
-
 void				Send(int, payload *,int);
 int					AckWait(int);
 uint16_t		sync(uint16_t);
@@ -151,6 +122,33 @@ int32_t			eval(int32_t);
 #define			_FLASH_BLANK		((int)-1)
 	
 #define			SW_version			100
+
+					
+extern		const char *			strPos[];
+extern		CAN_HandleTypeDef hcan2;
+extern		CRC_HandleTypeDef hcrc;
+extern 		TIM_HandleTypeDef htim1,
+														htim8,
+														htim3,
+														htim4,
+														htim5,
+														htim9;
+
+extern		_io								*_CAN,
+														*_VCP,
+														*_ITM,
+														*canConsole;
+
+
+extern		uint32_t					nDev,
+														idDev,
+														idPos,
+														idCrc,
+														testMask,
+														testReq,
+														testRef;
+extern	uint32_t						devices[];
+extern	tim 								timStack[];
 
 #endif
 

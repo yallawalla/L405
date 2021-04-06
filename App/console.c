@@ -292,7 +292,7 @@ FRESULT Remote(int id) {
 				_DBG=stdout->io;
 				uint32_t dbg=debug;
 				debug |= (1<<DBG_CONSOLE);
-				Send(_REMOTE_REQ,(payload *)&devices[id%4],sizeof(int32_t));
+				Send(_REMOTE_REQ,(payload *)&devices[id%4],sizeof(uint16_t));
 				_print("  remote console open...");
 				Send(idCAN2COM,(payload *)"\r",1);
 				
@@ -656,6 +656,8 @@ char	*c;
 					while(1);				
 				
 				case __CtrlY:																		// call system reset
+					Send(_ID_RESET,NULL,0);
+					_wait(10);
 					NVIC_SystemReset();	
 //__________________________________________________
 				case __Esc:
@@ -668,8 +670,8 @@ uint32_t	dbg=debug;
 					nDev=0;
 					Send(_ID_IAP_PING,NULL,0);
 					_wait(500);
-					_print("     ser %08X, hash <%08X>, %s",idDev,idCrc, strPos[min(_MAX_HEAD,idPos)]);
-					_print(", %d dev. found",nDev);
+					_print("     ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",idDev,idCrc, strPos[min(_MAX_HEAD,idPos)],error);
+					_print("%6d dev. found",nDev);
 					DecodeCom(NULL);
 					_DBG=io;
 					debug=dbg;
@@ -833,4 +835,21 @@ FRESULT	SaveSettings(void) {
 				f_close(&f);
 			}
 			return err;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+****************************f***************************************************/
+void	*selftest(void) {
+	for(tim *t=timStack; t->htim; ++t) {
+		if(HAL_GPIO_ReadPin(t->gpio,t->pin) != GPIO_PIN_SET)
+			_SETERR(ERR_PIN+t->sect);
+	}
+	if(abs(_V45 - pinV > 3.0f))	 _SETERR(ERR_V45);
+	if(abs(_VM5 - 5.0f  > 0.5f)) _SETERR(ERR_VM5);
+	if(error)	
+		_RED(200);
+	return selftest;
 }
