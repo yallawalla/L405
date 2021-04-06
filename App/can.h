@@ -34,8 +34,7 @@ typedef struct {
 	_buffer						*dma;
 	TIM_HandleTypeDef *htim;
 	uint32_t					Channel;
-	uint8_t						sect,ch;
-	enum {_DMA,_IT}		tmode;		
+	uint8_t						sect,ch;	
 	GPIO_TypeDef*			gpio;
 	uint16_t					pin;	
 	uint32_t					timeout,to,tref,crc;

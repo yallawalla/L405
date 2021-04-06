@@ -80,7 +80,6 @@ uint16_t	sync(uint16_t y) {
 			upperq=1;
 	else
 			upperq=0;
-//	syncval=(int32_t)linreg(count, y+offset) % 0x10000;
 	syncval=(int32_t)linreg(count, y+offset);
 	return syncval;
 }

@@ -30,30 +30,31 @@ uint8_t		prio[6][3]={
 };
 
 tim timStack[] = {
-	{NULL,&htim1,TIM_CHANNEL_1,0,0,_DMA,_1A1_GPIO_Port,_1A1_Pin},					//PA8		1A1
-	{NULL,&htim1,TIM_CHANNEL_2,1,0,_DMA,_2A1_GPIO_Port,_2A1_Pin},					//PA9		2A1
-	{NULL,&htim1,TIM_CHANNEL_3,2,0,_DMA,_3A1_GPIO_Port,_3A1_Pin},					//PA10	3A1
+	//DMA
+	{NULL,&htim1,TIM_CHANNEL_1,0,0,_1A1_GPIO_Port,_1A1_Pin},					//PA8		1A1
+	{NULL,&htim1,TIM_CHANNEL_2,1,0,_2A1_GPIO_Port,_2A1_Pin},					//PA9		2A1
+	{NULL,&htim1,TIM_CHANNEL_3,2,0,_3A1_GPIO_Port,_3A1_Pin},					//PA10	3A1
 	
-	{NULL,&htim3,TIM_CHANNEL_2,0,1,_DMA,_1A2_GPIO_Port,_1A2_Pin},					//PA7		1A2
-	{NULL,&htim4,TIM_CHANNEL_2,0,4,_DMA,_1B2_GPIO_Port,_1B2_Pin},					//PB7		1B2
+	{NULL,&htim3,TIM_CHANNEL_2,0,1,_1A2_GPIO_Port,_1A2_Pin},					//PA7		1A2
+	{NULL,&htim4,TIM_CHANNEL_2,0,4,_1B2_GPIO_Port,_1B2_Pin},					//PB7		1B2
 	
-	{NULL,&htim5,TIM_CHANNEL_1,1,1,_DMA,_2A2_GPIO_Port,_2A2_Pin},					//PA0 	2A2
-	{NULL,&htim5,TIM_CHANNEL_2,1,4,_DMA,_2B2_GPIO_Port,_2B2_Pin},					//PA1 	2B2
+	{NULL,&htim5,TIM_CHANNEL_1,1,1,_2A2_GPIO_Port,_2A2_Pin},					//PA0 	2A2
+	{NULL,&htim5,TIM_CHANNEL_2,1,4,_2B2_GPIO_Port,_2B2_Pin},					//PA1 	2B2
 	
-	{NULL,&htim5,TIM_CHANNEL_3,2,1,_DMA,_3A2_GPIO_Port,_3A2_Pin},					//PA2 	3A2
-	{NULL,&htim5,TIM_CHANNEL_4,2,4,_DMA,_3B2_GPIO_Port,_3B2_Pin},					//PA3		3B2
+	{NULL,&htim5,TIM_CHANNEL_3,2,1,_3A2_GPIO_Port,_3A2_Pin},					//PA2 	3A2
+	{NULL,&htim5,TIM_CHANNEL_4,2,4,_3B2_GPIO_Port,_3B2_Pin},					//PA3		3B2
 	
-	{NULL,&htim8,TIM_CHANNEL_2,0,3,_DMA,_1B1_GPIO_Port,_1B1_Pin},					//PC7		1B1
-	{NULL,&htim8,TIM_CHANNEL_3,1,3,_DMA,_2B1_GPIO_Port,_2B1_Pin},					//PC8		2B1
-	{NULL,&htim8,TIM_CHANNEL_4,2,3,_DMA,_3B1_GPIO_Port,_3B1_Pin},					//PC9		3B1
-
-	{NULL,&htim3,TIM_CHANNEL_1,0,2,_IT,_1A3_GPIO_Port,_1A3_Pin},					//PA6		1A3
-	{NULL,&htim3,TIM_CHANNEL_3,1,2,_IT,_2A3_GPIO_Port,_2A3_Pin},					//PB0		2A3
-	{NULL,&htim3,TIM_CHANNEL_4,2,2,_IT,_3A3_GPIO_Port,_3A3_Pin},					//PB1 	3A3
+	{NULL,&htim8,TIM_CHANNEL_2,0,3,_1B1_GPIO_Port,_1B1_Pin},					//PC7		1B1
+	{NULL,&htim8,TIM_CHANNEL_3,1,3,_2B1_GPIO_Port,_2B1_Pin},					//PC8		2B1
+	{NULL,&htim8,TIM_CHANNEL_4,2,3,_3B1_GPIO_Port,_3B1_Pin},					//PC9		3B1
+	// IT
+	{NULL,&htim3,TIM_CHANNEL_1,0,2,_1A3_GPIO_Port,_1A3_Pin},					//PA6		1A3
+	{NULL,&htim3,TIM_CHANNEL_3,1,2,_2A3_GPIO_Port,_2A3_Pin},					//PB0		2A3
+	{NULL,&htim3,TIM_CHANNEL_4,2,2,_3A3_GPIO_Port,_3A3_Pin},					//PB1 	3A3
 	
-	{NULL,&htim4,TIM_CHANNEL_1,0,5,_IT,_1B3_GPIO_Port,_1B3_Pin},					//PB6 	1B3
-	{NULL,&htim4,TIM_CHANNEL_3,1,5,_IT,_2B3_GPIO_Port,_2B3_Pin},					//PB8 	2B3
-	{NULL,&htim4,TIM_CHANNEL_4,2,5,_IT,_3B3_GPIO_Port,_3B3_Pin},					//PB9 	3B3
+	{NULL,&htim4,TIM_CHANNEL_1,0,5,_1B3_GPIO_Port,_1B3_Pin},					//PB6 	1B3
+	{NULL,&htim4,TIM_CHANNEL_3,1,5,_2B3_GPIO_Port,_2B3_Pin},					//PB8 	2B3
+	{NULL,&htim4,TIM_CHANNEL_4,2,5,_3B3_GPIO_Port,_3B3_Pin},					//PB9 	3B3
 
 	{0}
 };
@@ -74,7 +75,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		if(__HAL_TIM_GET_COUNTER(&htim9) % 1280 == 0)
 			_GREEN(20);
 
-		if((__HAL_TIM_GET_COUNTER(&htim9) == testRef) && testReq) {
+		if((__HAL_TIM_GET_COUNTER(&htim9) % 128 == testRef) && testReq) {
 			testReq=0;
 			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 
 //			uint32_t to=htim3.Instance->CNT+84*20;
@@ -131,7 +132,6 @@ void	Send(int id,  payload *buf, int len) {
 			_SETERR(ERR_CAN_TX);
 			return;
 		}
-//	_CLRERR(ERR_CAN_TX);
 	_DEBUG(DBG_CAN_TX,"\r%5d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
 	for(int i=0; i<tx.hdr.DLC; ++i)
 		_DEBUG(DBG_CAN_TX," %02X",tx.buf.bytes[i]);
@@ -228,7 +228,7 @@ void	*canTx(void *v) {
 		
 		for(tim *t=timStack; t->htim; ++t) {
 			t->dma=_buffer_init(128*sizeof(uint32_t));
-			if(t->tmode == _DMA)
+			if(t->htim->Instance && t->htim->hdma[((t->Channel)>>2)+1])
 				HAL_TIM_IC_Start_DMA(t->htim,t->Channel, (uint32_t *)t->dma->_buf, t->dma->size/sizeof(uint32_t));
 			else
 				HAL_TIM_IC_Start_IT(t->htim,t->Channel);
@@ -288,11 +288,11 @@ void	*canTx(void *v) {
 //----------------------------------------------------------------			
 					}	else {
 //----------------------------------------------------------------			
-						t->to=tcapt;																					// referenca za dt
+						t->to=tcapt;																								// referenca za dt
 						if(tcapt > 0x8000 && t->htim->Instance->CNT < 0x8000)
 							tcapt -= 0x10000;
-						t->tref=eval(tcapt + (__HAL_TIM_GET_COUNTER(&htim9)<<16));										// izracun glede na sinhronizacijo
-						if(t->ch==0 || t->ch==3)															// tref iz prioritete kanalov
+						t->tref=eval(tcapt + (__HAL_TIM_GET_COUNTER(&htim9)<<16));	// izracun glede na sinhronizacijo
+						if(t->ch==0 || t->ch==3)																		// tref iz prioritete kanalov
 							t->tref+=16;
 						if(t->ch==1 || t->ch==4)
 							t->tref+=32;
@@ -309,6 +309,7 @@ void	*canTx(void *v) {
 
 			if(t->timeout && HAL_GetTick() >= t->timeout) {
 				t->timeout=0;
+				_CLRERR(ERR_PIN+t->sect);
 				_DEBUG(DBG_CRC,"\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);
 				switch(t->crc) {
 					case _LEFT_FRONT:
@@ -425,8 +426,6 @@ void	*canRx(void *v) {
 		}
 		if(HAL_GetTick() > syncTimeout && idPos < _MAX_HEAD)
 			_SETERR(ERR_SYNC);
-//		else
-//			_CLRERR(ERR_SYNC);
 		
 		if(_buffer_pull(_CAN->rx,&rx,sizeof(CanRxMsg))) {
 			_DEBUG(DBG_CAN_RX,"\r%5d: < %03X",HAL_GetTick() % 10000,rx.hdr.StdId);
@@ -545,7 +544,4 @@ uint16_t 		ch=rx.buf.byte[0],
 	}
 	return canRx;
 }
-/*
-____-_-_-_-_-_______-_-________-_-_-_-_-_______________________-_-_-_-_-_______-_-________-_-_-_-_-___________________
-____|_|_|_|_|_______|_|________|_|_|_|_|_______________________|_|_|_|_|_______|_|________|_|_|_|_|___________________
-*/
+
