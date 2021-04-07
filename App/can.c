@@ -341,7 +341,7 @@ void	*canTx(void *v) {
 					break;
 			
 					case _REPEAT:
-						t->cnt=t->longcnt=0;
+						t->longcnt=32;
 					break;
 					
 					default: 												// signature
@@ -356,8 +356,10 @@ void	*canTx(void *v) {
 		}
 // isci prvega.... prekini, ce je katerikoli timeout se aktiven..		
 		for(t=timStack,first=NULL; t->htim; ++t) {
+// clear timeout & error, if forced flushing
 			if(flushTout && HAL_GetTick() > flushTout) {
-				t->timeout=0;
+				t->timeout=0;												
+				_CLRERR(ERR_PIN+t->sect);
 			}
 			if(t->timeout)
 				return canTx;

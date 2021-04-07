@@ -20,7 +20,7 @@ _ws ws[] =
 };
 
 uint32_t	DecodeTab[4096];
-uint32_t	pTimeout,pCount[__COLS][__NWS];
+uint32_t	pTimeout,crcTimeout,pCount[__COLS][__NWS];
 uint32_t	tref[__NWS/6],chLev;
 /*******************************************************************************
 * Function Name	: 
@@ -29,6 +29,10 @@ uint32_t	tref[__NWS/6],chLev;
 * Return				:
 *******************************************************************************/
 void			Decode(int sect,payload *p) {
+					if(crcTimeout && crcTimeout > HAL_GetTick())
+						return;
+					crcTimeout=0;
+					
 					if(p) {
 						if(!pTimeout)
 							pTimeout=HAL_GetTick()+20;
@@ -42,6 +46,7 @@ void			Decode(int sect,payload *p) {
 							}
 						
 					}	else {
+						crcTimeout=HAL_GetTick()+1000;
 						wsStream(sect*__NWS/4,0,__NWS/4-1);
 						for(int i=0; i<__NWS/4; ++i)
 							ws[0].timeout[sect*__NWS/4+i]=HAL_GetTick()+1000;
