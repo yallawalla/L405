@@ -16,3 +16,6 @@
 - TODO: izklop LED pri CAN tx,rx, vnesi funkcionalnost !!!
 - TODO: RAM drive brez veze ???
 - TODO: po remote konzoli ne grejo escape sekvence ???
+
+https://stackoverflow.com/questions/59251368/regression-from-rdp-level-1-to-0-on-stm32h7
+HAL_RCC_ClockConfig

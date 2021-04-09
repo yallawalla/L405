@@ -341,7 +341,7 @@ void	*canTx(void *v) {
 					break;
 			
 					case _REPEAT:
-						t->longcnt=32;
+						t->cnt=t->longcnt=0;
 					break;
 					
 					default: 												// signature

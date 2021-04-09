@@ -35,13 +35,13 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 _io		*InitITM(void),InitVCP(void);
 adc		pwr;
+uint16_t	fff[20000],*ff=fff;
 
 /* USER CODE END PD */
 
@@ -129,7 +129,7 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
-
+	memset(fff,1,sizeof(fff));
   /* Configure the system clock */
   SystemClock_Config();
 

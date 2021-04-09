@@ -653,6 +653,8 @@ char	*c;
 					break;				
 				
 				case __CtrlZ:																		// call watchdog reset
+					_print("reload...");
+					_wait(10);
 					while(1);				
 				
 				case __CtrlY:																		// call system reset
