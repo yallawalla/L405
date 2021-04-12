@@ -131,7 +131,8 @@ extern 		TIM_HandleTypeDef htim1,
 														htim3,
 														htim4,
 														htim5,
-														htim9;
+														htim9,
+														htim12;
 
 extern		_io								*_CAN,
 														*_VCP,

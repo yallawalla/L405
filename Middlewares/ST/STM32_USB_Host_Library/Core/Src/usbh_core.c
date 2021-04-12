@@ -475,7 +475,8 @@ USBH_StatusTypeDef  USBH_Process(USBH_HandleTypeDef *phost)
 
         /* Wait for 200 ms after connection */
         phost->gState = HOST_DEV_WAIT_FOR_ATTACHMENT;
-        USBH_Delay(200U);
+      
+				USBH_Delay(200U);
         USBH_LL_ResetPort(phost);
 
         /* Make sure to start with Default address */

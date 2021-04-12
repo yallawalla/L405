@@ -69,6 +69,11 @@ uint32_t	syncTimeout=3000;
 * Return				:
 *******************************************************************************/
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if(htim == &htim12 && testReq && idPos <= _MAX_HEAD-1) {
+		_buffer_push(timStack[testRef].dma,(void *)&timStack[testRef].htim->Instance->CNT,sizeof(uint32_t));
+		testReq = 0;
+	}
+	
 	if(htim == &htim3  && idPos > _MAX_HEAD-1) {
 		if(__HAL_TIM_GET_COUNTER(&htim9) % 128  == 0 && !iapInproc)
 			Send(_ID_SYNC_REQ,NULL,0);
@@ -83,6 +88,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			HAL_GPIO_TogglePin(TREF_GPIO_Port, TREF_Pin); 	
 		}
 	}		
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
+	if(htim == &htim12 && testReq && idPos <= _MAX_HEAD-1) {
+		_buffer_push(timStack[testRef].dma,(void *)&timStack[testRef].htim->Instance->CNT,sizeof(uint32_t));
+	}
 }
 /*******************************************************************************
 * Function Name	: 
@@ -130,7 +146,6 @@ void	Send(int id,  payload *buf, int len) {
 	if(HAL_CAN_AddTxMessage(&hcan2, &tx.hdr, (uint8_t *)&tx.buf, &mailbox) != HAL_OK)
 		if(_buffer_push(_CAN->tx,&tx,sizeof(CanTxMsg))!=sizeof(CanTxMsg)) {
 			_SETERR(ERR_CAN_TX);
-			return;
 		}
 	_DEBUG(DBG_CAN_TX,"\r%5d: > %03X",HAL_GetTick() % 10000,tx.hdr.StdId);
 	for(int i=0; i<tx.hdr.DLC; ++i)

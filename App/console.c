@@ -433,30 +433,11 @@ FRESULT fLog(int argc, char *argv[]) {
 }
 //-----------------------------------------------------
 FRESULT fTest(int argc, char *argv[]) {
-	_proc *p=_proc_find(testProc,NULL);
 	if(argv[1]) {
-		CanTxMsg	*m=malloc(sizeof(CanTxMsg));
-		m->hdr.StdId=_TEST_REQ;
-		m->hdr.DLC=1;
-		m->buf.hword[0]=atoi(argv[1]);				
-		if(argv[2]) {
-			if(p) {
-				p->dt=atoi(argv[2]);
-				memcpy(p->arg,m,sizeof(CanTxMsg));
-				free(m);
-			} else
-				_proc_add(testProc,m,"test",atoi(argv[2]));
-		} else {			
-			Send(m->hdr.StdId,&m->buf,m->hdr.DLC);
-			free(m);
-			if(p) {
-				p->f=NULL;
-				free(p->arg);
-			}
-		}
-	} else if(p) {
-		p->f=NULL;
-		free(p->arg);
+		testRef=atof(argv[1]);
+		testReq=1;
+		tim *t=&timStack[testRef];
+		t->htim->hdma[((t->Channel)>>2)+1]=NULL;
 	}
 	return FR_OK;		
 }
