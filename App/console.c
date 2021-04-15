@@ -676,23 +676,20 @@ uint32_t	dbg=debug;
 				{
 					#include	"bitmap.h"
 					void OledInit(void);
+					void *watch(void *);
 					extern I2C_HandleTypeDef hi2c1;
 					
 					if(!hi2c1.Instance) {
 						HAL_TIM_Base_MspDeInit(&htim4);
 						OledInit();
 						_wait(200);
+//						SSD1306_Init();
+//						_wait(200);
 					}
 					
 					SSD1306_DrawBitmap(0,0,logo, 128, 64, SSD1306_COLOR_WHITE);
 					SSD1306_UpdateScreen();
-					_wait(1000);
-					SSD1306_Clear();
-					SSD1306_GotoXY (0,0);
-					SSD1306_Puts ("HELLO", &Font_11x18, SSD1306_COLOR_WHITE);
-					SSD1306_GotoXY (10, 30);
-					SSD1306_Puts ("  WORLD :)", &Font_11x18, SSD1306_COLOR_WHITE);
-					SSD1306_UpdateScreen();
+					_proc_add(watch,NULL,"watch",60000);
 				}
 				break;	
 				
@@ -863,4 +860,19 @@ void	*selftest(void) {
 	if(error)	
 		_RED(200);
 	return selftest;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+****************************f***************************************************/
+void	*watch(void *v) {
+	char	t[16];
+	sprintf(t,"%02d:%02d",HAL_GetTick()/3600000,(HAL_GetTick()/60000)%60);
+	SSD1306_Clear();
+	SSD1306_GotoXY (5,5);
+	SSD1306_Puts (t, &Font_16x26, SSD1306_COLOR_WHITE);
+	SSD1306_UpdateScreen();
+	return watch;
 }
