@@ -3,6 +3,7 @@
 #include	"io.h"
 #include	"can.h"
 #include	"ws.h"
+#include	"ssd1306.h"
 #include	"leds.h"
 #include	<stdlib.h>
 /*******************************************************************************
@@ -670,13 +671,40 @@ uint32_t	dbg=debug;
 				case __f4:
 				case __F4: Remote(3); break;
 
+				case __f8:
+				case __F8:
+				{
+					#include	"bitmap.h"
+					void OledInit(void);
+					extern I2C_HandleTypeDef hi2c1;
+					
+					if(!hi2c1.Instance) {
+						HAL_TIM_Base_MspDeInit(&htim4);
+						OledInit();
+						_wait(200);
+					}
+					
+					SSD1306_DrawBitmap(0,0,logo, 128, 64, SSD1306_COLOR_WHITE);
+					SSD1306_UpdateScreen();
+					_wait(1000);
+					SSD1306_Clear();
+					SSD1306_GotoXY (0,0);
+					SSD1306_Puts ("HELLO", &Font_11x18, SSD1306_COLOR_WHITE);
+					SSD1306_GotoXY (10, 30);
+					SSD1306_Puts ("  WORLD :)", &Font_11x18, SSD1306_COLOR_WHITE);
+					SSD1306_UpdateScreen();
+				}
+				break;	
+				
 				case __f9:
 				case __F9:
+					Watchdog_init(4000);
 					MX_USB_HOST_DeInit();
 					HAL_USBD_Setup();
 					UsbDevice_Init();
 				break;
 				
+
 				case __f10:
 				case __F10:
 					UsbDevice_DeInit();

@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_HAL_DRIVER,STM32F405xx</Define>
+              <Define>USE_HAL_DRIVER,STM32F405xx, HAL_I2C_MODULE_ENABLED</Define>
               <Undefine></Undefine>
               <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\App;../Middlewares/Third_Party/FatFs/src;../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc</IncludePath>
             </VariousControls>
@@ -639,54 +639,6 @@
           <GroupName>libs</GroupName>
           <Files>
             <File>
-              <FileName>msc.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\msc\MDK-ARM\msc\msc.lib</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds/>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>vcp.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\vcp\MDK-ARM\vcp\vcp.lib</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds/>
-              </FileOption>
-            </File>
-            <File>
               <FileName>USBDevice.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\USBDevice\mdk\MDK-ARM\object\USBDevice.lib</FilePath>
@@ -745,6 +697,31 @@
               <FileName>misc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\misc.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ssd</GroupName>
+          <Files>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\ssd1306.c</FilePath>
+            </File>
+            <File>
+              <FileName>fonts.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\fonts.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1386,16 +1363,6 @@
           <GroupName>libs</GroupName>
           <Files>
             <File>
-              <FileName>msc.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\msc\MDK-ARM\msc\msc.lib</FilePath>
-            </File>
-            <File>
-              <FileName>vcp.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\vcp\MDK-ARM\vcp\vcp.lib</FilePath>
-            </File>
-            <File>
               <FileName>USBDevice.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\USBDevice\mdk\MDK-ARM\object\USBDevice.lib</FilePath>
@@ -1454,6 +1421,31 @@
               <FileName>misc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\misc.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ssd</GroupName>
+          <Files>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\ssd1306.c</FilePath>
+            </File>
+            <File>
+              <FileName>fonts.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\fonts.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2095,16 +2087,6 @@
           <GroupName>libs</GroupName>
           <Files>
             <File>
-              <FileName>msc.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\msc\MDK-ARM\msc\msc.lib</FilePath>
-            </File>
-            <File>
-              <FileName>vcp.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\vcp\MDK-ARM\vcp\vcp.lib</FilePath>
-            </File>
-            <File>
               <FileName>USBDevice.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\USBDevice\mdk\MDK-ARM\object\USBDevice.lib</FilePath>
@@ -2163,6 +2145,31 @@
               <FileName>misc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\misc.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ssd</GroupName>
+          <Files>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\ssd1306.c</FilePath>
+            </File>
+            <File>
+              <FileName>fonts.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\fonts.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -19,3 +19,6 @@
 
 https://stackoverflow.com/questions/59251368/regression-from-rdp-level-1-to-0-on-stm32h7
 HAL_RCC_ClockConfig
+
+- za ssd display dodani moduli v ssd group, <_msp.c> in <_it>, tag #8d63d#
+- direktiva HAL_I2C_MODULE_ENABLED v top L405 define
