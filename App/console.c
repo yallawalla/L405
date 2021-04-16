@@ -689,7 +689,9 @@ uint32_t	dbg=debug;
 					
 					SSD1306_DrawBitmap(0,0,logo, 128, 64, SSD1306_COLOR_WHITE);
 					SSD1306_UpdateScreen();
-					_proc_add(watch,NULL,"watch",60000);
+					_wait(1000);
+					SSD1306_Clear();
+					_proc_add(watch,NULL,"watch",1000);
 				}
 				break;	
 				
@@ -869,9 +871,10 @@ void	*selftest(void) {
 ****************************f***************************************************/
 void	*watch(void *v) {
 	char	t[16];
-	sprintf(t,"%02d:%02d",HAL_GetTick()/3600000,(HAL_GetTick()/60000)%60);
-	SSD1306_Clear();
-	SSD1306_GotoXY (5,5);
+	sprintf(t,"%02d:%02d:%02d",HAL_GetTick()/3600000,(HAL_GetTick()/60000)%60,(HAL_GetTick()/1000)%60);
+//	SSD1306_Clear();
+	SSD1306_DrawRectangle(0,0,127,31,SSD1306_COLOR_WHITE);
+	SSD1306_GotoXY (0,0);
 	SSD1306_Puts (t, &Font_16x26, SSD1306_COLOR_WHITE);
 	SSD1306_UpdateScreen();
 	return watch;

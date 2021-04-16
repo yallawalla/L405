@@ -296,8 +296,8 @@ char SSD1306_Putc(char ch, FontDef_t* Font, SSD1306_COLOR_t color) {
 	
 	/* Check available space in LCD */
 	if (
-		SSD1306_WIDTH <= (SSD1306.CurrentX + Font->FontWidth) ||
-		SSD1306_HEIGHT <= (SSD1306.CurrentY + Font->FontHeight)
+		SSD1306_WIDTH < (SSD1306.CurrentX + Font->FontWidth) ||
+		SSD1306_HEIGHT < (SSD1306.CurrentY + Font->FontHeight)
 	) {
 		/* Error */
 		return 0;
