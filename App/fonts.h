@@ -53,7 +53,7 @@ extern C {
 typedef struct {
 	uint8_t FontWidth;    /*!< Font width in pixels */
 	uint8_t FontHeight;   /*!< Font height in pixels */
-	const uint16_t *data; /*!< Pointer to data font data array */
+	const uint32_t *data; /*!< Pointer to data font data array */
 } FontDef_t;
 
 /** 
@@ -88,6 +88,10 @@ extern FontDef_t Font_11x18;
  * @brief  16 x 26 pixels font size structure 
  */
 extern FontDef_t Font_16x26;
+/**
+ * @brief  16 x 26 pixels font size structure 
+ */
+extern FontDef_t Font_32x64;
 
 /**
  * @}

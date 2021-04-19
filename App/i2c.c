@@ -65,22 +65,8 @@ static void MX_GPIO_Init(void)
 * Output				:
 * Return				:
 *******************************************************************************/
-void	OledInit() {
+void	i2cInit() {
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_I2C1_Init();
 }
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-uint32_t OledStart() {
-	SSD1306_GotoXY (0,0);
-	SSD1306_Puts ("HELLO", &Font_11x18, SSD1306_COLOR_WHITE);
-	SSD1306_GotoXY (10, 30);
-	SSD1306_Puts ("  WORLD :)", &Font_11x18, SSD1306_COLOR_WHITE);
-	SSD1306_UpdateScreen(); //display
-}
-
