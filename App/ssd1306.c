@@ -21,6 +21,7 @@
    ----------------------------------------------------------------------
  */
 #include "ssd1306.h"
+#include "console.h"
 
 __weak	void _wait(uint32_t t) {}
 
@@ -307,7 +308,7 @@ char SSD1306_Putc(char ch, FontDef_t* Font, SSD1306_COLOR_t color) {
 	for (i = 0; i < Font->FontHeight; i++) {
 		b = Font->data[(ch - 32) * Font->FontHeight + i];
 		for (j = 0; j < Font->FontWidth; j++) {
-			if (b & (1<<(Font->FontWidth-j-1))) {
+			if ((b << j) & 0x80000000) {
 				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t) color);
 			} else {
 				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t)!color);

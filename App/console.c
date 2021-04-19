@@ -683,15 +683,15 @@ uint32_t	dbg=debug;
 						HAL_TIM_Base_MspDeInit(&htim4);
 						i2cInit();
 						_wait(200);
-//						SSD1306_Init();
-//						_wait(200);
+						SSD1306_Init();
+						_wait(200);
 					}
 					
 					SSD1306_DrawBitmap(0,0,logo, 128, 64, SSD1306_COLOR_WHITE);
 					SSD1306_UpdateScreen();
-					_wait(1000);
+					_wait(3000);
 					SSD1306_Clear();
-					_proc_add(watch,NULL,"watch",1000);
+//					_proc_add(watch,NULL,"watch",1000);
 				}
 				break;	
 				

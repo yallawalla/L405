@@ -1,6 +1,6 @@
 #include	"ws.h"
 #include	"console.h"
-
+#include	"ssd1306.h"
 #define		SW_version			100
 
 __ALIGN_BEGIN 
@@ -60,9 +60,28 @@ void			Decode(int sect,payload *p) {
 *******************************************************************************/
 void			wsStream(int32_t npos, int32_t colour, int32_t n) {
 RGB				rgb={0,0,0};
-uint32_t	*p = &wsdma[(npos+8+4)*24];
+//uint32_t	*p = &wsdma[(npos+8+4)*24];
+uint32_t	*p = &wsdma[(npos+4)*24];
 					if(colour >= 0)
 						HSV2RGB(ws[colour].colour, &rgb);
+					if(n==1) {
+						char c[8];
+						sprintf(c,"%3d",(npos*360)/24);
+						SSD1306_GotoXY (0,0);
+						SSD1306_Puts (c, &Font_32x64, SSD1306_COLOR_WHITE);
+						SSD1306_GotoXY (105,0);
+						SSD1306_Puts ("O", &Font_11x18, SSD1306_COLOR_WHITE);
+						SSD1306_GotoXY (0,45);
+						if(colour==0)
+							SSD1306_Puts ("LR      ", &Font_11x18, SSD1306_COLOR_WHITE);
+						else if(colour==1)
+							SSD1306_Puts ("   LI   ", &Font_11x18, SSD1306_COLOR_WHITE);
+						else if(colour==2)
+							SSD1306_Puts ("      BR", &Font_11x18, SSD1306_COLOR_WHITE);
+//						else
+//							SSD1306_Puts (" ---    ", &Font_11x18, SSD1306_COLOR_WHITE);
+						SSD1306_UpdateScreen();
+					}
 // krog					
 					for(int i=0; i<n; ++i) {
 						for(int k=0; k<8; ++k)
@@ -73,18 +92,18 @@ uint32_t	*p = &wsdma[(npos+8+4)*24];
 							(rgb.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 					}
 // indikatorji			
-					if(n==1) {
-						int i=colour;
-						if(i<0)
-							i=-i-1;
-						p = &wsdma[(8+i-2)*24];
-						for(int k=0; k<8; ++k)
-							(rgb.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
-						for(int k=0; k<8; ++k)
-							(rgb.r & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
-						for(int k=0; k<8; ++k)
-							(rgb.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
-					}
+//					if(n==1) {
+//						int i=colour;
+//						if(i<0)
+//							i=-i-1;
+//						p = &wsdma[(8+i-2)*24];
+//						for(int k=0; k<8; ++k)
+//							(rgb.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+//						for(int k=0; k<8; ++k)
+//							(rgb.r & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+//						for(int k=0; k<8; ++k)
+//							(rgb.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+//					}
 					
 					
 					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,wsdma,sizeof(wsdma)/sizeof(uint32_t));
