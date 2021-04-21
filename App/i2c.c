@@ -1,13 +1,14 @@
 #include "stm32f4xx_hal.h"
 #include "fonts.h"
 #include "ssd1306.h"
+#include "proc.h"
+#include "console.h"
 
 I2C_HandleTypeDef hi2c1;
 DMA_HandleTypeDef hdma_i2c1_tx;
+_buffer *i2cBuf;
 
 void Error_Handler(void);
-
-
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -69,4 +70,38 @@ void	i2cInit() {
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_I2C1_Init();
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+****************************f***************************************************/
+
+void	*i2cProc(void *v) {
+	if(v) {
+		if(hi2c1.State == HAL_I2C_STATE_READY) {
+			static uint8_t buf[130];
+			if(_buffer_pull(v,buf,1)) {
+				switch(*buf) {
+					case 0x00:
+						while(!_buffer_pull(v,buf+1,1)) 
+							_wait(1);
+						HAL_I2C_Master_Transmit_DMA(&hi2c1, SSD1306_I2C_ADDR, buf, 2 );
+						break;
+					case 0x40:
+						while(_buffer_count(v) < sizeof(void *)) 
+							_wait(1);
+						_buffer_pull(v,buf+1,sizeof(void *));
+						memcpy(buf+1,*(const void **)&buf[1],128);
+						HAL_I2C_Master_Transmit_DMA(&hi2c1, SSD1306_I2C_ADDR, buf, 129 );
+						break;
+				}
+			}
+		}		
+	} else {
+		i2cBuf=_buffer_init(1024);
+		_proc_add(i2cProc,i2cBuf,"i2c",0);
+	}
+	return i2cProc;
 }

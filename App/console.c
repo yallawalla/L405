@@ -676,13 +676,14 @@ uint32_t	dbg=debug;
 				{
 					#include	"bitmap.h"
 					void i2cInit(void);
-					void *watch(void *);
+					void	*i2cProc(void *);
 					extern I2C_HandleTypeDef hi2c1;
 					
 					if(!hi2c1.Instance) {
 						HAL_TIM_Base_MspDeInit(&htim4);
 						i2cInit();
 						_wait(200);
+						i2cProc(NULL);
 						SSD1306_Init();
 						_wait(200);
 					}
@@ -691,7 +692,6 @@ uint32_t	dbg=debug;
 					SSD1306_UpdateScreen();
 					_wait(3000);
 					SSD1306_Clear();
-//					_proc_add(watch,NULL,"watch",1000);
 				}
 				break;	
 				
@@ -862,24 +862,4 @@ void	*selftest(void) {
 	if(error)	
 		_RED(200);
 	return selftest;
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-****************************f***************************************************/
-void	*watch(void *v) {
-	char	t[16];
-//	sprintf(t,"%02d:%02d:%02d",HAL_GetTick()/3600000,(HAL_GetTick()/60000)%60,(HAL_GetTick()/1000)%60);
-	sprintf(t,"%d:%02d",(HAL_GetTick()/60000)%10,(HAL_GetTick()/1000)%60);
-//	SSD1306_Clear();
-	SSD1306_GotoXY (0,0);
-	SSD1306_Puts (t, &Font_32x64, SSD1306_COLOR_WHITE);
-	SSD1306_DrawRectangle(0,0,31,63,SSD1306_COLOR_WHITE);
-	SSD1306_DrawRectangle(32,0,31,63,SSD1306_COLOR_WHITE);
-	SSD1306_DrawRectangle(64,0,31,63,SSD1306_COLOR_WHITE);
-	SSD1306_DrawRectangle(96,0,31,63,SSD1306_COLOR_WHITE);
-	SSD1306_UpdateScreen();
-	return watch;
 }

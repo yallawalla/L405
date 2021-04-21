@@ -26,10 +26,20 @@
 __weak	void _wait(uint32_t t) {}
 
 	extern I2C_HandleTypeDef hi2c1;
+	extern _buffer *i2cBuf;
+	
 /* Write command */
-#define SSD1306_WRITECOMMAND(command)      ssd1306_I2C_Write(SSD1306_I2C_ADDR, 0x00, (command))
-/* Write data */
-#define SSD1306_WRITEDATA(data)            ssd1306_I2C_Write(SSD1306_I2C_ADDR, 0x40, (data))
+void SSD1306_WRITECOMMAND(uint8_t cmd) {	
+	uint8_t type=0x00;
+	_buffer_push(i2cBuf,&type,sizeof(uint8_t));
+	_buffer_push(i2cBuf,&cmd,sizeof(uint8_t));
+}
+void SSD1306_WRITEDATA(uint8_t *data) {	
+	uint8_t type=0x40;
+	_buffer_push(i2cBuf,&type,sizeof(uint8_t));
+	_buffer_push(i2cBuf,&data,sizeof(uint8_t *));
+}
+
 /* Absolute value */
 #define ABS(x)   ((x) > 0 ? (x) : -(x))
 
@@ -240,10 +250,7 @@ void SSD1306_UpdateScreen(void) {
 		SSD1306_WRITECOMMAND(0xB0 + m);
 		SSD1306_WRITECOMMAND(0x00);
 		SSD1306_WRITECOMMAND(0x10);
-		
-		/* Write multi data */
-		ssd1306_I2C_WriteMulti(SSD1306_I2C_ADDR, 0x40, &SSD1306_Buffer[SSD1306_WIDTH * m], SSD1306_WIDTH);
-		_wait(2);
+		SSD1306_WRITEDATA(&SSD1306_Buffer[SSD1306_WIDTH * m]);
 	}
 }
 
@@ -606,12 +613,10 @@ void SSD1306_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, SSD1306_COLOR_t
     }
 }
  
-
-
 void SSD1306_Clear (void)
 {
 	SSD1306_Fill (SSD1306_COLOR_BLACK);
-    SSD1306_UpdateScreen();
+  SSD1306_UpdateScreen();
 }
 void SSD1306_ON(void) {
 	SSD1306_WRITECOMMAND(0x8D);  
@@ -622,44 +627,4 @@ void SSD1306_OFF(void) {
 	SSD1306_WRITECOMMAND(0x8D);  
 	SSD1306_WRITECOMMAND(0x10);
 	SSD1306_WRITECOMMAND(0xAE);  
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  _____ ___   _____ 
-// |_   _|__ \ / ____|
-//   | |    ) | |     
-//   | |   / /| |     
-//  _| |_ / /_| |____ 
-// |_____|____|\_____|
-//
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ssd1306_I2C_Init() {
-	//MX_I2C1_Init();
-	uint32_t p = 250000;
-	while(p>0)
-		p--;
-	//HAL_I2C_DeInit(&hi2c1);
-	//p = 250000;
-	//while(p>0)
-	//	p--;
-	//MX_I2C1_Init();
-}
-	
-void ssd1306_I2C_WriteMulti(uint8_t address, uint8_t reg, uint8_t* data, uint16_t count) {
-	uint8_t dt[256];
-	dt[0] = reg;
-	uint8_t i;
-	for(i = 0; i < count; i++)
-		dt[i+1] = data[i];
-	HAL_I2C_Master_Transmit(&hi2c1, address, dt, count+1, 10);
-}
-
-
-void ssd1306_I2C_Write(uint8_t address, uint8_t reg, uint8_t data) {
-	uint8_t dt[2];
-	dt[0] = reg;
-	dt[1] = data;
-	while(HAL_I2C_Master_Transmit(&hi2c1, address, dt, 2, 10) != HAL_OK)
-		_wait(2);
 }
