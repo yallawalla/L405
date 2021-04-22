@@ -64,24 +64,6 @@ RGB				rgb={0,0,0};
 uint32_t	*p = &wsdma[(npos+4)*24];
 					if(colour >= 0)
 						HSV2RGB(ws[colour].colour, &rgb);
-					if(n==1) {
-						char c[8];
-						sprintf(c,"%3d",(npos*360)/24);
-						SSD1306_GotoXY (0,0);
-						SSD1306_Puts (c, &Font_32x64, SSD1306_COLOR_WHITE);
-						SSD1306_GotoXY (105,0);
-						SSD1306_Puts ("O", &Font_11x18, SSD1306_COLOR_WHITE);
-						SSD1306_GotoXY (0,45);
-						if(colour==0)
-							SSD1306_Puts ("LR      ", &Font_11x18, SSD1306_COLOR_WHITE);
-						else if(colour==1)
-							SSD1306_Puts ("   LI   ", &Font_11x18, SSD1306_COLOR_WHITE);
-						else if(colour==2)
-							SSD1306_Puts ("      BR", &Font_11x18, SSD1306_COLOR_WHITE);
-//						else
-//							SSD1306_Puts (" ---    ", &Font_11x18, SSD1306_COLOR_WHITE);
-						SSD1306_UpdateScreen();
-					}
 // krog					
 					for(int i=0; i<n; ++i) {
 						for(int k=0; k<8; ++k)
@@ -174,8 +156,10 @@ uint32_t		t=0;
 // dekodiranje bit12>>bit24						
 						for(int i=0; i<__COLS; ++i) {
 							for(int j=0; j < __NWS; ++j)
-								if(DecodeTab[ws[i].bit12] & (1 << j))
+								if(DecodeTab[ws[i].bit12] & (1 << j)) {
 									ws[i].timeout[j]=HAL_GetTick()+500;
+									ssdPrint(i,j);
+								}
 							ws[i].bit24 |= DecodeTab[ws[i].bit12];
 							ws[i].bit12=0;
 						}
@@ -184,8 +168,9 @@ uint32_t		t=0;
 					for(int i=0,j; i < __NWS; ++i) {
 						for(j=0; j < __COLS; ++j) {
 							if((ws[j].bit24 & (1 << i)) && pCount[j][i] < 5) {
-								if(!pCount[j][i]++)
+								if(!pCount[j][i]++) {
 									wsStream(i,j,1);
+								}
 								break;
 							}
 						}
@@ -323,5 +308,28 @@ void	HSV2RGB(HSV HSV, RGB *RGB){
  break;
  }
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+void	ssdPrint(uint32_t col, uint32_t pos) {
+	char c[8];
+	sprintf(c,"%3d",((pos*360)/24+15)%360);
+	SSD1306_GotoXY (0,0);
+	SSD1306_Puts (c, &Font_32x64, SSD1306_COLOR_WHITE);
+	SSD1306_GotoXY (105,0);
+	SSD1306_Puts ("O", &Font_11x18, SSD1306_COLOR_WHITE);
+	SSD1306_GotoXY (0,45);
+	if(col==0)
+		SSD1306_Puts ("LR      ", &Font_11x18, SSD1306_COLOR_WHITE);
+	else if(col==1)
+		SSD1306_Puts ("   LI   ", &Font_11x18, SSD1306_COLOR_WHITE);
+	else if(col==2)
+		SSD1306_Puts ("      BR", &Font_11x18, SSD1306_COLOR_WHITE);
+//		else
+//			SSD1306_Puts (" ---    ", &Font_11x18, SSD1306_COLOR_WHITE);
+	SSD1306_UpdateScreen();
 
-
+}

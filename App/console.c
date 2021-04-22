@@ -501,6 +501,27 @@ FRESULT	err=FR_OK;
 	}
 	return err;
 }
+//-----------------------------------------------------
+void	*watch(void *v) {
+	static uint32_t	offset=0;
+	char	t[16];
+	if(v) {
+		if(!offset) {
+			_proc_add(watch,NULL,"watch",1000);
+			SSD1306_Fill(SSD1306_COLOR_BLACK);
+		}
+		offset=(uint32_t)v;
+	}
+	sprintf(t,"%2d:%02d:%02d",((HAL_GetTick()-offset)/1000/3600)%24,((HAL_GetTick()-offset)/1000/60)%60,((HAL_GetTick()-offset)/1000)%60);
+	SSD1306_GotoXY (0,0);
+	SSD1306_Puts (t, &Font_16x26, SSD1306_COLOR_WHITE);
+	return watch;
+}
+//-----------------------------------------------------
+FRESULT fWatch(int argc, char *argv[]) {
+	watch((void *)HAL_GetTick());
+	return FR_OK;		
+}
 /*******************************************************************************
 * Function Name	:
 * Description		:
@@ -526,6 +547,7 @@ struct cmd {
 	{"iap",				fIap},
 	{"format",		fFormat},
 	{"erase",			fErase},
+	{"watch",			fWatch},
 	{"pack",			fPack}
 };
 /*******************************************************************************
@@ -670,30 +692,6 @@ uint32_t	dbg=debug;
 				case __F3: Remote(2); break;
 				case __f4:
 				case __F4: Remote(3); break;
-
-				case __f8:
-				case __F8:
-				{
-					#include	"bitmap.h"
-					void i2cInit(void);
-					void	*i2cProc(void *);
-					extern I2C_HandleTypeDef hi2c1;
-					
-					if(!hi2c1.Instance) {
-						HAL_TIM_Base_MspDeInit(&htim4);
-						i2cInit();
-						_wait(200);
-						i2cProc(NULL);
-						SSD1306_Init();
-						_wait(200);
-					}
-					
-					SSD1306_DrawBitmap(0,0,logo, 128, 64, SSD1306_COLOR_WHITE);
-					SSD1306_UpdateScreen();
-					_wait(3000);
-					SSD1306_Clear();
-				}
-				break;	
 				
 				case __f9:
 				case __F9:

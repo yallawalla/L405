@@ -22,40 +22,18 @@
  */
 #include "ssd1306.h"
 #include "console.h"
-
-__weak	void _wait(uint32_t t) {}
-
-	extern I2C_HandleTypeDef hi2c1;
-	extern _buffer *i2cBuf;
 	
 /* Write command */
 void SSD1306_WRITECOMMAND(uint8_t cmd) {	
-	uint8_t type=0x00;
-	_buffer_push(i2cBuf,&type,sizeof(uint8_t));
-	_buffer_push(i2cBuf,&cmd,sizeof(uint8_t));
 }
 void SSD1306_WRITEDATA(uint8_t *data) {	
-	uint8_t type=0x40;
-	_buffer_push(i2cBuf,&type,sizeof(uint8_t));
-	_buffer_push(i2cBuf,&data,sizeof(uint8_t *));
 }
 
 /* Absolute value */
 #define ABS(x)   ((x) > 0 ? (x) : -(x))
 
-/* SSD1306 data buffer */
-static uint8_t SSD1306_Buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
-
-/* Private SSD1306 structure */
-typedef struct {
-	uint16_t CurrentX;
-	uint16_t CurrentY;
-	uint8_t Inverted;
-	uint8_t Initialized;
-} SSD1306_t;
-
 /* Private variable */
-static SSD1306_t SSD1306;
+SSD1306_t SSD1306;
 
 
 #define SSD1306_RIGHT_HORIZONTAL_SCROLL              0x26
@@ -250,7 +228,7 @@ void SSD1306_UpdateScreen(void) {
 		SSD1306_WRITECOMMAND(0xB0 + m);
 		SSD1306_WRITECOMMAND(0x00);
 		SSD1306_WRITECOMMAND(0x10);
-		SSD1306_WRITEDATA(&SSD1306_Buffer[SSD1306_WIDTH * m]);
+		SSD1306_WRITEDATA(&SSD1306.Buffer[SSD1306_WIDTH * m]);
 	}
 }
 
@@ -261,14 +239,14 @@ void SSD1306_ToggleInvert(void) {
 	SSD1306.Inverted = !SSD1306.Inverted;
 	
 	/* Do memory toggle */
-	for (i = 0; i < sizeof(SSD1306_Buffer); i++) {
-		SSD1306_Buffer[i] = ~SSD1306_Buffer[i];
+	for (i = 0; i < sizeof(SSD1306.Buffer); i++) {
+		SSD1306.Buffer[i] = ~SSD1306.Buffer[i];
 	}
 }
 
 void SSD1306_Fill(SSD1306_COLOR_t color) {
 	/* Set memory */
-	memset(SSD1306_Buffer, (color == SSD1306_COLOR_BLACK) ? 0x00 : 0xFF, sizeof(SSD1306_Buffer));
+	memset(SSD1306.Buffer, (color == SSD1306_COLOR_BLACK) ? 0x00 : 0xFF, sizeof(SSD1306.Buffer));
 }
 
 void SSD1306_DrawPixel(uint16_t x, uint16_t y, SSD1306_COLOR_t color) {
@@ -287,9 +265,9 @@ void SSD1306_DrawPixel(uint16_t x, uint16_t y, SSD1306_COLOR_t color) {
 	
 	/* Set color */
 	if (color == SSD1306_COLOR_WHITE) {
-		SSD1306_Buffer[x + (y / 8) * SSD1306_WIDTH] |= 1 << (y % 8);
+		SSD1306.Buffer[x + (y / 8) * SSD1306_WIDTH] |= 1 << (y % 8);
 	} else {
-		SSD1306_Buffer[x + (y / 8) * SSD1306_WIDTH] &= ~(1 << (y % 8));
+		SSD1306.Buffer[x + (y / 8) * SSD1306_WIDTH] &= ~(1 << (y % 8));
 	}
 }
 

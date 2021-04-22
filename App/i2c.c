@@ -3,10 +3,10 @@
 #include "ssd1306.h"
 #include "proc.h"
 #include "console.h"
+#include	"bitmap.h"
 
 I2C_HandleTypeDef hi2c1;
 DMA_HandleTypeDef hdma_i2c1_tx;
-_buffer *i2cBuf;
 
 void Error_Handler(void);
 /*******************************************************************************
@@ -66,42 +66,23 @@ static void MX_GPIO_Init(void)
 * Output				:
 * Return				:
 *******************************************************************************/
+extern uint8_t SSD1306_Buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
+uint8_t cmdbuf[]={0x00,0xAE,0x20,0x10,0xB0,0xC8,0x00,0x10,0x40,
+									0x81,0xFF,0xA1,0xA6,0xA8,0x3F,0xA4,0xD3,
+									0x00,0xD5,0xF0,0xD9,0x22,0xDA,0x12,0xDB,
+									0x20,0x8D,0x14,0xAF,
+									0xB0,0x00,0x10};					
+void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
+	SSD1306.prefix=0x40;
+	HAL_I2C_Master_Transmit_DMA(&hi2c1,SSD1306_I2C_ADDR,&SSD1306.prefix,SSD1306_WIDTH * SSD1306_HEIGHT / 8 + 1);
+}
 void	i2cInit() {
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_I2C1_Init();
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-****************************f***************************************************/
-
-void	*i2cProc(void *v) {
-	if(v) {
-		if(hi2c1.State == HAL_I2C_STATE_READY) {
-			static uint8_t buf[130];
-			if(_buffer_pull(v,buf,1)) {
-				switch(*buf) {
-					case 0x00:
-						while(!_buffer_pull(v,buf+1,1)) 
-							_wait(1);
-						HAL_I2C_Master_Transmit_DMA(&hi2c1, SSD1306_I2C_ADDR, buf, 2 );
-						break;
-					case 0x40:
-						while(_buffer_count(v) < sizeof(void *)) 
-							_wait(1);
-						_buffer_pull(v,buf+1,sizeof(void *));
-						memcpy(buf+1,*(const void **)&buf[1],128);
-						HAL_I2C_Master_Transmit_DMA(&hi2c1, SSD1306_I2C_ADDR, buf, 129 );
-						break;
-				}
-			}
-		}		
-	} else {
-		i2cBuf=_buffer_init(1024);
-		_proc_add(i2cProc,i2cBuf,"i2c",0);
-	}
-	return i2cProc;
+	SSD1306_DrawBitmap(0,0,logo, 128, 64, SSD1306_COLOR_WHITE);
+	
+	HAL_I2C_Master_Transmit_DMA(&hi2c1,SSD1306_I2C_ADDR,cmdbuf,sizeof(cmdbuf));
+	_wait(1000);
+	SSD1306_Fill(SSD1306_COLOR_BLACK);
 }

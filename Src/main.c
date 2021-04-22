@@ -40,9 +40,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 _io		*InitITM(void),InitVCP(void);
+void	 i2cInit(void);
+extern I2C_HandleTypeDef hi2c1;
 adc		pwr;
-uint16_t	fff[20000],*ff=fff;
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -210,7 +210,12 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 				Parse(__f9);
 			else
 				Parse(__f10);
-		}	
+		}
+		
+		if(!hi2c1.Instance && idPos > _MAX_HEAD-1 && HAL_GetTick() > 1000) {
+			HAL_TIM_Base_MspDeInit(&htim4);
+			i2cInit();
+		}
 	}
   /* USER CODE END 3 */
 }
