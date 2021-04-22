@@ -502,12 +502,12 @@ FRESULT	err=FR_OK;
 	return err;
 }
 //-----------------------------------------------------
-void	*watch(void *v) {
+void	*watch1(void *v) {
 	static uint32_t	offset=0;
 	char	t[16];
 	if(v) {
 		if(!offset) {
-			_proc_add(watch,NULL,"watch",1000);
+			_proc_add(watch1,NULL,"watch",1000);
 			SSD1306_Fill(SSD1306_COLOR_BLACK);
 		}
 		offset=(uint32_t)v;
@@ -515,6 +515,43 @@ void	*watch(void *v) {
 	sprintf(t,"%2d:%02d:%02d",((HAL_GetTick()-offset)/1000/3600)%24,((HAL_GetTick()-offset)/1000/60)%60,((HAL_GetTick()-offset)/1000)%60);
 	SSD1306_GotoXY (0,0);
 	SSD1306_Puts (t, &Font_16x26, SSD1306_COLOR_WHITE);
+	return watch1;
+}
+//-----------------------------------------------------
+float rx(float x,float y,float fi) {
+	return x*cos(fi)+y*sin(fi)+0.5;
+}
+float ry(float x,float y,float fi) {
+	return y*cos(fi)-x*sin(fi)+0.5;
+}
+//-----------------------------------------------------
+void	*watch(void *v) {
+	#define THICK	7
+	#include	<math.h>
+	char	c[16];
+	static uint32_t	offset=0;
+	if(v) {
+		if(!offset) {
+			_proc_add(watch,NULL,"watch",1000);
+			SSD1306_Fill(SSD1306_COLOR_BLACK);
+		}
+		offset=(uint32_t)v;
+	}
+	SSD1306_Fill(SSD1306_COLOR_BLACK);
+	sprintf(c,"%2d:%02d:%02d",((HAL_GetTick()-offset)/1000/3600)%24,((HAL_GetTick()-offset)/1000/60)%60,((HAL_GetTick()-offset)/1000)%60);
+	SSD1306_GotoXY (0,0);
+	SSD1306_Puts (c, &Font_7x10, SSD1306_COLOR_WHITE);
+	SSD1306_DrawCircle(96,32,31 ,SSD1306_COLOR_WHITE);
+	float pi=3.14159265359f;
+	float fi=(HAL_GetTick()-offset)/1000.0f/30.0f*pi;
+	float Cos=cos(fi),Sin=sin(fi);
+	SSD1306_DrawLine(rx(0,0,fi)+96,32-ry(0,0,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
+	fi /= 60.0f;
+	for(int8_t i=-THICK/2; i<=THICK/2; ++i)
+		SSD1306_DrawLine(rx(i,0,fi)+96,32-ry(i,0,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
+	fi /= 60.0f;
+	for(int8_t i=-THICK/2; i<=THICK/2; ++i)
+		SSD1306_DrawLine(rx(i,0,fi)+96,32-ry(i,0,fi), rx(0,15,fi)+96, 31-ry(0,15,fi) ,SSD1306_COLOR_WHITE);
 	return watch;
 }
 //-----------------------------------------------------
