@@ -526,7 +526,7 @@ float ry(float x,float y,float fi) {
 }
 //-----------------------------------------------------
 void	*watch(void *v) {
-	#define THICK	7
+	#define THICK	3
 	#include	<math.h>
 	char	c[16];
 	static uint32_t	offset=0;
@@ -541,22 +541,28 @@ void	*watch(void *v) {
 	sprintf(c,"%2d:%02d:%02d",((HAL_GetTick()-offset)/1000/3600)%24,((HAL_GetTick()-offset)/1000/60)%60,((HAL_GetTick()-offset)/1000)%60);
 	SSD1306_GotoXY (0,0);
 	SSD1306_Puts (c, &Font_7x10, SSD1306_COLOR_WHITE);
-	SSD1306_DrawCircle(96,32,31 ,SSD1306_COLOR_WHITE);
+	
 	float pi=3.14159265359f;
 	float fi=(HAL_GetTick()-offset)/1000.0f/30.0f*pi;
 	float Cos=cos(fi),Sin=sin(fi);
-	SSD1306_DrawLine(rx(0,0,fi)+96,32-ry(0,0,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
-	fi /= 60.0f;
-	for(int8_t i=-THICK/2; i<=THICK/2; ++i)
-		SSD1306_DrawLine(rx(i,0,fi)+96,32-ry(i,0,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
-	fi /= 60.0f;
-	for(int8_t i=-THICK/2; i<=THICK/2; ++i)
-		SSD1306_DrawLine(rx(i,0,fi)+96,32-ry(i,0,fi), rx(0,15,fi)+96, 31-ry(0,15,fi) ,SSD1306_COLOR_WHITE);
+	SSD1306_DrawRectangle(64,0,63,63,SSD1306_COLOR_WHITE);
+	for(int8_t i=0; i<4; ++i)
+		SSD1306_DrawCircle(rx(0,28,pi*i/2)+96,32-ry(0,28,pi*i/2),1,SSD1306_COLOR_WHITE);
+	for(int8_t i=0; i<12; ++i)
+		SSD1306_DrawPixel(rx(0,28,pi*i/6)+96,32-ry(0,28,pi*i/6),SSD1306_COLOR_WHITE);
+	SSD1306_DrawLine(rx(0,-8,fi)+96,32-ry(0,-8,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
+	fi /= 60.0f;	
+	SSD1306_DrawFilledTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_BLACK);
+	SSD1306_DrawTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
+	fi /= 12.0f;
+	SSD1306_DrawFilledTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,15,fi)+96, 32-ry(0,15,fi) ,SSD1306_COLOR_BLACK);
+	SSD1306_DrawTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,15,fi)+96, 32-ry(0,15,fi) ,SSD1306_COLOR_WHITE);
 	return watch;
 }
 //-----------------------------------------------------
 FRESULT fWatch(int argc, char *argv[]) {
-	watch((void *)HAL_GetTick());
+	uint32_t t=HAL_GetTick()-3600*1000*atoi(argv[1]) -60000*atoi(argv[2]);
+	watch((void *)t);
 	return FR_OK;		
 }
 /*******************************************************************************
@@ -671,7 +677,7 @@ FRESULT		ret=FR_OK;
 					int n=0;
 					q[n]=strtok(c," ,");
 					while(q[n]) {
-						q[++n]=strtok(NULL," ,");
+						q[++n]=strtok(NULL," ,:");
 					}
 					for(int i=0; i<sizeof(cmds)/sizeof(struct cmd); ++i)
 						if(q[0] && !strncmp(q[0],cmds[i].str,strlen(q[0])))
