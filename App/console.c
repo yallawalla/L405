@@ -738,7 +738,6 @@ uint32_t	dbg=debug;
 				
 				case __f9:
 				case __F9:
-					Watchdog_init(4000);
 					MX_USB_HOST_DeInit();
 					HAL_USBD_Setup();
 					UsbDevice_Init();

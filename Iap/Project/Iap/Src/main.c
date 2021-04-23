@@ -49,7 +49,7 @@ int					*p=(int *)*_FW_START;
 						GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 // CAN STB, TERM
-						GPIO_WriteBit(GPIOB, GPIO_Pin_14 | GPIO_Pin_14, Bit_RESET);
+						GPIO_WriteBit(GPIOB, GPIO_Pin_14 | GPIO_Pin_15, Bit_RESET);
 						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
 						GPIO_Init(GPIOB, &GPIO_InitStructure);
 
@@ -489,17 +489,15 @@ GPIO_InitTypeDef				GPIO_InitStructure;
 
 						GPIO_StructInit(&GPIO_InitStructure);
 						GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+						GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
 						GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-
-						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-						GPIO_Init(GPIOB, &GPIO_InitStructure);
-						GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+						GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13;
 						GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 						GPIO_PinAFConfig(GPIOB, GPIO_PinSource12, GPIO_AF_CAN2);
 						GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_CAN2);
 	
+
 						RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
 						RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN2, ENABLE);
 						CAN_StructInit(&CAN_InitStructure);
