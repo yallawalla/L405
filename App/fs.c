@@ -3,6 +3,8 @@
 #include 		"console.h"
 #include 		"proc.h"
 #include		"leds.h"
+#include		"ssd1306.h"
+
 //______________________________________________________________________________________
 //______________________________________________________________________________________
 //______________________________________________________________________________________
@@ -16,7 +18,7 @@
 * Input          : CAN TX msg, waiting time (ms) 
 * Return         : IAP message or EOF (not successful...)
 *******************************************************************************/
-int					AckWait(int t) {
+int32_t			AckWait(int32_t t) {
 						int to,n=nDev;
 						if(t == 0)
 							return EOF;
@@ -38,8 +40,8 @@ int					AckWait(int t) {
 FRESULT			iapRemote() {
 						uint32_t n,k;																		// misc
 																														// count lines >>>> n
-						for(k=n=_FLASH_TOP; k<FATFS_ADDRESS; k+=sizeof(uint32_t)) {
-							if(*(int32_t *)k != _FLASH_BLANK)
+						for(k=n=FLASH_TOP; k<FATFS_ADDRESS; k+=sizeof(uint32_t)) {
+							if(*(int32_t *)k != EOF)
 								n=k;
 							Watchdog();
 						}
@@ -47,7 +49,7 @@ FRESULT			iapRemote() {
 						_wait(500);
 						nDev=0;
 						Send(_ID_IAP_PING,NULL,0);											// send ping;	
-						_wait(500);
+						_wait(100);
 						if(nDev==0) {
 							_print("\r\nno device detected...");
 							return FR_NOT_READY;
@@ -56,7 +58,7 @@ FRESULT			iapRemote() {
 						_print("\r\n%d pings received...",nDev);
 						_print("\r\nerasing");													// erase 5 pages (att. CubeMX ima drugacne 
 																														// oznake za sektorje kot bootloader!!!
-						for(k=FLASH_SECTOR_1<<3; k<FLASH_SECTOR_6<<3; k+=FLASH_SECTOR_1<<3) {
+						for(k=FLASH_SECTOR_1; k<FLASH_SECTOR_6; k+=FLASH_SECTOR_1) {
 							Send(_ID_IAP_ERASE,(payload *)&k,sizeof(int));
 							if(!AckWait(3000))														// send erase page, wait for ack
 								return FR_NOT_READY;
@@ -64,26 +66,36 @@ FRESULT			iapRemote() {
 						}
 						
 						_print("\r\nprogramming");
-						k=_FLASH_TOP;
+						SSD1306_Fill(SSD1306_COLOR_BLACK);
+						SSD1306_DrawRectangle(0,0,127,16,SSD1306_COLOR_WHITE);
+						k=FLASH_TOP;
 						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
 						_wait(10);
 						while(k <= n) {
 							Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
-							if(!AckWait(200))
-								return FR_NOT_READY;
-							if((k-_FLASH_TOP) % (8*((n-_FLASH_TOP)/8/20)) == 0)
-								_print(".%3d%c%c%c%c%c",(100*(k-_FLASH_TOP))/(n-_FLASH_TOP),'%','\x8','\x8','\x8','\x8');
+							if(!AckWait(200)) {
+									return FR_NOT_READY;
+							}
+							if((k-FLASH_TOP) % (8*((n-FLASH_TOP)/8/20)) == 0)
+								_print(".%3d%c%c%c%c%c",(100*(k-FLASH_TOP))/(n-FLASH_TOP),'%','\x8','\x8','\x8','\x8');
+							SSD1306_DrawFilledRectangle(3,3,121*(k-FLASH_TOP)/(n-FLASH_TOP),10,SSD1306_COLOR_WHITE);
+
 							k+=sizeof(payload);
 						}
 						_print(".%3d%c%c%c%c%c",100,'%','\x8','\x8','\x8','\x8');
-
-						Send(_ID_IAP_SIGN,NULL,0);											// send sign command
-						if(!AckWait(300))																// wait for ack...
-							return FR_NOT_READY;
-						_print("\r\nsign ...");
+						k=SIGN_TOP;
+						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
+						_wait(10);
+						Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
+							if(!AckWait(200))
+									return FR_NOT_READY;
+						k+=sizeof(payload);
+						Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
+							if(!AckWait(200))
+									return FR_NOT_READY;
 						Send(_ID_IAP_GO,NULL,0);												// send <go> command
-						AckWait(0);
 						_print("and RUN :)\r\n");
+						SSD1306_Fill(SSD1306_COLOR_BLACK);
 						DecodeCom(NULL);
 						return FR_OK;
 }
@@ -144,7 +156,7 @@ FILINFO			fno;
 * Return				:
 *******************************************************************************/
 HAL_StatusTypeDef	FLASH_Program(uint32_t Address, uint32_t Data) {
-			HAL_StatusTypeDef status;
+			HAL_StatusTypeDef status=HAL_OK;
 			__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPERR  | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR );
 			if(*(uint32_t *)Address !=  Data) {
 				HAL_FLASH_Unlock();

@@ -43,6 +43,7 @@ _io		*InitITM(void),InitVCP(void);
 void	 i2cInit(void);
 extern I2C_HandleTypeDef hi2c1;
 adc		pwr;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -166,7 +167,7 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 		_GREEN(1000);
 		f_unlink("L405.hex");
 		f_unlink("L405.bin");
-		idCrc=HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int));
+		idCrc=HAL_CRC_Calculate(&hcrc,(uint32_t *)FLASH_TOP, (FATFS_ADDRESS-FLASH_TOP)/sizeof(int));
 		if(ff_pack(0) > 20)
 			ff_pack(EOF);		
 	} else 

@@ -123,3 +123,11 @@ bool flashLock(bool state)
 	HAL_FLASH_OB_Lock();
 	return ret;
 }
+/*******************************************************************************
+* Function Name	: trik za goljufanje bootloaderja, ce so nicle spusti skozi
+* Description		: samo pri nalaganju iz debuggerja !!!
+* Output				:
+* Return				:
+*******************************************************************************/
+const uint32_t _BLANKS_[]	__attribute__((at(0x08004000))) = {0,0,0,0};
+

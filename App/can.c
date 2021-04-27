@@ -10,7 +10,7 @@
 *******************************************************************************/
 _io				*_CAN, *canConsole;
 //______________________________________________________________________________________
-const char *strPos[]={"front left","front right","rear right","rear left","console"};
+const char *strPos[]={"front right","rear right","rear left","front left","console"};
 uint32_t	idDev,
 					nDev,
 					idCrc,
@@ -328,28 +328,28 @@ void	*canTx(void *v) {
 				_DEBUG(DBG_CRC,"\r\n%d,%d:<%08X>",t->ch,t->sect,t->crc);
 				switch(t->crc) {
 					case _LEFT_FRONT:
-						idPos=0;
+						idPos=3;
 						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _RIGHT_FRONT:
-						idPos=1;
+						idPos=0;
 						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _RIGHT_REAR:
-						idPos=2;
+						idPos=1;
 						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
 					break;
 						
 					case _LEFT_REAR:
-						idPos=3;
+						idPos=2;
 						t->cnt=t->longcnt=0;
 						Send(_ACK_LEFT_FRONT+idPos,NULL,0);
 						SaveSettings();
@@ -455,10 +455,10 @@ void	*canRx(void *v) {
 				case _ID_IAP_PING ... _ID_IAP_PING+_MAX_DEV-1:
 					if(rx.hdr.DLC) {
 						if(nDev)
-							_DEBUG(DBG_CONSOLE,"     ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",rx.buf.hword[2],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)],rx.buf.hword[3]);
-						else
-							_DEBUG(DBG_CONSOLE,"  ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",rx.buf.hword[2],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)],rx.buf.hword[3]);
+							_DEBUG(DBG_CONSOLE,"%s","   ");
+						_DEBUG(DBG_CONSOLE,"  ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",rx.buf.hword[2],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)],rx.buf.hword[3]);
 						devices[nDev++]=rx.buf.word[1];
+						Decode(rx.hdr.StdId-_ID_IAP_PING,NULL);
 					} else {			
 						p.word[0]=idCrc;
 						p.hword[2]=idDev & 0xffff;
@@ -474,8 +474,11 @@ void	*canRx(void *v) {
 					while(1);
 
 				case _ID_IAP_ACK:
-					++nDev;
-					_DEBUG(DBG_CONSOLE,"\r\n  ser %08X, boot",rx.buf.word[1]);
+					if(nDev)
+						_DEBUG(DBG_CONSOLE,"%s","   ");
+					_DEBUG(DBG_CONSOLE,"  ser %08X, boot\r\n",rx.buf.word[1]);
+					if(!rx.buf.word[0])
+						devices[nDev++]=rx.buf.word[1];
 					break;
 
 				case _ID_SYNC_REQ:

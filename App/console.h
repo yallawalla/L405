@@ -97,3 +97,8 @@ void	*selftest(void);
 #define _V45	((float)(pwr.V45*3.3/4095.0*(1.2+47)/1.2))
 #define _VM5	((float)(3.3 - (4095-pwr.Vm5)*((1.2+6.8)/1.2*3.3/4095.0)))
 #define _TEMP	((float)((pwr.T*3.3/4095.0 - 0.76)/2.5e-3+25.0))
+	
+extern uint32_t __Vectors[];
+HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t), FLASH_Erase(uint32_t, uint32_t);
+
+

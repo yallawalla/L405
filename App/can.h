@@ -104,25 +104,13 @@ typedef struct {
 	payload buf;
 } CanTxMsg;
 
-void				Send(int, payload *,int);
-int					AckWait(int);
-uint16_t		sync(uint16_t);
-int32_t			eval(int32_t);
+void			Send(int, payload *,int);
+int32_t		eval(int32_t),
+					AckWait(int32_t);
+uint16_t	sync(uint16_t);
 
-#define			_SIGN_PAGE			FLASH_Sector_1
-#define			_FLASH_TOP			0x08008000
-#define			_BOOT_SECTOR		0x08000000
-#define			FATFS_ADDRESS 	0x08040000
-						                        
-#define			_FW_START				((int *)(_FLASH_TOP-16))
-#define			_FW_CRC					((int *)(_FLASH_TOP-20))
-#define			_FW_SIZE				((int *)(_FLASH_TOP-24))
-#define			_SIGN_CRC				((int *)(_FLASH_TOP-28))
-#define			_FLASH_BLANK		((int)-1)
+#define		SW_version				100
 	
-#define			SW_version			100
-
-					
 extern		const char *			strPos[];
 extern		CAN_HandleTypeDef hcan2;
 extern		CRC_HandleTypeDef hcrc;

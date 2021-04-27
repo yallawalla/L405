@@ -517,14 +517,19 @@ void	*watch1(void *v) {
 	SSD1306_Puts (t, &Font_16x26, SSD1306_COLOR_WHITE);
 	return watch1;
 }
-//-----------------------------------------------------
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
 float rx(float x,float y,float fi) {
 	return x*cos(fi)+y*sin(fi)+0.5;
 }
 float ry(float x,float y,float fi) {
 	return y*cos(fi)-x*sin(fi)+0.5;
 }
-//-----------------------------------------------------
+//...
 void	*watch(void *v) {
 	#define THICK	3
 	#include	<math.h>
@@ -559,11 +564,73 @@ void	*watch(void *v) {
 	SSD1306_DrawTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,15,fi)+96, 32-ry(0,15,fi) ,SSD1306_COLOR_WHITE);
 	return watch;
 }
-//-----------------------------------------------------
+//...
 FRESULT fWatch(int argc, char *argv[]) {
 	uint32_t t=HAL_GetTick()-3600*1000*atoi(argv[1]) -60000*atoi(argv[2]);
 	watch((void *)t);
 	return FR_OK;		
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT fSign(int argc, char *argv[]) {
+	FLASH_Erase(FLASH_SECTOR_1,1);
+	FLASH_Program(SIGN_TOP,(uint32_t)__Vectors);
+	FLASH_Program(SIGN_TOP+4,(FATFS_ADDRESS-FLASH_TOP)/sizeof(int));
+	FLASH_Program(SIGN_TOP+8,HAL_CRC_Calculate(&hcrc,__Vectors,  (FATFS_ADDRESS-FLASH_TOP)/sizeof(int)));
+	FLASH_Program(SIGN_TOP+12,HAL_CRC_Calculate(&hcrc,(uint32_t *)SIGN_TOP, 3));
+	return(FR_OK);
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT fColours(int argc, char *argv[]) {
+	uint8_t col=atoi(argv[1]);
+	if(col > 6) {
+		_print("error.. select 0-5");
+		return FR_OK;
+	}
+	wsStream(0,col,24);
+	_print("\rh=%3d,s=%3d,v=%3d",ws[col].colour.h,ws[col].colour.s,ws[col].colour.v);
+
+	while(1) {
+		switch(Escape()) {
+			default:
+			case EOF:
+				_wait(2);
+			continue;
+			case __Left:
+				ws[col].colour.h = max(ws[col].colour.h-1,1);
+			break;
+			case __Right:
+				ws[col].colour.h = min(ws[col].colour.h+1,360);
+			break;
+			case __Up:
+				ws[col].colour.s = min(ws[col].colour.s+1,255);
+			break;
+			case __Down:
+				ws[col].colour.s = max(ws[col].colour.s-1,1);
+			break;
+			case __PageUp:
+				ws[col].colour.v = min(ws[col].colour.v+1,255);
+			break;
+			case __PageDown:
+				ws[col].colour.v = max(ws[col].colour.v-1,1);
+			break;
+			case __Esc:
+				wsStream(0,6,24);
+				return FR_OK;		
+		}					
+		wsStream(0,col,24);
+		_print("\rh=%3d,s=%3d,v=%3d",ws[col].colour.h,ws[col].colour.s,ws[col].colour.v);
+	}
+
 }
 /*******************************************************************************
 * Function Name	:
@@ -591,6 +658,8 @@ struct cmd {
 	{"format",		fFormat},
 	{"erase",			fErase},
 	{"watch",			fWatch},
+	{"sign",			fSign},
+	{"colours",		fColours},
 	{"pack",			fPack}
 };
 /*******************************************************************************
@@ -718,7 +787,7 @@ uint32_t	dbg=debug;
 					
 					nDev=0;
 					Send(_ID_IAP_PING,NULL,0);
-					_wait(500);
+					_wait(100);
 					_print("     ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",idDev,idCrc, strPos[min(_MAX_HEAD,idPos)],error);
 					_print("%6d dev. found",nDev);
 					DecodeCom(NULL);
@@ -824,7 +893,7 @@ void	printVersion() {
 			_print("  V%d.%02d %s <%08X>",
 				SW_version/100,SW_version%100,
 					__DATE__,
-						HAL_CRC_Calculate(&hcrc,(uint32_t *)_FLASH_TOP, (FATFS_ADDRESS-_FLASH_TOP)/sizeof(int)));	
+						HAL_CRC_Calculate(&hcrc,(uint32_t *)FLASH_TOP, (FATFS_ADDRESS-FLASH_TOP)/sizeof(int)));	
 }
 /*******************************************************************************
 * Function Name	: 

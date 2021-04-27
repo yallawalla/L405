@@ -16,7 +16,7 @@ _ws ws[] =
 	{{180,255,100},	0,0,{0}},
 	{{240,255,100},	0,0,{0}},
 	{{300,255,100},	0,0,{0}},
-	{{0,0,5},				0,0,{0}}
+	{{0,0,0},				0,0,{0}}
 };
 
 uint32_t	DecodeTab[4096];
@@ -29,11 +29,11 @@ uint32_t	tref[__NWS/6],chLev;
 * Return				:
 *******************************************************************************/
 void			Decode(int sect,payload *p) {
-					if(crcTimeout && crcTimeout > HAL_GetTick())
-						return;
-					crcTimeout=0;
-					
 					if(p) {
+						if(crcTimeout && crcTimeout > HAL_GetTick())
+							return;
+						crcTimeout=0;
+						
 						if(!pTimeout)
 							pTimeout=HAL_GetTick()+20;
 						if(!tref[sect])
@@ -47,9 +47,10 @@ void			Decode(int sect,payload *p) {
 						
 					}	else {
 						crcTimeout=HAL_GetTick()+1000;
-						wsStream(sect*__NWS/4,0,__NWS/4-1);
+						ws[4].bit24 |= (0x1f<<(sect*__NWS/4));
+//						wsStream(sect*__NWS/4,4,__NWS/4-1);
 						for(int i=0; i<__NWS/4; ++i)
-							ws[0].timeout[sect*__NWS/4+i]=HAL_GetTick()+1000;
+							ws[4].timeout[sect*__NWS/4+i]=HAL_GetTick()+1000;
 					}
 }
 /*******************************************************************************
@@ -86,7 +87,6 @@ uint32_t	*p = &wsdma[(npos+4)*24];
 //						for(int k=0; k<8; ++k)
 //							(rgb.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 //					}
-					
 					
 					HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_4,wsdma,sizeof(wsdma)/sizeof(uint32_t));
 					_DEBUG(DBG_LED,"\r%3d: * %02X %02X %02X %02X %02X %2d\r\n",HAL_GetTick() % 1000, npos, rgb.r,rgb.g,rgb.b,n,colour);
