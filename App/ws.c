@@ -1,7 +1,6 @@
 #include	"ws.h"
 #include	"console.h"
 #include	"ssd1306.h"
-#define		SW_version			100
 
 __ALIGN_BEGIN 
 uint32_t	wsdma[(__NWS+8+8)*24]; 
