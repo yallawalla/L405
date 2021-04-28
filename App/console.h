@@ -42,7 +42,7 @@ typedef		struct {
 }	adc;
 
 extern adc			pwr;
-extern uint32_t debug,error,errmask,pinV;
+extern uint32_t debug,error,errmask,pinV,ssd_timeout;
 extern _io**		_DBG;
 extern	bool		iapInproc;
 enum dbg {    

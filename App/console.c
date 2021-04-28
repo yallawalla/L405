@@ -14,7 +14,7 @@
 *******************************************************************************/
 FATFS			fatfs;
 bool			isMounted=false,iapInproc=false;
-uint32_t	debug,error,errmask,pinV;
+uint32_t	debug,error,errmask,pinV,ssd_timeout;
 _io				**_DBG;
 /*******************************************************************************
 * Function Name	: 
@@ -396,9 +396,14 @@ FRESULT fType(int argc, char *argv[]) {
 * Return				:
 *******************************************************************************/
 FRESULT fIap(int argc, char *argv[]) {
+	if(iapInproc) 														// already in another console app
+		return FR_NOT_READY;
 	iapInproc=true;
 	FRESULT ret=iapRemote();
+	if(ret==FR_TIMEOUT)
+		_print("\r\n...timeout error");
 	iapInproc=false;
+	DecodeCom(NULL);
 	return ret;
 }
 /*******************************************************************************
@@ -766,6 +771,10 @@ void	Parse(int i) {
 char	*c;
 			switch(i) {
 				case EOF:																				// empty usart
+					if(ssd_timeout && HAL_GetTick() > ssd_timeout) {
+						SSD1306_Fill(SSD1306_COLOR_BLACK);
+						ssd_timeout=0;
+					}
 					break;				
 				
 				case __CtrlZ:																		// call watchdog reset

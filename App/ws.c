@@ -330,5 +330,5 @@ void	ssdPrint(uint32_t col, uint32_t pos) {
 //		else
 //			SSD1306_Puts (" ---    ", &Font_11x18, SSD1306_COLOR_WHITE);
 	SSD1306_UpdateScreen();
-
+	ssd_timeout=HAL_GetTick()+3000;
 }

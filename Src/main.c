@@ -39,10 +39,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-_io		*InitITM(void),InitVCP(void);
-void	 i2cInit(void);
-extern I2C_HandleTypeDef hi2c1;
-adc		pwr;
+_io			*InitITM(void),InitVCP(void);
+void		i2cInit(void);
+extern	I2C_HandleTypeDef hi2c1;
+adc			pwr;
 
 /* USER CODE END PD */
 

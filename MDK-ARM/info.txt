@@ -39,3 +39,4 @@ HAL_RCC_ClockConfig
 
 <201  08 00 00 00 00 10 00 10
 <203  0a 00 00 00 00 10 00 10
+							_print("\r\nno device detected...");

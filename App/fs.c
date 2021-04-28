@@ -28,7 +28,6 @@ int32_t			AckWait(int32_t t) {
 							if(n == nDev)
 								return EOF;
 						}
-						_print("...err");
 						return 0;
 }
 /*******************************************************************************
@@ -38,8 +37,12 @@ int32_t			AckWait(int32_t t) {
 * Return				:
 *******************************************************************************/
 FRESULT			iapRemote() {
-						uint32_t n,k;																		// misc
-																														// count lines >>>> n
+						uint32_t n,k;
+						ssd_timeout=HAL_GetTick()+5000;
+						SSD1306_Fill(SSD1306_COLOR_BLACK);
+						SSD1306_DrawRectangle(0,0,127,16,SSD1306_COLOR_WHITE);
+						SSD1306_GotoXY (0,20);
+																														// counting lines >>>> n
 						for(k=n=FLASH_TOP; k<FATFS_ADDRESS; k+=sizeof(uint32_t)) {
 							if(*(int32_t *)k != EOF)
 								n=k;
@@ -50,36 +53,43 @@ FRESULT			iapRemote() {
 						nDev=0;
 						Send(_ID_IAP_PING,NULL,0);											// send ping;	
 						_wait(100);
+						
 						if(nDev==0) {
-							_print("\r\nno device detected...");
+							_print("\r\n...no devices found");
+							SSD1306_Puts ("no devices found", &Font_7x10, SSD1306_COLOR_WHITE);
 							return FR_NOT_READY;
 						}
-
+						SSD1306_Putc('0'+nDev, &Font_7x10, SSD1306_COLOR_WHITE);
+						SSD1306_Puts (" devices found", &Font_7x10, SSD1306_COLOR_WHITE);
 						_print("\r\n%d pings received...",nDev);
 						_print("\r\nerasing");													// erase 5 pages (att. CubeMX ima drugacne 
 																														// oznake za sektorje kot bootloader!!!
+						SSD1306_GotoXY (0,30);
+						SSD1306_Puts ("erasing", &Font_7x10, SSD1306_COLOR_WHITE);
 						for(k=FLASH_SECTOR_1; k<FLASH_SECTOR_6; k+=FLASH_SECTOR_1) {
+							ssd_timeout=HAL_GetTick()+5000;
+							SSD1306_DrawFilledRectangle(3,3,121*k/5,10,SSD1306_COLOR_WHITE);
 							Send(_ID_IAP_ERASE,(payload *)&k,sizeof(int));
 							if(!AckWait(3000))														// send erase page, wait for ack
-								return FR_NOT_READY;
+								return FR_TIMEOUT;
 							_print(".");
 						}
 						
 						_print("\r\nprogramming");
-						SSD1306_Fill(SSD1306_COLOR_BLACK);
-						SSD1306_DrawRectangle(0,0,127,16,SSD1306_COLOR_WHITE);
+						SSD1306_DrawFilledRectangle(3,3,121,10,SSD1306_COLOR_BLACK);
+						SSD1306_GotoXY (0,40);
+						SSD1306_Puts ("programming ", &Font_7x10, SSD1306_COLOR_WHITE);
 						k=FLASH_TOP;
 						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
 						_wait(10);
 						while(k <= n) {
 							Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
-							if(!AckWait(200)) {
-									return FR_NOT_READY;
-							}
+							if(!AckWait(200))
+								return FR_TIMEOUT;
 							if((k-FLASH_TOP) % (8*((n-FLASH_TOP)/8/20)) == 0)
 								_print(".%3d%c%c%c%c%c",(100*(k-FLASH_TOP))/(n-FLASH_TOP),'%','\x8','\x8','\x8','\x8');
 							SSD1306_DrawFilledRectangle(3,3,121*(k-FLASH_TOP)/(n-FLASH_TOP),10,SSD1306_COLOR_WHITE);
-
+							ssd_timeout=HAL_GetTick()+5000;
 							k+=sizeof(payload);
 						}
 						_print(".%3d%c%c%c%c%c",100,'%','\x8','\x8','\x8','\x8');
@@ -87,15 +97,16 @@ FRESULT			iapRemote() {
 						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
 						_wait(10);
 						Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
-							if(!AckWait(200))
-									return FR_NOT_READY;
+						if(!AckWait(200))
+							return FR_TIMEOUT;
 						k+=sizeof(payload);
 						Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
-							if(!AckWait(200))
-									return FR_NOT_READY;
+						if(!AckWait(200))
+							return FR_TIMEOUT;
 						Send(_ID_IAP_GO,NULL,0);												// send <go> command
-						_print("and RUN :)\r\n");
-						SSD1306_Fill(SSD1306_COLOR_BLACK);
+						_print("and RUN :)");
+						SSD1306_GotoXY (0,50);
+						SSD1306_Puts ("finished", &Font_7x10, SSD1306_COLOR_WHITE);
 						DecodeCom(NULL);
 						return FR_OK;
 }
