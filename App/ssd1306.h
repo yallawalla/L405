@@ -69,14 +69,6 @@ SDA        |PB7          |Serial data line
 #define SSD1306_HEIGHT           64
 #endif
 
-/**
- * @brief  SSD1306 color enumeration
- */
-typedef enum {
-	SSD1306_COLOR_BLACK = 0x00, /*!< Black color, no pixel */
-	SSD1306_COLOR_WHITE = 0x01  /*!< Pixel is set. Color depends on LCD */
-} SSD1306_COLOR_t;
-
 /* SSD1306 structure */
 typedef struct {
 	uint8_t		prefix;
@@ -85,6 +77,8 @@ typedef struct {
 	uint16_t	CurrentY;
 	uint8_t		Inverted;
 	uint8_t		Initialized;
+	FontDef_t *Font;
+	SSD1306_COLOR_t color;
 } SSD1306_t;
 
 extern			SSD1306_t	SSD1306;
@@ -279,11 +273,6 @@ void SSD1306_Stopscroll(void);
 // inverts the display i = 1->inverted, i = 0->normal
 
 void SSD1306_InvertDisplay (int i);
-
-
-
-
-
 
 // clear the display
 

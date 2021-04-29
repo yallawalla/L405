@@ -1,11 +1,11 @@
+#include	<stdlib.h>
 #include	"console.h"
 #include	"ascii.h"
 #include	"io.h"
 #include	"can.h"
 #include	"ws.h"
-#include	"ssd1306.h"
 #include	"leds.h"
-#include	<stdlib.h>
+#include	"i2c.h"
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -14,7 +14,7 @@
 *******************************************************************************/
 FATFS			fatfs;
 bool			isMounted=false,iapInproc=false;
-uint32_t	debug,error,errmask,pinV,ssd_timeout;
+uint32_t	debug,error,errmask,pinV;
 _io				**_DBG;
 /*******************************************************************************
 * Function Name	: 
@@ -506,70 +506,13 @@ FRESULT	err=FR_OK;
 	}
 	return err;
 }
-//-----------------------------------------------------
-void	*watch1(void *v) {
-	static uint32_t	offset=0;
-	char	t[16];
-	if(v) {
-		if(!offset) {
-			_proc_add(watch1,NULL,"watch",1000);
-			SSD1306_Fill(SSD1306_COLOR_BLACK);
-		}
-		offset=(uint32_t)v;
-	}
-	sprintf(t,"%2d:%02d:%02d",((HAL_GetTick()-offset)/1000/3600)%24,((HAL_GetTick()-offset)/1000/60)%60,((HAL_GetTick()-offset)/1000)%60);
-	SSD1306_GotoXY (0,0);
-	SSD1306_Puts (t, &Font_16x26, SSD1306_COLOR_WHITE);
-	return watch1;
-}
+
 /*******************************************************************************
 * Function Name	:
 * Description		:
 * Output				:
 * Return				:
 *******************************************************************************/
-float rx(float x,float y,float fi) {
-	return x*cos(fi)+y*sin(fi)+0.5;
-}
-float ry(float x,float y,float fi) {
-	return y*cos(fi)-x*sin(fi)+0.5;
-}
-//...
-void	*watch(void *v) {
-	#define THICK	3
-	#include	<math.h>
-	char	c[16];
-	static uint32_t	offset=0;
-	if(v) {
-		if(!offset) {
-			_proc_add(watch,NULL,"watch",1000);
-			SSD1306_Fill(SSD1306_COLOR_BLACK);
-		}
-		offset=(uint32_t)v;
-	}
-	SSD1306_Fill(SSD1306_COLOR_BLACK);
-	sprintf(c,"%2d:%02d:%02d",((HAL_GetTick()-offset)/1000/3600)%24,((HAL_GetTick()-offset)/1000/60)%60,((HAL_GetTick()-offset)/1000)%60);
-	SSD1306_GotoXY (0,0);
-	SSD1306_Puts (c, &Font_7x10, SSD1306_COLOR_WHITE);
-	
-	float pi=3.14159265359f;
-	float fi=(HAL_GetTick()-offset)/1000.0f/30.0f*pi;
-	float Cos=cos(fi),Sin=sin(fi);
-	SSD1306_DrawRectangle(64,0,63,63,SSD1306_COLOR_WHITE);
-	for(int8_t i=0; i<4; ++i)
-		SSD1306_DrawCircle(rx(0,28,pi*i/2)+96,32-ry(0,28,pi*i/2),1,SSD1306_COLOR_WHITE);
-	for(int8_t i=0; i<12; ++i)
-		SSD1306_DrawPixel(rx(0,28,pi*i/6)+96,32-ry(0,28,pi*i/6),SSD1306_COLOR_WHITE);
-	SSD1306_DrawLine(rx(0,-8,fi)+96,32-ry(0,-8,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
-	fi /= 60.0f;	
-	SSD1306_DrawFilledTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_BLACK);
-	SSD1306_DrawTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,28,fi)+96, 32-ry(0,28,fi) ,SSD1306_COLOR_WHITE);
-	fi /= 12.0f;
-	SSD1306_DrawFilledTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,15,fi)+96, 32-ry(0,15,fi) ,SSD1306_COLOR_BLACK);
-	SSD1306_DrawTriangle(rx(-THICK,-8,fi)+96,32-ry(-THICK,-8,fi), rx(THICK,-8,fi)+96,32-ry(THICK,-8,fi), rx(0,15,fi)+96, 32-ry(0,15,fi) ,SSD1306_COLOR_WHITE);
-	return watch;
-}
-//...
 FRESULT fWatch(int argc, char *argv[]) {
 	uint32_t t=HAL_GetTick()-3600*1000*atoi(argv[1]) -60000*atoi(argv[2]);
 	watch((void *)t);
@@ -771,10 +714,6 @@ void	Parse(int i) {
 char	*c;
 			switch(i) {
 				case EOF:																				// empty usart
-					if(ssd_timeout && HAL_GetTick() > ssd_timeout) {
-						SSD1306_Fill(SSD1306_COLOR_BLACK);
-						ssd_timeout=0;
-					}
 					break;				
 				
 				case __CtrlZ:																		// call watchdog reset

@@ -336,7 +336,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>--exceptions</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx, HAL_I2C_MODULE_ENABLED</Define>
               <Undefine></Undefine>
               <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\App;../Middlewares/Third_Party/FatFs/src;../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc</IncludePath>
@@ -704,11 +704,6 @@
           <GroupName>ssd</GroupName>
           <Files>
             <File>
-              <FileName>ssd1306.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\ssd1306.c</FilePath>
-            </File>
-            <File>
               <FileName>fonts.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\fonts.c</FilePath>
@@ -722,6 +717,11 @@
               <FileName>stm32f4xx_hal_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\ssd1306.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1428,11 +1428,6 @@
           <GroupName>ssd</GroupName>
           <Files>
             <File>
-              <FileName>ssd1306.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\ssd1306.c</FilePath>
-            </File>
-            <File>
               <FileName>fonts.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\fonts.c</FilePath>
@@ -1446,6 +1441,11 @@
               <FileName>stm32f4xx_hal_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\ssd1306.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2152,11 +2152,6 @@
           <GroupName>ssd</GroupName>
           <Files>
             <File>
-              <FileName>ssd1306.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\ssd1306.c</FilePath>
-            </File>
-            <File>
               <FileName>fonts.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\fonts.c</FilePath>
@@ -2170,6 +2165,11 @@
               <FileName>stm32f4xx_hal_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\ssd1306.c</FilePath>
             </File>
           </Files>
         </Group>

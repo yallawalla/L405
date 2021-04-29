@@ -42,7 +42,7 @@ typedef		struct {
 }	adc;
 
 extern adc			pwr;
-extern uint32_t debug,error,errmask,pinV,ssd_timeout;
+extern uint32_t debug,error,errmask,pinV;
 extern _io**		_DBG;
 extern	bool		iapInproc;
 enum dbg {    
@@ -93,6 +93,7 @@ void	UsbDevice_Init(void);
 void	UsbDevice_DeInit(void);
 bool	flashLock(bool);
 void	*selftest(void);
+void	*watch(void *);
 	
 #define _V45	((float)(pwr.V45*3.3/4095.0*(1.2+47)/1.2))
 #define _VM5	((float)(3.3 - (4095-pwr.Vm5)*((1.2+6.8)/1.2*3.3/4095.0)))

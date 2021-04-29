@@ -65,6 +65,15 @@ typedef struct {
 } FONTS_SIZE_t;
 
 /**
+ * @brief  SSD1306 color enumeration
+ */
+
+typedef enum {
+	SSD1306_COLOR_BLACK = 0x00, /*!< Black color, no pixel */
+	SSD1306_COLOR_WHITE = 0x01  /*!< Pixel is set. Color depends on LCD */
+} SSD1306_COLOR_t;
+
+/**
  * @}
  */
 

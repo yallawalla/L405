@@ -1,6 +1,6 @@
 #include	"ws.h"
 #include	"console.h"
-#include	"ssd1306.h"
+#include	"i2c.h"
 
 __ALIGN_BEGIN 
 uint32_t	wsdma[(__NWS+8+8)*24]; 
@@ -157,7 +157,7 @@ uint32_t		t=0;
 							for(int j=0; j < __NWS; ++j)
 								if(DecodeTab[ws[i].bit12] & (1 << j)) {
 									ws[i].timeout[j]=HAL_GetTick()+500;
-									ssdPrint(i,j);
+									wsSSD(i,j);
 								}
 							ws[i].bit24 |= DecodeTab[ws[i].bit12];
 							ws[i].bit12=0;
@@ -313,22 +313,18 @@ void	HSV2RGB(HSV HSV, RGB *RGB){
 * Output				:
 * Return				:
 *******************************************************************************/
-void	ssdPrint(uint32_t col, uint32_t pos) {
-	char c[8];
-	sprintf(c,"%3d",((pos*360)/24+15)%360);
-	SSD1306_GotoXY (0,0);
-	SSD1306_Puts (c, &Font_32x64, SSD1306_COLOR_WHITE);
-	SSD1306_GotoXY (105,0);
-	SSD1306_Puts ("O", &Font_11x18, SSD1306_COLOR_WHITE);
-	SSD1306_GotoXY (0,45);
+void	wsSSD(uint32_t col, uint32_t pos) {
+	ssdHome();
+	ssdFont(&Font_32x64);
+	ssdPrint("%3d",((pos*360)/24+15)%360);
+	ssdXY(105,0);
+	ssdFont(&Font_11x18);
+	ssdPrint ("O");
+	ssdXY(0,45);
 	if(col==0)
-		SSD1306_Puts ("LR      ", &Font_11x18, SSD1306_COLOR_WHITE);
+		ssdPrint(" LR      ");
 	else if(col==1)
-		SSD1306_Puts ("   LI   ", &Font_11x18, SSD1306_COLOR_WHITE);
+		ssdPrint("    LI   ");
 	else if(col==2)
-		SSD1306_Puts ("      BR", &Font_11x18, SSD1306_COLOR_WHITE);
-//		else
-//			SSD1306_Puts (" ---    ", &Font_11x18, SSD1306_COLOR_WHITE);
-	SSD1306_UpdateScreen();
-	ssd_timeout=HAL_GetTick()+3000;
+		ssdPrint("       BR");
 }

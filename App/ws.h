@@ -18,7 +18,7 @@ extern		uint32_t	DecodeTab[];
 void			wsProcInit(void),
 					wsStream(int32_t, int32_t, int32_t),
 					*wsProc(void *),
-					ssdPrint(uint32_t, uint32_t),
+					wsSSD(uint32_t, uint32_t),
 					Decode(int,payload *),
 					RGB2HSV(RGB, HSV *),
 					HSV2RGB(HSV, RGB *);

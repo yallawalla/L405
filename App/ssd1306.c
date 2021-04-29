@@ -21,7 +21,6 @@
    ----------------------------------------------------------------------
  */
 #include "ssd1306.h"
-#include "console.h"
 	
 /* Write command */
 void SSD1306_WRITECOMMAND(uint8_t cmd) {	
@@ -288,21 +287,26 @@ char SSD1306_Putc(char ch, FontDef_t* Font, SSD1306_COLOR_t color) {
 		/* Error */
 		return 0;
 	}
-	
-	/* Go through font */
-	for (i = 0; i < Font->FontHeight; i++) {
-		b = Font->data[(ch - 32) * Font->FontHeight + i];
-		for (j = 0; j < Font->FontWidth; j++) {
-			if ((b << j) & 0x80000000) {
-				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t) color);
-			} else {
-				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t)!color);
+	if(ch == '\r')
+		SSD1306.CurrentX=0;
+	else if (ch == '\n')
+		SSD1306.CurrentY+=Font->FontHeight;
+	else {
+		/* Go through font */
+		for (i = 0; i < Font->FontHeight; i++) {
+			b = Font->data[(ch - 32) * Font->FontHeight + i];
+			for (j = 0; j < Font->FontWidth; j++) {
+				if ((b << j) & 0x80000000) {
+					SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t) color);
+				} else {
+					SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t)!color);
+				}
 			}
 		}
+		
+		/* Increase pointer */
+		SSD1306.CurrentX += Font->FontWidth;
 	}
-	
-	/* Increase pointer */
-	SSD1306.CurrentX += Font->FontWidth;
 	
 	/* Return character written */
 	return ch;
@@ -601,8 +605,10 @@ void SSD1306_ON(void) {
 	SSD1306_WRITECOMMAND(0x14);  
 	SSD1306_WRITECOMMAND(0xAF);  
 }
+
 void SSD1306_OFF(void) {
 	SSD1306_WRITECOMMAND(0x8D);  
 	SSD1306_WRITECOMMAND(0x10);
 	SSD1306_WRITECOMMAND(0xAE);  
 }
+
