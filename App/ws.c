@@ -4,7 +4,7 @@
 
 __ALIGN_BEGIN 
 uint32_t	wsdma[(__NWS+8+8)*24]; 
-__ALIGN_END;
+//__ALIGN_END;
 
 
 _ws ws[] =

@@ -129,5 +129,6 @@ bool flashLock(bool state)
 * Output				:
 * Return				:
 *******************************************************************************/
-const uint32_t _BLANKS_[]	__attribute__((at(0x08004000))) = {0,0,0,0};
+const uint32_t _BLANKS_[]	__attribute__((section(".ARM.__at_0x08004000")))={0,0,0,0};
+//__attribute__((at(0x08004000))) = {0,0,0,0};
 

@@ -454,15 +454,14 @@ void	*canRx(void *v) {
 				
 				case _ID_IAP_PING ... _ID_IAP_PING+_MAX_DEV-1:
 					if(rx.hdr.DLC) {
-						if(nDev)
-							_DEBUG(DBG_CONSOLE,"%s","   ");
-						_DEBUG(DBG_CONSOLE,"  ser.%04hX, hash <%08X>, %-12s(%04hX)\r\n",rx.buf.hword[2],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)],rx.buf.hword[3]);
+						_DEBUG(DBG_CONSOLE,"\r\n%d%:/  ser.%04hX, hash <%08X>, %-12s(%04hX)",rx.hdr.StdId-_ID_IAP_PING+1, rx.buf.hword[2],rx.buf.word[0], strPos[min(_MAX_HEAD,rx.hdr.StdId-_ID_IAP_PING)],rx.buf.hword[3]);
 						devices[nDev++]=rx.buf.word[1];
 						Decode(rx.hdr.StdId-_ID_IAP_PING,NULL);
 					} else {			
 						p.word[0]=idCrc;
 						p.hword[2]=idDev & 0xffff;
 						p.hword[3]=error & 0xffff;
+						_wait((idPos+1)*5);
 						Send(_ID_IAP_PING+idPos,&p,sizeof(payload));
 					}
 				break;
@@ -474,9 +473,7 @@ void	*canRx(void *v) {
 					while(1);
 
 				case _ID_IAP_ACK:
-					if(nDev)
-						_DEBUG(DBG_CONSOLE,"%s","   ");
-					_DEBUG(DBG_CONSOLE,"  ser %08X, boot\r\n",rx.buf.word[1]);
+					_DEBUG(DBG_CONSOLE,"\r\n?:/  ser %08X, boot",rx.buf.word[1]);
 					if(!rx.buf.word[0])
 						devices[nDev++]=rx.buf.word[1];
 					break;

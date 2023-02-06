@@ -179,7 +179,7 @@ uint32_t	otgDeviceId=false, otgDeviceTimeout=0;
 	_proc_add(selftest,NULL,"selftest",100); 
 	_proc_add(ledProc,NULL,"leds",10); 
 	
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, sizeof(pwr.dma)/sizeof(uint16_t));
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&pwr.dma, (sizeof(pwr.dma))/(sizeof(uint16_t)));
 	
 	InitVCP();
 	InitITM();

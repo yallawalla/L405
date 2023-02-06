@@ -109,7 +109,7 @@ int32_t		eval(int32_t),
 					AckWait(int32_t);
 uint16_t	sync(uint16_t);
 
-#define		SW_version				103
+#define		SW_version				110
 	
 extern		const char *			strPos[];
 extern		CAN_HandleTypeDef hcan2;

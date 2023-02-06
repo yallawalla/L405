@@ -40,8 +40,8 @@ FRESULT			iapRemote() {
 						ssdClear(); ssdFont(&Font_7x10); ssdHome();
 						_BAR *bar=barInit(111,0,16,63,_BAR_VERTICAL);
 																													
-						for(k=n=FLASH_TOP; k<FATFS_ADDRESS; k+=sizeof(uint32_t)) {	// counting lines >>>> n
-							if(*(int32_t *)k != EOF)
+						for(k=n=FLASH_TOP; k<FATFS_ADDRESS; k+=sizeof(uint32_t)) {	
+							if(*(int32_t *)k != EOF)											// counting lines >>>> n
 								n=k;
 							Watchdog();
 						}
@@ -66,29 +66,30 @@ FRESULT			iapRemote() {
 							_print(".");
 						}
 						
-						 _print("\r\nprogramming"); ssdPrint("programming\r\n");
+						_print("\r\nprogramming"); ssdPrint("programming\r\n");
 						k=FLASH_TOP;
 						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
-						_wait(10);
 						while(k <= n) {
-							Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
-							if(!AckWait(200))
+							for(int i=0; i<16; ++i) {
+								Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
+								k+=sizeof(payload);
+							}
+							Send(_ID_IAP_PING,NULL,0);											// send ping;	
+							if(!AckWait(100))
 								return FR_TIMEOUT;
-							if((k-FLASH_TOP) % (8*((n-FLASH_TOP)/8/20)) == 0)
+							if((k-FLASH_TOP) % (128*((n-FLASH_TOP)/128/20)) == 0)
 								_print(".%3d%c%c%c%c%c",(100*(k-FLASH_TOP))/(n-FLASH_TOP),'%','\x8','\x8','\x8','\x8');
 							barDraw(bar,(k-FLASH_TOP)*100/(n-FLASH_TOP));
-							k+=sizeof(payload);
 						}
 						_print(".%3d%c%c%c%c%c",100,'%','\x8','\x8','\x8','\x8');
 						k=SIGN_TOP;
 						Send(_ID_IAP_ADDRESS,(payload *)&k,sizeof(uint32_t));
-						_wait(10);
 						Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
-						if(!AckWait(200))
-							return FR_TIMEOUT;
 						k+=sizeof(payload);
 						Send(_ID_IAP_DWORD,(payload *)k,sizeof(payload));
-						if(!AckWait(200))
+						k+=sizeof(payload);
+						Send(_ID_IAP_PING,NULL,0);											// send ping;	
+						if(!AckWait(100))
 							return FR_TIMEOUT;
 						Send(_ID_IAP_GO,NULL,0);												// send <go> command
 						_print("and RUN :)");
